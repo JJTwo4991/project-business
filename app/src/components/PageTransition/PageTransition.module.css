@@ -1,0 +1,80 @@
+.container {
+  position: relative;
+  width: 100%;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+.page {
+  width: 100%;
+  min-height: 100dvh;
+}
+
+.slideInRight {
+  animation: slideInFromRight 300ms ease-out both;
+}
+
+.slideInLeft {
+  animation: slideInFromLeft 300ms ease-out both;
+}
+
+.slideOutLeft {
+  animation: slideOutToLeft 300ms ease-out both;
+}
+
+.slideOutRight {
+  animation: slideOutToRight 300ms ease-out both;
+}
+
+.fadeIn {
+  animation: fadeIn 250ms ease-out both;
+}
+
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(30%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    transform: translateX(-30%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutToLeft {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-30%);
+    opacity: 0;
+  }
+}
+
+@keyframes slideOutToRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(30%);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

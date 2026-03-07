@@ -1,0 +1,6 @@
+.wrapper {
+  width: 100%;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  padding: var(--spacing-sm) 0;
+}
