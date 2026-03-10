@@ -1,12 +1,12 @@
 export function formatKRW(value: number): string {
-  if (Number.isNaN(value)) return '0원';
+  if (value == null || Number.isNaN(value)) return '0원';
   if (!isFinite(value)) return '∞';
   const formatted = Math.abs(Math.round(value)).toLocaleString('ko-KR');
   return value < 0 ? `-${formatted}원` : `${formatted}원`;
 }
 
 export function formatKRWShort(value: number): string {
-  if (Number.isNaN(value)) return '0원';
+  if (value == null || Number.isNaN(value)) return '0원';
   if (!isFinite(value)) return '∞';
   const abs = Math.abs(value);
   const sign = value < 0 ? '-' : '';

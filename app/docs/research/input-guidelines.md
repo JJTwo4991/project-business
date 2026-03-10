@@ -325,7 +325,7 @@
 
 **데이터 출처:**
 - 커피 원가 관련: https://www.thinkfood.co.kr/news/articleView.html?idxno=103469
-- 한식 원가: https://blog.hansungshowcase.kr/음식점-매출-순위-2025년-데이터로-본-겉보다-실속-있는-창업-업종-가이드-88875
+- 한식 원가: https://blog.hansun응howcase.kr/음식점-매출-순위-2025년-데이터로-본-겉보다-실속-있는-창업-업종-가이드-88875
 - 2024 외식업체 경영실태조사 (KREI): https://www.krei.re.kr/foodInfo/page/306?cmd=view&pst=503340&pageIndex=1
 
 **데이터 신뢰도:** 중간 (공공통계 PDF 미확인, 업계 통상값 기반)

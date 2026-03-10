@@ -3,6 +3,7 @@ import { SliderInput } from '../../components/SliderInput/SliderInput';
 import { RegionSelector } from '../../components/RegionSelector/RegionSelector';
 import type { SimulatorInputs, BusinessScale, CapitalStructure, RentGuide } from '../../types';
 import { formatKRWShort, formatPercent } from '../../lib/format';
+import { getScaleSqm } from '../../lib/scale';
 
 interface Props {
   inputs: SimulatorInputs;
@@ -69,7 +70,7 @@ export function InputPage({ inputs, rentGuide, onBack, onScale, onCapital, onRen
           sidos={rentGuide.sidos}
           getSigungus={rentGuide.getSigungus}
           getRent={rentGuide.getRent}
-          scaleSqm={scale === 'small' ? 33 : scale === 'large' ? 66 : 50}
+          scaleSqm={getScaleSqm(scale)}
           onSelect={onRentSelect}
         />
       </section>

@@ -52,6 +52,9 @@ export function RegionSelector({ sidos, getSigungus, getRent, scaleSqm, onSelect
           <span className={styles.guideSub}>
             ({scaleSqm}㎡ 기준, {sigungu} 평균 {rentInfo?.rent_per_sqm.toLocaleString() ?? '?'}원/㎡)
           </span>
+          <span className={styles.guideSource}>
+            한국부동산원 상업용부동산 임대동향조사 {rentInfo?.data_quarter ?? ''}
+          </span>
         </div>
       )}
     </div>

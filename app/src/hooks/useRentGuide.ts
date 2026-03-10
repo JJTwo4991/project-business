@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import type { RentGuide } from '../types';
 import { fetchRentGuide } from '../lib/supabase';
 
@@ -19,7 +19,7 @@ export function useRentGuide(): UseRentGuideResult {
   useEffect(() => {
     fetchRentGuide()
       .then(setRentGuides)
-      .catch((e: Error) => setError(e.message ?? '지역 데이터 로딩 실패'))
+      .catch(e => setError(e.message))
       .finally(() => setLoading(false));
   }, []);
 
@@ -28,11 +28,15 @@ export function useRentGuide(): UseRentGuideResult {
     [rentGuides]
   );
 
-  const getSigungus = (sido: string) =>
-    rentGuides.filter(r => r.sido === sido).map(r => r.sigungu).sort();
+  const getSigungus = useCallback((sido: string) =>
+    rentGuides.filter(r => r.sido === sido).map(r => r.sigungu).sort(),
+    [rentGuides]
+  );
 
-  const getRent = (sido: string, sigungu: string) =>
-    rentGuides.find(r => r.sido === sido && r.sigungu === sigungu);
+  const getRent = useCallback((sido: string, sigungu: string) =>
+    rentGuides.find(r => r.sido === sido && r.sigungu === sigungu),
+    [rentGuides]
+  );
 
   return { rentGuides, loading, error, sidos, getSigungus, getRent };
 }

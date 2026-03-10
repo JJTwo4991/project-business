@@ -16,7 +16,7 @@ export function useBusinessTypes(): UseBusinessTypesResult {
   useEffect(() => {
     fetchBusinessTypes()
       .then(setBusinessTypes)
-      .catch((err: Error) => setError(err.message))
+      .catch(e => setError(e.message))
       .finally(() => setLoading(false));
   }, []);
 

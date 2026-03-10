@@ -12,17 +12,20 @@ graph TD
         LOCAL_BT["📁 businessTypes.ts<br/>14개 업종 데이터"]
         LOCAL_CI["📁 costItems.ts<br/>89개 비용 항목"]
         LOCAL_RG["📁 rentGuide.ts<br/>50개 지역 임대료"]
+        LOCAL_FC["📁 franchiseData.ts<br/>프랜차이즈 비용 폴백"]
         SUPA["☁️ Supabase<br/>(선택사항)"]
+        FTC_PDF["📄 FTC 정보공개서 PDF<br/>→ parse-ftc-pdf.mjs<br/>→ franchise_costs 테이블"]
     end
 
     subgraph "데이터 페칭 레이어"
-        FETCH["supabase.ts<br/>fetchBusinessTypes()<br/>fetchCostItems(id)<br/>fetchRentGuide()"]
+        FETCH["supabase.ts<br/>fetchBusinessTypes()<br/>fetchCostItems(id)<br/>fetchRentGuide()<br/>fetchFranchiseCosts(btId)"]
     end
 
     subgraph "훅 레이어"
         H_BT["useBusinessTypes<br/>→ businessTypes[]"]
         H_CI["useCostItems<br/>→ costItems[]"]
         H_RG["useRentGuide<br/>→ sidos, getRent()"]
+        H_FC["useFranchiseCosts<br/>→ brands[], loading"]
         H_SIM["useSimulator<br/>→ inputs, result,<br/>setters, calculate()"]
     end
 
@@ -44,11 +47,14 @@ graph TD
     LOCAL_BT --> FETCH
     LOCAL_CI --> FETCH
     LOCAL_RG --> FETCH
+    LOCAL_FC --> FETCH
     SUPA -.->|env 설정시| FETCH
+    FTC_PDF -.->|스크립트로 업로드| SUPA
 
     FETCH --> H_BT
     FETCH --> H_CI
     FETCH --> H_RG
+    FETCH --> H_FC
 
     H_BT --> HOME
     H_CI --> APP
@@ -149,14 +155,32 @@ src/data/
 │   │
 │   └── 사용처: ResultPage > PnLDisplay > SGADetail (참고 표시만, 계산 미사용❗)
 │
-└── rentGuide.ts (50개 지역)
-    ├── 각 지역 필드:
-    │   ├── sido + sigungu ────→ 지역 선택 드롭다운
-    │   ├── rent_per_sqm ──────→ 월임대료 = rent_per_sqm × scaleSqm
-    │   ├── deposit_per_sqm ───→ 저장만, 계산 미사용❗
-    │   └── data_quarter ──────→ "2025Q1" (표시용)
+├── rentGuide.ts (50개 지역)
+│   ├── 각 지역 필드:
+│   │   ├── sido + sigungu ────→ 지역 선택 드롭다운
+│   │   ├── rent_per_sqm ──────→ 월임대료 = rent_per_sqm × scaleSqm
+│   │   ├── deposit_per_sqm ───→ 저장만, 계산 미사용❗
+│   │   └── data_quarter ──────→ "2025Q1" (표시용)
+│   │
+│   └── 사용처: InputPage > RegionSelector (임대료 계산)
+│
+└── franchiseData.ts (프랜차이즈 비용 로컬 폴백)
+    ├── Supabase franchise_costs 테이블의 로컬 미러
+    ├── 각 브랜드 필드:
+    │   ├── brand_name ──────────→ 브랜드명
+    │   ├── franchise_fee ───────→ 가맹비 (원)
+    │   ├── education_fee ───────→ 교육비 (원)
+    │   ├── deposit ─────────────→ 보증금 (원)
+    │   ├── total_cost ──────────→ 초기비용 합계 (원)
+    │   ├── interior_per_33sqm ──→ 인테리어 3.3㎡당 (원)
+    │   ├── interior_total ──────→ 인테리어 총액 (원)
+    │   ├── royalty_rate ────────→ 상표사용료 (%, 매출 대비)
+    │   └── advertising_rate ────→ 광고분담금 (%, 매출 대비)
     │
-    └── 사용처: InputPage > RegionSelector (임대료 계산)
+    ├── 데이터 수집 파이프라인:
+    │   FTC PDF 다운로드 → parse-ftc-pdf.mjs → .parsed-costs.json → --upload → Supabase
+    │
+    └── 사용처: InvestmentBreakdownStep (브랜드별 비용 비교), FranchiseSearch
 ```
 
 ## 4. 사용자 입력 → 계산 매핑

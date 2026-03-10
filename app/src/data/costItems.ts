@@ -1,4 +1,4 @@
-import type { CostItem } from '../types';
+import type { CostItem, BusinessScale, InvestmentItem } from '../types';
 
 export const COST_ITEMS: CostItem[] = [
   {id:1,business_type_id:1,cost_category:"rent",cost_name:"임대료",amount_monthly_min:800000,amount_monthly_max:2500000,is_initial_cost:false,note:"상권별 편차 큼"},
@@ -60,24 +60,12 @@ export const COST_ITEMS: CostItem[] = [
   {id:57,business_type_id:9,cost_category:"utilities",cost_name:"공과금",amount_monthly_min:250000,amount_monthly_max:500000,is_initial_cost:false,note:"오븐 전기료"},
   {id:58,business_type_id:9,cost_category:"equipment",cost_name:"오븐/설비/인테리어",amount_monthly_min:20000000,amount_monthly_max:80000000,is_initial_cost:true,note:null},
   {id:59,business_type_id:9,cost_category:"other",cost_name:"기타 고정비",amount_monthly_min:400000,amount_monthly_max:400000,is_initial_cost:false,note:null},
-  {id:60,business_type_id:10,cost_category:"rent",cost_name:"임대료",amount_monthly_min:500000,amount_monthly_max:2000000,is_initial_cost:false,note:null},
-  {id:61,business_type_id:10,cost_category:"labor",cost_name:"강사 인건비",amount_monthly_min:3000000,amount_monthly_max:3000000,is_initial_cost:false,note:"1인 기준"},
-  {id:62,business_type_id:10,cost_category:"material",cost_name:"교재/부자재",amount_monthly_min:150000,amount_monthly_max:1000000,is_initial_cost:false,note:"매출의 5%"},
-  {id:63,business_type_id:10,cost_category:"utilities",cost_name:"공과금",amount_monthly_min:100000,amount_monthly_max:250000,is_initial_cost:false,note:null},
-  {id:64,business_type_id:10,cost_category:"equipment",cost_name:"인테리어/교구",amount_monthly_min:5000000,amount_monthly_max:30000000,is_initial_cost:true,note:null},
-  {id:65,business_type_id:10,cost_category:"other",cost_name:"기타 고정비",amount_monthly_min:300000,amount_monthly_max:300000,is_initial_cost:false,note:null},
   {id:66,business_type_id:11,cost_category:"rent",cost_name:"임대료",amount_monthly_min:400000,amount_monthly_max:1500000,is_initial_cost:false,note:null},
   {id:67,business_type_id:11,cost_category:"labor",cost_name:"네일리스트 인건비",amount_monthly_min:2600000,amount_monthly_max:2600000,is_initial_cost:false,note:"1인 기준"},
   {id:68,business_type_id:11,cost_category:"material",cost_name:"재료비",amount_monthly_min:320000,amount_monthly_max:1200000,is_initial_cost:false,note:"매출의 8%"},
   {id:69,business_type_id:11,cost_category:"utilities",cost_name:"공과금",amount_monthly_min:100000,amount_monthly_max:200000,is_initial_cost:false,note:null},
   {id:70,business_type_id:11,cost_category:"equipment",cost_name:"인테리어/장비",amount_monthly_min:5000000,amount_monthly_max:25000000,is_initial_cost:true,note:null},
   {id:71,business_type_id:11,cost_category:"other",cost_name:"기타 고정비",amount_monthly_min:200000,amount_monthly_max:200000,is_initial_cost:false,note:null},
-  {id:72,business_type_id:12,cost_category:"rent",cost_name:"임대료",amount_monthly_min:1500000,amount_monthly_max:4000000,is_initial_cost:false,note:"넓은 면적 필요"},
-  {id:73,business_type_id:12,cost_category:"labor",cost_name:"PT강사 인건비",amount_monthly_min:3200000,amount_monthly_max:3200000,is_initial_cost:false,note:"1인 기준"},
-  {id:74,business_type_id:12,cost_category:"material",cost_name:"소모품",amount_monthly_min:400000,amount_monthly_max:1500000,is_initial_cost:false,note:"매출의 5%"},
-  {id:75,business_type_id:12,cost_category:"utilities",cost_name:"공과금",amount_monthly_min:300000,amount_monthly_max:600000,is_initial_cost:false,note:null},
-  {id:76,business_type_id:12,cost_category:"equipment",cost_name:"운동기구/인테리어",amount_monthly_min:15000000,amount_monthly_max:60000000,is_initial_cost:true,note:null},
-  {id:77,business_type_id:12,cost_category:"other",cost_name:"기타 고정비",amount_monthly_min:500000,amount_monthly_max:500000,is_initial_cost:false,note:null},
   {id:78,business_type_id:13,cost_category:"rent",cost_name:"임대료",amount_monthly_min:500000,amount_monthly_max:1500000,is_initial_cost:false,note:null},
   {id:79,business_type_id:13,cost_category:"labor",cost_name:"직원 인건비",amount_monthly_min:2500000,amount_monthly_max:2500000,is_initial_cost:false,note:"1인 기준"},
   {id:80,business_type_id:13,cost_category:"material",cost_name:"식재료비",amount_monthly_min:3600000,amount_monthly_max:11250000,is_initial_cost:false,note:"매출의 45%"},
@@ -91,3 +79,48 @@ export const COST_ITEMS: CostItem[] = [
   {id:88,business_type_id:14,cost_category:"equipment",cost_name:"무인시스템(키오스크)",amount_monthly_min:3000000,amount_monthly_max:10000000,is_initial_cost:true,note:null},
   {id:89,business_type_id:14,cost_category:"other",cost_name:"기타 고정비",amount_monthly_min:300000,amount_monthly_max:300000,is_initial_cost:false,note:"CCTV/보안"},
 ];
+
+export function getMiscFixedDefault(businessTypeId: number): number {
+  const items = COST_ITEMS.filter(
+    c => c.business_type_id === businessTypeId && !c.is_initial_cost &&
+      c.cost_category !== 'labor' && c.cost_category !== 'rent' && c.cost_category !== 'material'
+  );
+  if (items.length === 0) return 0;
+  return items.reduce((sum, c) => sum + Math.round((c.amount_monthly_min + c.amount_monthly_max) / 2), 0);
+}
+
+export interface CostBreakdown {
+  utilities: number;
+  delivery: number;
+  other_fixed: number;
+}
+
+export function getCostBreakdown(businessTypeId: number): CostBreakdown {
+  const items = COST_ITEMS.filter(
+    c => c.business_type_id === businessTypeId && !c.is_initial_cost &&
+      c.cost_category !== 'labor' && c.cost_category !== 'rent' && c.cost_category !== 'material'
+  );
+  const avg = (c: { amount_monthly_min: number; amount_monthly_max: number }) =>
+    Math.round((c.amount_monthly_min + c.amount_monthly_max) / 2);
+
+  const utilities = items.filter(c => c.cost_category === 'utilities').reduce((s, c) => s + avg(c), 0);
+  const delivery = items.filter(c => c.cost_category === 'marketing').reduce((s, c) => s + avg(c), 0);
+  const other_fixed = items.filter(c => c.cost_category === 'other').reduce((s, c) => s + avg(c), 0);
+
+  return { utilities, delivery, other_fixed };
+}
+
+export function getInvestmentBreakdown(businessTypeId: number, scale: BusinessScale): InvestmentItem[] {
+  const initialItems = COST_ITEMS.filter(
+    c => c.business_type_id === businessTypeId && c.is_initial_cost
+  );
+
+  const scaleFactor = scale === 'small' ? 0.6 : scale === 'large' ? 1.4 : 1.0;
+
+  return initialItems.map(c => ({
+    category: (c.cost_category === 'equipment' ? 'equipment' : 'other') as InvestmentItem['category'],
+    label: c.cost_name,
+    amount: Math.round(((c.amount_monthly_min + c.amount_monthly_max) / 2) * scaleFactor),
+    editable: true,
+  }));
+}

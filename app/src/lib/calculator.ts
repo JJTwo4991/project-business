@@ -3,47 +3,110 @@ import type {
   DailyPnL, SGADetail, PnLAnnotation,
 } from '../types';
 import { calcTotalTax, calcEffectiveTaxRate } from './tax';
+import { getCostBreakdown } from '../data/costItems';
 
-const OPERATING_DAYS = 26;
+// 3-C: operating days by business type
+const OPERATING_DAYS_MAP: Record<number, number> = {
+  3: 30,  // 편의점 (24시간/365일)
+  14: 30, // 무인아이스크림 (무인 운영)
+};
+const DEFAULT_OPERATING_DAYS = 26;
+
+export function getOperatingDays(businessTypeId: number): number {
+  return OPERATING_DAYS_MAP[businessTypeId] ?? DEFAULT_OPERATING_DAYS;
+}
+
+// 3-A: resolve business params from BusinessType + SubType + overrides
+interface ResolvedParams {
+  avg_ticket_price: number;
+  material_cost_ratio: number;
+  avg_daily_customers_small: number;
+  avg_daily_customers_medium: number;
+  avg_daily_customers_large: number;
+  franchise_royalty_rate: number;
+  franchise_ad_rate: number;
+  franchise_other_rate: number;
+}
+
+export function resolveBusinessParams(inputs: SimulatorInputs): ResolvedParams {
+  const bt = inputs.business_type;
+  const brand = inputs.selected_brand;
+
+  // Override chain: user override > business_type default
+  const avg_ticket_price = inputs.ticket_price_override ?? bt.avg_ticket_price;
+  const material_cost_ratio = inputs.material_cost_ratio_override ?? bt.material_cost_ratio;
+
+  const avg_daily_customers_small = bt.avg_daily_customers_small;
+  const avg_daily_customers_medium = bt.avg_daily_customers_medium;
+  const avg_daily_customers_large = bt.avg_daily_customers_large;
+
+  const franchise_royalty_rate = brand?.royalty_rate ?? 0;
+  const franchise_ad_rate = brand?.advertising_rate ?? 0;
+  const franchise_other_rate = brand?.other_fees_rate ?? 0;
+
+  return {
+    avg_ticket_price,
+    material_cost_ratio,
+    avg_daily_customers_small,
+    avg_daily_customers_medium,
+    avg_daily_customers_large,
+    franchise_royalty_rate,
+    franchise_ad_rate,
+    franchise_other_rate,
+  };
+}
 
 function getDebt(capital: SimulatorInputs['capital']): number {
   return Math.max(0, capital.initial_investment - capital.equity);
 }
 
-function getDailyCustomers(inputs: SimulatorInputs): number {
-  const { business_type: bt, scale } = inputs;
-  return inputs.daily_customers_override ??
-    (scale === 'small' ? bt.avg_daily_customers_small :
-     scale === 'large' ? bt.avg_daily_customers_large :
-     bt.avg_daily_customers_medium);
-}
-
-function getTicketPrice(inputs: SimulatorInputs): number {
-  return inputs.ticket_price_override ?? inputs.business_type.avg_ticket_price;
+function getDailyCustomers(inputs: SimulatorInputs, params: ResolvedParams): number {
+  if (inputs.daily_customers_override != null) return inputs.daily_customers_override;
+  const { scale } = inputs;
+  return scale === 'small' ? params.avg_daily_customers_small
+    : scale === 'large' ? params.avg_daily_customers_large
+    : params.avg_daily_customers_medium;
 }
 
 export function calcDailyPnL(inputs: SimulatorInputs): DailyPnL {
-  const dailyCustomers = getDailyCustomers(inputs);
-  const ticketPrice = getTicketPrice(inputs);
-  const daily_revenue = ticketPrice * dailyCustomers;
-  const daily_cogs = Math.round(daily_revenue * inputs.business_type.material_cost_ratio);
+  const params = resolveBusinessParams(inputs);
+  const dailyCustomers = getDailyCustomers(inputs, params);
+  const daily_revenue = params.avg_ticket_price * dailyCustomers;
+  const daily_cogs = Math.round(daily_revenue * params.material_cost_ratio);
   const daily_gross_profit = daily_revenue - daily_cogs;
   return { daily_revenue, daily_cogs, daily_gross_profit };
 }
 
 export function calcMonthlyPnL(inputs: SimulatorInputs): MonthlyPnL {
   const { business_type: bt, capital } = inputs;
+  const params = resolveBusinessParams(inputs);
+  const operatingDays = getOperatingDays(bt.id);
+
   const daily = calcDailyPnL(inputs);
-  const revenue = daily.daily_revenue * OPERATING_DAYS;
-  const cogs = daily.daily_cogs * OPERATING_DAYS;
+  const revenue = daily.daily_revenue * operatingDays;
+  const cogs = daily.daily_cogs * operatingDays;
   const gross_profit = revenue - cogs;
 
   const laborHeadcount = inputs.labor_headcount ?? 1;
   const labor = bt.labor_cost_monthly_per_person * laborHeadcount;
   const rent = inputs.rent_monthly ?? 0;
-  const misc_fixed = bt.misc_fixed_cost_monthly;
-  const sg_and_a = labor + rent + misc_fixed;
-  const sga_detail: SGADetail = { labor, labor_headcount: laborHeadcount, rent, misc_fixed };
+
+  // Cost breakdown from costItems (공과금, 배달앱수수료, 기타고정비)
+  const breakdown = getCostBreakdown(bt.id);
+  const utilities = breakdown.utilities;
+  const delivery_commission = breakdown.delivery;
+  const other_fixed = breakdown.other_fixed;
+
+  // 3-D: 프랜차이즈 수수료 (변동비 — 매출 연동)
+  const royalty = Math.round(revenue * params.franchise_royalty_rate);
+  const advertising_fund = Math.round(revenue * params.franchise_ad_rate);
+  const other_franchise_fees = Math.round(revenue * params.franchise_other_rate);
+
+  // 예비비: 월 매출의 5% (불확실성 대비)
+  const contingency = Math.round(revenue * 0.05);
+
+  const sg_and_a = labor + rent + utilities + delivery_commission + other_fixed + royalty + advertising_fund + other_franchise_fees + contingency;
+  const sga_detail: SGADetail = { labor, labor_headcount: laborHeadcount, rent, utilities, delivery_commission, other_fixed, royalty, advertising_fund, other_franchise_fees, contingency };
 
   const operating_profit = gross_profit - sg_and_a;
   const debt = getDebt(capital);
@@ -64,22 +127,24 @@ export function calcMonthlyPnL(inputs: SimulatorInputs): MonthlyPnL {
 
 export function generateAnnotations(inputs: SimulatorInputs): PnLAnnotation {
   const { business_type: bt, capital } = inputs;
-  const dailyCustomers = getDailyCustomers(inputs);
-  const ticketPrice = getTicketPrice(inputs);
+  const params = resolveBusinessParams(inputs);
+  const dailyCustomers = getDailyCustomers(inputs, params);
+  const operatingDays = getOperatingDays(bt.id);
   const laborHeadcount = inputs.labor_headcount ?? 1;
   const debt = getDebt(capital);
-  const costRatioPercent = Math.round(bt.material_cost_ratio * 100);
+  const costRatioPercent = Math.round(params.material_cost_ratio * 100);
+  const breakdown = getCostBreakdown(bt.id);
 
   return {
-    revenue: `객단가 ${ticketPrice.toLocaleString()}원 × 일 ${dailyCustomers}명 × ${OPERATING_DAYS}일`,
-    cogs: `${bt.name} 업계 평균 매출원가율 ${costRatioPercent}% 적용`,
-    sga: `인건비 ${laborHeadcount}명 × ${(bt.labor_cost_monthly_per_person / 10000).toFixed(0)}만원 + 임대료 + 기타고정비 ${(bt.misc_fixed_cost_monthly / 10000).toFixed(0)}만원`,
+    revenue: `객단가 ${params.avg_ticket_price.toLocaleString()}원 × 일 ${dailyCustomers}명 × ${operatingDays}일`,
+    cogs: `재료비율 ${costRatioPercent}% 적용 (업종 평균 추정치, 공식 출처 미확인)`,
+    sga: `인건비 ${laborHeadcount}명 × ${(bt.labor_cost_monthly_per_person / 10000).toFixed(0)}만원 + 공과금 ${(breakdown.utilities / 10000).toFixed(0)}만원 + 배달수수료 ${(breakdown.delivery / 10000).toFixed(0)}만원 + 기타 ${(breakdown.other_fixed / 10000).toFixed(0)}만원${inputs.selected_brand && (params.franchise_royalty_rate > 0 || params.franchise_ad_rate > 0) ? ` + 상표사용료 ${(params.franchise_royalty_rate * 100).toFixed(1)}% + 광고분담금 ${(params.franchise_ad_rate * 100).toFixed(1)}%` : ''} (예비비 별도)`,
     interest: debt > 0
-      ? `대출 ${(debt / 10000).toLocaleString()}만원 × 연 ${(capital.interest_rate * 100).toFixed(1)}% ÷ 12개월`
+      ? `대출 ${(debt / 10000).toLocaleString()}만원 × 연 ${(capital.interest_rate * 100).toFixed(1)}% ÷ 12 (초월 기준, 상환 시 점차 감소)`
       : '대출 없음',
     tax: '종합소득세 2025년 구간세율 + 지방소득세 10%',
     principal: debt > 0
-      ? `대출 ${(debt / 10000).toLocaleString()}만원 ÷ ${capital.loan_term_years * 12}개월 (원금균등)`
+      ? `대출 ${(debt / 10000).toLocaleString()}만원 ÷ ${capital.loan_term_years * 12}개월 (원금균등상환, 이자 별도)`
       : '대출 없음',
   };
 }
@@ -131,7 +196,7 @@ export function calcDCF(pnl: MonthlyPnL, inputs: SimulatorInputs): DCFResult {
   const fcf_annual = Math.round(annualOperatingProfit * (1 - effectiveTaxRate));
 
   const denominator = discount_rate - growth_rate;
-  const business_value = (denominator === 0 || fcf_annual <= 0)
+  const business_value = (denominator <= 0 || fcf_annual <= 0)
     ? null
     : Math.round(fcf_annual / denominator);
 

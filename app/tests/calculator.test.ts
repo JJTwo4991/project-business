@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calcMonthlyPnL, calcPayback, calcDCF, runSimulation, calcDailyPnL, generateAnnotations } from '../src/lib/calculator';
+import { calcMonthlyPnL, calcPayback, calcDCF, runSimulation, calcDailyPnL, generateAnnotations, resolveBusinessParams } from '../src/lib/calculator';
 import type { BusinessType, CapitalStructure, SimulatorInputs } from '../src/types';
 
 const mockBusiness: BusinessType = {
@@ -61,10 +61,10 @@ describe('calcMonthlyPnL', () => {
     expect(pnl.gross_profit).toBe(pnl.revenue - pnl.cogs);
   });
 
-  it('판관비 = 인건비 + 임대료 + 기타고정비', () => {
+  it('판매관리비 = 인건비 + 임대료 + 공과금 + 배달수수료 + 기타고정비 + 프랜차이즈수수료 + 예비비', () => {
     const pnl = calcMonthlyPnL(mockInputs);
-    const expectedSGA = 2_500_000 * 1 + 1_500_000 + 300_000;
-    expect(pnl.sg_and_a).toBe(expectedSGA);
+    const { labor, rent, utilities, delivery_commission, other_fixed, royalty, advertising_fund, other_franchise_fees, contingency } = pnl.sga_detail;
+    expect(pnl.sg_and_a).toBe(labor + rent + utilities + delivery_commission + other_fixed + royalty + advertising_fund + other_franchise_fees + contingency);
   });
 
   it('영업이익 = 매출총이익 - 판관비', () => {
@@ -153,6 +153,13 @@ describe('calcDCF', () => {
     const dcf = calcDCF(pnl, sameRateInputs);
     expect(dcf.business_value).toBeNull();
   });
+
+  it('성장률 > 할인율이면 사업체가치 = null (음수 분모 방지)', () => {
+    const pnl = calcMonthlyPnL(mockInputs);
+    const negDenomInputs = { ...mockInputs, discount_rate: 0.05, growth_rate: 0.10 };
+    const dcf = calcDCF(pnl, negDenomInputs);
+    expect(dcf.business_value).toBeNull();
+  });
 });
 
 describe('runSimulation', () => {
@@ -166,9 +173,25 @@ describe('runSimulation', () => {
 });
 
 describe('sga_detail', () => {
-  it('sga_detail breaks down labor, rent, misc', () => {
+  it('sga_detail breaks down all cost components including franchise fees', () => {
     const pnl = calcMonthlyPnL(mockInputs);
-    expect(pnl.sga_detail.labor + pnl.sga_detail.rent + pnl.sga_detail.misc_fixed).toBe(pnl.sg_and_a);
+    const { labor, rent, utilities, delivery_commission, other_fixed, royalty, advertising_fund, other_franchise_fees, contingency } = pnl.sga_detail;
+    expect(labor + rent + utilities + delivery_commission + other_fixed + royalty + advertising_fund + other_franchise_fees + contingency).toBe(pnl.sg_and_a);
+  });
+
+  it('franchise fees are applied when selected_brand has rates', () => {
+    const brand = { name: '도미노피자', business_type_id: 8, initial_fee: 15_000_000, education_fee: 5_000_000, deposit: 10_000_000, interior_per_sqm: 800_000, other_cost: 15_000_000, source: 'test', royalty_rate: 0.06, advertising_rate: 0.045 };
+    const inputsWithBrand = { ...mockInputs, selected_brand: brand };
+    const pnl = calcMonthlyPnL(inputsWithBrand);
+    expect(pnl.sga_detail.royalty).toBe(Math.round(pnl.revenue * 0.06));
+    expect(pnl.sga_detail.advertising_fund).toBe(Math.round(pnl.revenue * 0.045));
+  });
+
+  it('franchise fees are zero when no brand selected', () => {
+    const pnl = calcMonthlyPnL(mockInputs);
+    expect(pnl.sga_detail.royalty).toBe(0);
+    expect(pnl.sga_detail.advertising_fund).toBe(0);
+    expect(pnl.sga_detail.other_franchise_fees).toBe(0);
   });
 });
 

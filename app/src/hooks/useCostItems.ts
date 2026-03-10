@@ -8,12 +8,14 @@ export function useCostItems(businessTypeId: number | null) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!businessTypeId) return;
+    if (!businessTypeId) {
+      setCostItems([]);
+      return;
+    }
     setLoading(true);
-    setError(null);
     fetchCostItems(businessTypeId)
       .then(setCostItems)
-      .catch((e: Error) => setError(e.message ?? '비용 데이터 로딩 실패'))
+      .catch(e => setError(e.message))
       .finally(() => setLoading(false));
   }, [businessTypeId]);
 

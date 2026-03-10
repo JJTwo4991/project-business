@@ -2,7 +2,7 @@
   background: var(--color-surface);
   border-radius: var(--radius-lg);
   padding: var(--spacing-md);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
 }
 
 .rowGroup {
@@ -14,13 +14,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 0;
+  padding: 12px 0;
 }
 
 .rowHighlight {
   background: var(--color-bg);
   margin: 0 calc(-1 * var(--spacing-md));
-  padding: 12px var(--spacing-md);
+  padding: 14px var(--spacing-md);
   border-radius: var(--radius-sm);
 }
 
@@ -36,7 +36,7 @@
 .rowExpandable:active {
   background: var(--color-bg);
   margin: 0 calc(-1 * var(--spacing-md));
-  padding: 10px var(--spacing-md);
+  padding: 12px var(--spacing-md);
   border-radius: var(--radius-sm);
 }
 
@@ -46,54 +46,81 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  color: var(--color-text);
 }
 
 .value {
   font-size: var(--font-size-sm);
   font-weight: 600;
   white-space: nowrap;
+  color: var(--color-text);
 }
 
 .highlightValue {
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-xl);
   font-weight: 800;
   color: var(--color-primary);
+  letter-spacing: -0.5px;
 }
 
 .negative { color: var(--color-danger); }
+.positive { color: var(--color-success); }
 
 .chevron {
   font-size: 10px;
-  color: var(--color-text-secondary);
-  transition: transform 0.15s;
+  color: var(--color-text-tertiary);
+  transition: transform 0.2s ease;
 }
 
 .annotation {
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
-  padding: 0 0 8px var(--spacing-md);
-  line-height: 1.4;
+  padding: 0 0 10px var(--spacing-md);
+  line-height: 1.5;
 }
 
 .sgaDetail {
   background: var(--color-bg);
   margin: 0 calc(-1 * var(--spacing-md));
   padding: var(--spacing-sm) var(--spacing-md) var(--spacing-sm) calc(var(--spacing-md) * 2);
-  border-top: 1px dashed var(--color-border);
+  border-top: 1px solid var(--color-border);
 }
 
+.sgaGroupLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 8px 0 2px;
+  border-top: 1px solid var(--color-border);
+}
+.sgaGroupLabel:first-child { border-top: none; padding-top: 0; }
+
 .sgaRow {
-  display: flex;
-  justify-content: space-between;
+  display: block;
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   padding: 4px 0;
 }
 
+.sgaRowMain {
+  display: flex;
+  justify-content: space-between;
+}
+
+.sgaRowAnnotation {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  opacity: 0.85;
+  padding-top: 2px;
+  font-style: italic;
+}
+
 .sgaMiscHint {
-  font-size: 10px;
-  color: var(--color-text-secondary);
-  opacity: 0.7;
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  opacity: 0.75;
   padding-top: 4px;
   font-style: italic;
 }
@@ -103,5 +130,5 @@
   color: var(--color-text-secondary);
   text-align: center;
   padding: var(--spacing-md) 0 var(--spacing-sm);
-  opacity: 0.7;
+  opacity: 0.75;
 }

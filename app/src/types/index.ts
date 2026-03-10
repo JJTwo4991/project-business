@@ -21,7 +21,32 @@ export interface BusinessType {
   closure_rate_1yr: number;
   closure_rate_3yr: number;
   closure_rate_5yr: number;
+  survival_rate_3yr?: number;
   data_sources: string[];
+}
+
+export interface FranchiseBrand {
+  name: string;
+  business_type_id: number;
+  initial_fee: number;
+  education_fee: number;
+  deposit: number;
+  interior_per_sqm: number;
+  other_cost: number;
+  source: string;
+  royalty_rate: number;        // 상표사용료 (매출 대비 소수, 예: 0.06)
+  advertising_rate: number;    // 광고분담금 (매출 대비 소수, 예: 0.045)
+  other_fees_rate?: number;    // 기타 수수료 (기본값 0)
+  fees_source?: string;        // 수수료 출처
+}
+
+export type InvestmentCategory = 'deposit' | 'interior' | 'equipment' | 'franchise' | 'other';
+
+export interface InvestmentItem {
+  category: InvestmentCategory;
+  label: string;
+  amount: number;
+  editable: boolean;
 }
 
 export interface CostItem {
@@ -40,6 +65,7 @@ export interface CapitalStructure {
   equity: number;
   interest_rate: number;
   loan_term_years: number;
+  investment_breakdown?: InvestmentItem[];
 }
 
 export interface RentGuide {
@@ -62,6 +88,9 @@ export interface SimulatorInputs {
   discount_rate?: number;
   growth_rate?: number;
   region?: { sido: string; sigungu: string; rent_per_sqm: number };
+  material_cost_ratio_override?: number;
+  misc_fixed_cost_override?: number;
+  selected_brand?: FranchiseBrand;
 }
 
 export interface DailyPnL {
@@ -74,7 +103,13 @@ export interface SGADetail {
   labor: number;
   labor_headcount: number;
   rent: number;
-  misc_fixed: number;
+  utilities: number;            // 공과금 (고정비)
+  delivery_commission: number;  // 배달앱수수료 (변동비)
+  other_fixed: number;          // 소모품/보험 등 (고정비)
+  royalty: number;              // 상표사용료 (변동비)
+  advertising_fund: number;     // 광고분담금 (변동비)
+  other_franchise_fees: number; // 기타 프랜차이즈 수수료 (변동비)
+  contingency: number;          // 예비비 (월 매출의 5%)
 }
 
 export interface MonthlyPnL {
@@ -120,4 +155,17 @@ export interface SimulationResult {
   annotations: PnLAnnotation;
   payback: PaybackResult;
   dcf: DCFResult;
+}
+
+export type StepId = 'select-industry' | 'select-scale' |
+  'investment-breakdown' | 'select-region' | 'set-investment' | 'set-loan' |
+  'set-customers' | 'set-ticket' | 'set-labor' | 'set-rent' | 'confirm' |
+  'result-daily' | 'result-monthly' | 'result-payback' | 'set-misc' | 'result-dcf';
+
+export interface ScaleDescription {
+  scale: BusinessScale;
+  label: string;
+  sqm: number;
+  seats?: number;
+  description: string;
 }
