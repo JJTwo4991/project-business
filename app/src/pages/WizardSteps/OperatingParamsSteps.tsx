@@ -108,6 +108,8 @@ export function RentStep({ inputs, onOverride, onNext }: StepProps) {
     source: '한국부동산원 R-ONE 2024년 4분기 기준',
   } : null;
 
+  const rentDeposit = inputs.rent_deposit ?? 50_000_000;
+
   return (
     <div className={styles.step}>
       <h2 className={styles.stepTitle}>월 임대료</h2>
@@ -122,6 +124,18 @@ export function RentStep({ inputs, onOverride, onNext }: StepProps) {
         format={formatKRWShort}
         onChange={v => onOverride('rent_monthly', v)}
       />
+      <SliderInput
+        label="임대보증금"
+        value={rentDeposit}
+        min={0}
+        max={300_000_000}
+        step={5_000_000}
+        format={formatKRWShort}
+        onChange={v => onOverride('rent_deposit', v)}
+      />
+      <p style={{ color: '#aaa', fontSize: '12px', margin: '-4px 0 8px 4px' }}>
+        임의 값이에요. 실제 계약 조건에 맞게 조정하세요
+      </p>
       <button className={styles.nextBtn} onClick={onNext}>다음</button>
     </div>
   );

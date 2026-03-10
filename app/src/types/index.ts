@@ -90,6 +90,7 @@ export interface SimulatorInputs {
   region?: { sido: string; sigungu: string; rent_per_sqm: number };
   material_cost_ratio_override?: number;
   misc_fixed_cost_override?: number;
+  rent_deposit?: number;
   selected_brand?: FranchiseBrand;
 }
 

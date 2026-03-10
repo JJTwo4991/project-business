@@ -8,9 +8,10 @@ interface Props {
   step: number;
   format: (v: number) => string;
   onChange: (v: number) => void;
+  disabled?: boolean;
 }
 
-export function SliderInput({ label, value, min, max, step, format, onChange }: Props) {
+export function SliderInput({ label, value, min, max, step, format, onChange, disabled }: Props) {
   const percent = max === min ? 0 : Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100));
 
   return (
@@ -27,7 +28,8 @@ export function SliderInput({ label, value, min, max, step, format, onChange }: 
           max={max}
           step={step}
           value={value}
-          style={{ '--fill-percent': `${percent}%` } as React.CSSProperties}
+          disabled={disabled}
+          style={{ '--fill-percent': `${percent}%`, opacity: disabled ? 0.4 : 1 } as React.CSSProperties}
           onChange={e => onChange(Number(e.target.value))}
           aria-label={label}
           aria-valuenow={value}

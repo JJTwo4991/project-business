@@ -11,6 +11,7 @@ import { FranchiseSearch } from '../../components/FranchiseSearch/FranchiseSearc
 import type { FranchiseInvestment } from '../../components/FranchiseSearch/FranchiseSearch';
 import { getScaleSqm } from '../../lib/scale';
 import { useFranchiseCosts } from '../../hooks/useFranchiseCosts';
+import { getIndustryAverages } from '../../data/franchiseData';
 
 type Mode = 'choose' | 'franchise' | 'independent';
 
@@ -58,8 +59,18 @@ export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onCh
   }, [onChange]);
 
   const handleIndependent = useCallback(() => {
+    const avg = getIndustryAverages(businessTypeId);
+    const interiorTotal = avg.interior_per_sqm * scaleSqm;
+    const independentItems: InvestmentItem[] = [
+      { category: 'franchise', label: '가맹비', amount: 0, editable: false },
+      { category: 'franchise', label: '교육비', amount: 0, editable: false },
+      { category: 'deposit', label: '보증금', amount: 0, editable: false },
+      { category: 'other', label: '기타비용 (집기, 비품)', amount: avg.other_cost, editable: true },
+      { category: 'interior', label: '인테리어비', amount: interiorTotal, editable: true },
+    ];
+    onChange(independentItems);
     setMode('independent');
-  }, []);
+  }, [businessTypeId, scaleSqm, onChange]);
 
   const handleResetChoice = useCallback(() => {
     setMode('choose');
@@ -96,18 +107,30 @@ export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onCh
           ← 프랜차이즈 선택으로 돌아가기
         </button>
       )}
+      {mode === 'independent' && (
+        <p className={styles.hint} style={{ color: '#888', fontSize: '13px', margin: '0 0 12px' }}>
+          개인 사업은 가맹비, 교육비 등이 없어요
+        </p>
+      )}
       <div className={styles.sliderGroup}>
         {items.map((item, i) => (
-          <SliderInput
-            key={i}
-            label={item.label}
-            value={item.amount}
-            min={0}
-            max={Math.max((defaultItems[i]?.amount ?? item.amount) * 2, 5_000_000)}
-            step={1_000_000}
-            format={formatKRWShort}
-            onChange={v => handleItemChange(i, v)}
-          />
+          <div key={i}>
+            <SliderInput
+              label={item.label}
+              value={item.amount}
+              min={0}
+              max={Math.max((defaultItems[i]?.amount ?? item.amount) * 2, 5_000_000)}
+              step={1_000_000}
+              format={formatKRWShort}
+              onChange={v => handleItemChange(i, v)}
+              disabled={item.editable === false}
+            />
+            {mode === 'independent' && item.editable && (
+              <p style={{ color: '#aaa', fontSize: '12px', margin: '-4px 0 8px 4px' }}>
+                같은 업종 평균값이에요. 조정할 수 있어요
+              </p>
+            )}
+          </div>
         ))}
       </div>
       <div className={styles.investmentTotal}>
