@@ -1,8 +1,15 @@
+import { useState } from 'react';
 import styles from './ResultPage.module.css';
 import { CashFlowChart } from '../../components/CashFlowChart/CashFlowChart';
 import { PnLDisplay } from '../../components/PnLDisplay/PnLDisplay';
 import type { SimulationResult, StepId } from '../../types';
 import { formatKRWShort, formatPercent, formatMonths } from '../../lib/format';
+import {
+  calcScenarioDailyPnL,
+  calcScenarioMonthlyPnL,
+  calcScenarioPayback,
+  type ScenarioType,
+} from '../../lib/calculator';
 
 type ResultView = 'result-daily' | 'result-monthly' | 'result-payback' | 'result-dcf';
 
@@ -13,6 +20,12 @@ const TITLES: Record<ResultView, string> = {
   'result-dcf': '권리금 (사업체 추정 가치)',
 };
 
+const SCENARIO_DESCS: Record<ScenarioType, string> = {
+  high: '예상보다 더 잘 됐을 때',
+  base: '사장님의 예측이 딱 맞을 경우',
+  low: '안전 제일. 예상보다 장사가 안 되는 경우',
+};
+
 interface Props {
   result: SimulationResult;
   view: ResultView;
@@ -21,10 +34,42 @@ interface Props {
   onGoTo: (step: StepId) => void;
 }
 
+function ScenarioTabs({ scenario, onChange }: { scenario: ScenarioType; onChange: (s: ScenarioType) => void }) {
+  return (
+    <div className={styles.scenarioTabs}>
+      <button
+        className={`${styles.scenarioTab} ${scenario === 'high' ? styles.scenarioTabActive : ''}`}
+        onClick={() => onChange('high')}
+      >
+        📈 High
+      </button>
+      <button
+        className={`${styles.scenarioTab} ${scenario === 'base' ? styles.scenarioTabActive : ''}`}
+        onClick={() => onChange('base')}
+      >
+        😎 Base
+      </button>
+      <button
+        className={`${styles.scenarioTab} ${scenario === 'low' ? styles.scenarioTabActive : ''}`}
+        onClick={() => onChange('low')}
+      >
+        🛡️ Low
+      </button>
+    </div>
+  );
+}
+
 export function ResultPage({ result, view, onBack, onNext, onGoTo }: Props) {
-  const { pnl, daily, annotations, payback, dcf, inputs } = result;
+  const { annotations, payback, dcf, inputs } = result;
+  const [scenario, setScenario] = useState<ScenarioType>('base');
 
   const isLastResult = view === 'result-dcf';
+
+  const scenarioDaily = calcScenarioDailyPnL(inputs, scenario);
+  const scenarioPnl = calcScenarioMonthlyPnL(inputs, scenario);
+  const scenarioPaybackBase = calcScenarioPayback(inputs, 'base');
+  const scenarioPaybackHigh = calcScenarioPayback(inputs, 'high');
+  const scenarioPaybackLow = calcScenarioPayback(inputs, 'low');
 
   return (
     <div className={styles.page}>
@@ -36,9 +81,11 @@ export function ResultPage({ result, view, onBack, onNext, onGoTo }: Props) {
       <div className={styles.content}>
         {view === 'result-daily' && (
           <div className={styles.pnlSection}>
+            <ScenarioTabs scenario={scenario} onChange={setScenario} />
+            <p className={styles.scenarioDesc}>{SCENARIO_DESCS[scenario]}</p>
             <PnLDisplay
-              pnl={pnl}
-              daily={daily}
+              pnl={scenarioPnl}
+              daily={scenarioDaily}
               annotations={annotations}
               mode="daily"
             />
@@ -47,9 +94,11 @@ export function ResultPage({ result, view, onBack, onNext, onGoTo }: Props) {
 
         {view === 'result-monthly' && (
           <div className={styles.pnlSection}>
+            <ScenarioTabs scenario={scenario} onChange={setScenario} />
+            <p className={styles.scenarioDesc}>{SCENARIO_DESCS[scenario]}</p>
             <PnLDisplay
-              pnl={pnl}
-              daily={daily}
+              pnl={scenarioPnl}
+              daily={scenarioDaily}
               annotations={annotations}
               mode="monthly"
             />
@@ -65,11 +114,15 @@ export function ResultPage({ result, view, onBack, onNext, onGoTo }: Props) {
         {view === 'result-payback' && (
           <div className={styles.paybackSection}>
             <div className={styles.summaryCard}>
-              <p className={styles.summaryLabel}>투자회수기간</p>
+              <p className={styles.summaryLabel}>투자회수기간 (Base)</p>
               <p className={styles.summaryValue}>{formatMonths(payback.payback_months)}</p>
               <p className={styles.summarySubtext}>초기투자금 {formatKRWShort(inputs.capital.initial_investment)}</p>
             </div>
-            <CashFlowChart payback={payback} />
+            <CashFlowChart
+              payback={scenarioPaybackBase}
+              highPayback={scenarioPaybackHigh}
+              lowPayback={scenarioPaybackLow}
+            />
           </div>
         )}
 

@@ -221,3 +221,36 @@
   line-height: 1.6;
   margin-top: var(--spacing-lg);
 }
+
+.scenarioTabs {
+  display: flex;
+  gap: 8px;
+  padding: 0 0 12px 0;
+}
+
+.scenarioTab {
+  flex: 1;
+  padding: 10px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.scenarioTabActive {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.scenarioDesc {
+  text-align: center;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin: 0 0 12px 0;
+}

@@ -21,20 +21,22 @@ export interface FranchiseBrandUnified {
 }
 
 function rowToBrand(row: FranchiseCostRow, businessTypeId: number): FranchiseBrandUnified {
-  // interior_per_33sqm (3.3㎡당, 천원→원 already converted in scraper) → ㎡당 환산
+  // Supabase franchise_costs 테이블은 천원 단위로 저장 → 원 단위로 변환
+  const toWon = (v: number) => v * 1000;
+  // interior_per_33sqm (3.3㎡당, 천원) → ㎡당 원 환산
   const interiorPerSqm = row.interior_per_33sqm > 0
-    ? Math.round(row.interior_per_33sqm / 3.3)
+    ? Math.round(toWon(row.interior_per_33sqm) / 3.3)
     : 0;
 
   return {
     name: row.brand_name,
     company_name: row.company_name,
     business_type_id: businessTypeId,
-    initial_fee: row.franchise_fee,
-    education_fee: row.education_fee,
-    deposit: row.deposit,
+    initial_fee: toWon(row.franchise_fee),
+    education_fee: toWon(row.education_fee),
+    deposit: toWon(row.deposit),
     interior_per_sqm: interiorPerSqm,
-    other_cost: row.other_cost,
+    other_cost: toWon(row.other_cost),
     source: 'FTC 정보공개서',
     royalty_rate: 0,        // Supabase 스키마에 컬럼 추가 후 연결
     advertising_rate: 0,    // Supabase 스키마에 컬럼 추가 후 연결

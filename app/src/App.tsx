@@ -17,6 +17,7 @@ import { TicketStep, LaborStep, RentStep, MiscStep } from './pages/WizardSteps/O
 import { VisitorEstimationStep } from './pages/WizardSteps/VisitorEstimationStep';
 import { TossTransition } from './components/TossTransition/TossTransition';
 import { ConfirmStep } from './pages/WizardSteps/ConfirmStep';
+import { UI_ICONS } from './assets/icons';
 
 export default function App() {
   const simulator = useSimulator();
@@ -132,7 +133,7 @@ export default function App() {
       case 'transition-operating':
         return (
           <TossTransition
-            emoji="👏"
+            iconSrc={UI_ICONS.clap}
             message="수고하셨어요! 이제 장사가 얼마나 잘 될지 예상해볼까요?"
             buttonText="준비됐어요"
             onComplete={nav.goNext}

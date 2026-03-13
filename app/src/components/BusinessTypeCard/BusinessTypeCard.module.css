@@ -22,6 +22,11 @@
   line-height: 1;
 }
 
+.icon {
+  width: 32px;
+  height: 32px;
+}
+
 .name {
   font-size: var(--font-size-lg);
   font-weight: 700;

@@ -208,6 +208,98 @@ export function calcPayback(inputs: SimulatorInputs): PaybackResult {
   return { payback_months, cumulative_cashflow };
 }
 
+export type ScenarioType = 'base' | 'high' | 'low';
+
+export const SCENARIO_MULTIPLIERS: Record<ScenarioType, number> = {
+  base: 1.0,
+  high: 1.15,
+  low: 0.70,
+};
+
+export function calcScenarioDailyPnL(inputs: SimulatorInputs, scenario: ScenarioType): DailyPnL {
+  const base = calcDailyPnL(inputs);
+  const mult = SCENARIO_MULTIPLIERS[scenario];
+  const daily_revenue = Math.round(base.daily_revenue * mult);
+  const daily_cogs = Math.round(base.daily_cogs * mult);
+  const daily_gross_profit = daily_revenue - daily_cogs;
+  return { daily_revenue, daily_cogs, daily_gross_profit };
+}
+
+export function calcScenarioMonthlyPnL(inputs: SimulatorInputs, scenario: ScenarioType): MonthlyPnL {
+  const basePnl = calcMonthlyPnL(inputs);
+  const mult = SCENARIO_MULTIPLIERS[scenario];
+
+  const revenue = Math.round(basePnl.revenue * mult);
+  const cogs = Math.round(basePnl.cogs * mult);
+  const gross_profit = revenue - cogs;
+
+  const sg_and_a = basePnl.sg_and_a;
+  const sga_detail = basePnl.sga_detail;
+
+  const operating_profit = gross_profit - sg_and_a;
+  const interest_expense = basePnl.interest_expense;
+  const pretax_income = operating_profit - interest_expense;
+  const tax = calcTotalTax(pretax_income);
+  const net_income = pretax_income - tax;
+  const principal_repayment = basePnl.principal_repayment;
+  const free_cash_flow = net_income - principal_repayment;
+
+  return {
+    revenue, cogs, gross_profit, sg_and_a, sga_detail, operating_profit,
+    interest_expense, pretax_income, tax, net_income,
+    principal_repayment, free_cash_flow,
+  };
+}
+
+export function calcScenarioPayback(inputs: SimulatorInputs, scenario: ScenarioType): PaybackResult {
+  const mult = SCENARIO_MULTIPLIERS[scenario];
+  const { capital } = inputs;
+  const debt = getDebt(capital);
+  const totalMonths = Math.max(1, capital.loan_term_years * 12);
+  const principalPerMonth = debt > 0 ? Math.round(debt / totalMonths) : 0;
+
+  const depositAmount = inputs.selected_brand?.deposit
+    ?? capital.investment_breakdown?.find(
+        item => item.category === 'deposit' && item.label.includes('보증금')
+      )?.amount
+    ?? 0;
+  const paybackInvestment = Math.max(0, capital.initial_investment - depositAmount);
+
+  const basePnl = calcMonthlyPnL(inputs);
+  const scenarioRevenue = Math.round(basePnl.revenue * mult);
+  const scenarioCogs = Math.round(basePnl.cogs * mult);
+  const scenarioGrossProfit = scenarioRevenue - scenarioCogs;
+  const operating_profit = scenarioGrossProfit - basePnl.sg_and_a;
+
+  let remainingDebt = debt;
+  let cumulative = -paybackInvestment;
+  const cumulative_cashflow: { month: number; value: number }[] = [];
+  let payback_months: number | null = null;
+
+  for (let month = 1; month <= 60; month++) {
+    const interestThisMonth = remainingDebt > 0
+      ? Math.round(remainingDebt * capital.interest_rate / 12)
+      : 0;
+    const pretax_income = operating_profit - interestThisMonth;
+    const tax = calcTotalTax(pretax_income);
+    const net_income = pretax_income - tax;
+    const monthlyFCF = net_income - (month <= totalMonths ? principalPerMonth : 0);
+
+    cumulative += monthlyFCF;
+    cumulative_cashflow.push({ month, value: Math.round(cumulative) });
+
+    if (payback_months === null && cumulative >= 0) {
+      payback_months = month;
+    }
+
+    if (month <= totalMonths) {
+      remainingDebt = Math.max(0, remainingDebt - principalPerMonth);
+    }
+  }
+
+  return { payback_months, cumulative_cashflow };
+}
+
 export function calcDCF(pnl: MonthlyPnL, inputs: SimulatorInputs): DCFResult {
   const discount_rate = inputs.discount_rate ?? 0.15;
   const growth_rate = inputs.growth_rate ?? 0.00;

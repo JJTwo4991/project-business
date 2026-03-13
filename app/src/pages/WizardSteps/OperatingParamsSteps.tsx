@@ -9,6 +9,7 @@ import { GuidelineBox } from '../../components/GuidelineBox/GuidelineBox';
 import { getGuideline, getRevenueGuideline } from '../../data/guidelines';
 import { useBenchmarkData } from '../../hooks/useBenchmarkData';
 import { getMenuItems } from '../../data/menuItems';
+import { getMenuIcon } from '../../assets/icons';
 
 interface StepProps {
   inputs: SimulatorInputs;
@@ -63,7 +64,11 @@ export function TicketStep({ inputs, onOverride, onNext }: StepProps) {
         <div className={styles.menuCards}>
           {menuItems.map((item, i) => (
             <div key={i} className={styles.menuCard}>
-              <div className={styles.menuEmoji}>{item.emoji}</div>
+              <div className={styles.menuEmoji}>
+                {getMenuIcon(item.emoji) ? (
+                  <img src={getMenuIcon(item.emoji)} alt={item.name} width={24} height={24} draggable={false} />
+                ) : item.emoji}
+              </div>
               <div className={styles.menuName}>{item.name}</div>
               <div className={styles.menuPrice}>{formatKRW(item.price)}</div>
             </div>
@@ -85,14 +90,15 @@ export function TicketStep({ inputs, onOverride, onNext }: StepProps) {
 }
 
 export function LaborStep({ inputs, onOverride, onNext }: StepProps) {
-  const headcount = inputs.labor_headcount ?? 1;
+  const [localHeadcount, setLocalHeadcount] = useState(1);
   const [weeklyHours, setWeeklyHours] = useState(40);
   const [hourlyWage, setHourlyWage] = useState(10030);
 
-  const totalLaborCost = headcount * weeklyHours * 4.345 * hourlyWage;
+  const totalLaborCost = localHeadcount * weeklyHours * 4.345 * hourlyWage;
   const perPersonCost = inputs.business_type.labor_cost_monthly_per_person;
 
   const handleHeadcountChange = (v: number) => {
+    setLocalHeadcount(v);
     const newTotal = v * weeklyHours * 4.345 * hourlyWage;
     const effectiveHeadcount = perPersonCost > 0 ? newTotal / perPersonCost : v;
     onOverride('labor_headcount', effectiveHeadcount);
@@ -100,24 +106,17 @@ export function LaborStep({ inputs, onOverride, onNext }: StepProps) {
 
   const handleHoursChange = (v: number) => {
     setWeeklyHours(v);
-    const newTotal = headcount * v * 4.345 * hourlyWage;
-    const effectiveHeadcount = perPersonCost > 0 ? newTotal / perPersonCost : headcount;
+    const newTotal = localHeadcount * v * 4.345 * hourlyWage;
+    const effectiveHeadcount = perPersonCost > 0 ? newTotal / perPersonCost : localHeadcount;
     onOverride('labor_headcount', effectiveHeadcount);
   };
 
   const handleWageChange = (v: number) => {
     setHourlyWage(v);
-    const newTotal = headcount * weeklyHours * 4.345 * v;
-    const effectiveHeadcount = perPersonCost > 0 ? newTotal / perPersonCost : headcount;
+    const newTotal = localHeadcount * weeklyHours * 4.345 * v;
+    const effectiveHeadcount = perPersonCost > 0 ? newTotal / perPersonCost : localHeadcount;
     onOverride('labor_headcount', effectiveHeadcount);
   };
-
-  // Display headcount: back-calculate from current labor_headcount override
-  const displayHeadcount = (() => {
-    const raw = inputs.labor_headcount ?? 1;
-    const computed = perPersonCost > 0 ? raw * perPersonCost / (weeklyHours * 4.345 * hourlyWage) : raw;
-    return Math.round(computed * 2) / 2; // round to nearest 0.5
-  })();
 
   return (
     <div className={styles.step}>
@@ -127,11 +126,11 @@ export function LaborStep({ inputs, onOverride, onNext }: StepProps) {
       <div className={styles.sliderGroup}>
         <SliderInput
           label="직원 수"
-          value={displayHeadcount}
+          value={localHeadcount}
           min={0}
           max={10}
-          step={0.5}
-          format={v => `${v.toFixed(1)} 명`}
+          step={1}
+          format={v => `${v} 명`}
           onChange={handleHeadcountChange}
         />
         <SliderInput
@@ -148,8 +147,8 @@ export function LaborStep({ inputs, onOverride, onNext }: StepProps) {
           value={hourlyWage}
           min={10030}
           max={30000}
-          step={100}
-          format={formatKRWShort}
+          step={10}
+          format={v => `${v.toLocaleString('ko-KR')}원`}
           onChange={handleWageChange}
         />
         <p className={styles.hint}>최저임금은 10,030원이에요 (고용노동부 2025년 고시)</p>
@@ -179,7 +178,12 @@ export function RentStep({ inputs, onOverride, onNext }: StepProps) {
     <div className={styles.step}>
       <h2 className={styles.stepTitle}>월 임대료</h2>
       <p className={styles.stepDesc}>보증금 제외 월 임대료</p>
-      <GuidelineBox guideline={rentGuideline} />
+      <GuidelineBox guideline={rentGuideline ?? getGuideline(inputs.business_type.id, inputs.scale, 'set-rent')} />
+      {benchmark.realRent && inputs.region && (
+        <p className={styles.hint}>
+          {inputs.region.sido} {inputs.region.sigungu} 평균 임대료율은 ㎡당 {formatKRWShort(benchmark.realRent)}이에요 ({Math.round(scaleSqm)}㎡ 기준 월 약 {formatKRWShort(Math.round(benchmark.realRent * scaleSqm))})
+        </p>
+      )}
       <SliderInput
         label="월 임대료"
         value={current}
@@ -193,7 +197,7 @@ export function RentStep({ inputs, onOverride, onNext }: StepProps) {
         label="임대보증금"
         value={rentDeposit}
         min={0}
-        max={300_000_000}
+        max={100_000_000}
         step={5_000_000}
         format={formatKRWShort}
         onChange={v => onOverride('rent_deposit', v)}

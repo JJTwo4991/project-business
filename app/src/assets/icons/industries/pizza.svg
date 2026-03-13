@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <rect width="48" height="48" rx="12" fill="#F39C12"/>
+  <rect width="48" height="48" rx="12" fill="url(#g1)" opacity="0.25"/>
+  <defs><linearGradient id="g1" x1="0" y1="0" x2="48" y2="48"><stop stop-color="#fff"/><stop offset="1" stop-color="#000" stop-opacity="0"/></linearGradient></defs>
+  <!-- pizza slice -->
+  <path d="M24 8L10 38h28L24 8z" fill="#fff"/>
+  <!-- crust -->
+  <path d="M10 38c2 2 6 3 14 3s12-1 14-3" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <!-- toppings -->
+  <circle cx="22" cy="26" r="2.5" fill="#F39C12" opacity="0.6"/>
+  <circle cx="27" cy="30" r="2.5" fill="#F39C12" opacity="0.6"/>
+  <circle cx="24" cy="18" r="2" fill="#F39C12" opacity="0.6"/>
+</svg>

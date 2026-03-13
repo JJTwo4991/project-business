@@ -1,10 +1,8 @@
 import styles from './WizardSteps.module.css';
 import type { BusinessType } from '../../types';
 import { formatKRWShort } from '../../lib/format';
-
-const CATEGORY_EMOJI: Record<string, string> = {
-  '외식': '🍜', '카페': '☕', '소매': '🛍️', '서비스': '✂️', '기타': '🏪',
-};
+import { Icon } from '../../components/Icon/Icon';
+import { getIndustryIcon } from '../../assets/icons';
 
 interface Props {
   businessTypes: BusinessType[];
@@ -19,7 +17,7 @@ export function IndustrySelectStep({ businessTypes, onSelect }: Props) {
       <div className={styles.grid}>
         {businessTypes.map(bt => (
           <button key={bt.id} className={styles.card} onClick={() => onSelect(bt)}>
-            <span className={styles.cardEmoji}>{CATEGORY_EMOJI[bt.category] ?? '🏪'}</span>
+            <Icon src={getIndustryIcon(bt.id, bt.category)} alt={bt.name} size={34} />
             <span className={styles.cardName}>{bt.name}</span>
             <span className={styles.cardDetail}>
               {formatKRWShort(bt.avg_monthly_revenue_min)}~{formatKRWShort(bt.avg_monthly_revenue_max)}

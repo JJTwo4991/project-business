@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <rect width="48" height="48" rx="12" fill="#00B894"/>
+  <rect width="48" height="48" rx="12" fill="url(#g1)" opacity="0.2"/>
+  <defs><linearGradient id="g1" x1="0" y1="0" x2="48" y2="48"><stop stop-color="#fff"/><stop offset="1" stop-color="#000" stop-opacity="0"/></linearGradient></defs>
+  <!-- shopping bag -->
+  <path d="M12 18h24l-2 22H14L12 18z" fill="#fff"/>
+  <!-- handles -->
+  <path d="M18 18v-4c0-3.3 2.7-6 6-6s6 2.7 6 6v4" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- heart/star on bag -->
+  <path d="M24 26l-3.5 3.5c-1 1-1 2.5 0 3.5s2.5 1 3.5 0l3.5-3.5-3.5-3.5z" fill="#00B894" opacity="0.3"/>
+  <path d="M24 26l3.5 3.5c1 1 1 2.5 0 3.5s-2.5 1-3.5 0" fill="#00B894" opacity="0.3"/>
+</svg>

@@ -2,7 +2,8 @@ import { useState, useRef } from 'react';
 import styles from './TossTransition.module.css';
 
 export interface TossTransitionProps {
-  emoji: string;
+  emoji?: string;
+  iconSrc?: string;
   message: string;
   buttonText: string;
   onComplete: () => void;
@@ -13,6 +14,7 @@ type Phase = 'emojiIn' | 'emojiOut' | 'textIn' | 'buttonIn' | 'idle';
 
 export function TossTransition({
   emoji,
+  iconSrc,
   message,
   buttonText,
   onComplete,
@@ -22,7 +24,6 @@ export function TossTransition({
   const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function handleEmojiInEnd() {
-    // Hold emoji for 500ms, then transition out
     holdTimer.current = setTimeout(() => {
       setPhase('emojiOut');
     }, 500);
@@ -44,7 +45,6 @@ export function TossTransition({
     <div className={styles.screen}>
       <div className={styles.content}>
 
-        {/* Emoji stage */}
         {showEmoji && (
           <span
             className={
@@ -57,11 +57,14 @@ export function TossTransition({
             }
             aria-hidden="true"
           >
-            {emoji}
+            {iconSrc ? (
+              <img src={iconSrc} alt="" width={64} height={64} draggable={false} />
+            ) : (
+              emoji
+            )}
           </span>
         )}
 
-        {/* Text stage */}
         {showText && (
           <div
             className={`${styles.textBlock} ${styles.slideUp}`}
@@ -74,7 +77,6 @@ export function TossTransition({
           </div>
         )}
 
-        {/* Button stage */}
         {showButton && (
           <div
             className={`${styles.buttonWrap} ${styles.buttonIn}`}

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <rect width="48" height="48" rx="12" fill="#74B9FF"/>
+  <rect width="48" height="48" rx="12" fill="url(#g1)" opacity="0.2"/>
+  <defs><linearGradient id="g1" x1="0" y1="0" x2="48" y2="48"><stop stop-color="#fff"/><stop offset="1" stop-color="#000" stop-opacity="0"/></linearGradient></defs>
+  <!-- small store -->
+  <rect x="12" y="22" width="24" height="18" rx="2" fill="#fff"/>
+  <!-- roof -->
+  <path d="M10 22l14-10 14 10H10z" fill="#fff"/>
+  <!-- door -->
+  <rect x="20" y="30" width="8" height="10" rx="1" fill="#74B9FF" opacity="0.4"/>
+  <!-- window -->
+  <rect x="14" y="26" width="5" height="5" rx="1" fill="#74B9FF" opacity="0.3"/>
+  <!-- sign -->
+  <rect x="28" y="26" width="5" height="3" rx="1" fill="#74B9FF" opacity="0.3"/>
+</svg>

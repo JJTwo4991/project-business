@@ -66,6 +66,9 @@ function SGADetailView({ detail, revenue }: SGADetailProps) {
   const deliveryPercent = revenue > 0
     ? Math.round((detail.delivery_commission / revenue) * 100)
     : 0;
+  const miscPercent = revenue > 0
+    ? (detail.other_fixed / revenue * 100).toFixed(1)
+    : '0.0';
 
   return (
     <div className={styles.sgaDetail}>
@@ -86,14 +89,14 @@ function SGADetailView({ detail, revenue }: SGADetailProps) {
         <SGADetailRow
           label="공과금"
           value={detail.utilities}
-          annotation="업종별 평균 (한국전력공사 2024 상업용 전기요금 기준)"
+          annotation="업종별 평균 (전기·수도·가스 포함, 소상공인실태조사 2023 기준)"
         />
       )}
       {detail.other_fixed > 0 && (
         <SGADetailRow
           label="기타고정비"
           value={detail.other_fixed}
-          annotation="소모품·위생용품·보험료 등 (업종별 평균 추정)"
+          annotation={`매출 대비 ${miscPercent}% (소상공인실태조사 2023, 외식업체 경영실태조사 2024 기준)`}
         />
       )}
       {detail.contingency > 0 && (
@@ -110,7 +113,7 @@ function SGADetailView({ detail, revenue }: SGADetailProps) {
             <SGADetailRow
               label="배달앱 수수료"
               value={detail.delivery_commission}
-              annotation={`매출의 약 ${deliveryPercent}% (배달앱 평균 수수료율)`}
+              annotation={`매출의 약 ${deliveryPercent}% (배달의민족·요기요 평균 중개수수료율, 공정거래위원회 2024)`}
             />
           )}
           {detail.royalty > 0 && (

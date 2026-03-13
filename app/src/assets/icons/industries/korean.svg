@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <rect width="48" height="48" rx="12" fill="#C0392B"/>
+  <rect width="48" height="48" rx="12" fill="url(#g1)" opacity="0.25"/>
+  <defs><linearGradient id="g1" x1="0" y1="0" x2="48" y2="48"><stop stop-color="#fff"/><stop offset="1" stop-color="#000" stop-opacity="0"/></linearGradient></defs>
+  <!-- rice bowl -->
+  <path d="M10 24c0 7.7 6.3 14 14 14s14-6.3 14-14H10z" fill="#fff"/>
+  <path d="M10 24h28" stroke="#fff" stroke-width="2.5"/>
+  <!-- rice -->
+  <ellipse cx="24" cy="22" rx="12" ry="4" fill="#fff"/>
+  <!-- chopsticks -->
+  <line x1="30" y1="10" x2="36" y2="20" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <line x1="33" y1="10" x2="39" y2="20" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+</svg>

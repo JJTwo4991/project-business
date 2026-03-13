@@ -4,6 +4,8 @@ import { getScaleDescriptions } from '../../data/scaleDescriptions';
 import { formatKRWShort } from '../../lib/format';
 import { GuidelineBox } from '../../components/GuidelineBox/GuidelineBox';
 import { getGuideline } from '../../data/guidelines';
+import { Icon } from '../../components/Icon/Icon';
+import { SCALE_ICONS } from '../../assets/icons';
 
 interface Props {
   businessType: BusinessType;
@@ -11,12 +13,6 @@ interface Props {
   onSelect: (scale: BusinessScale) => void;
   onNext: () => void;
 }
-
-const SCALE_EMOJI: Record<string, string> = {
-  small: '🏪',
-  medium: '🏬',
-  large: '🏢',
-};
 
 export function ScaleSelectStep({ businessType, selected, onSelect, onNext }: Props) {
   const descriptions = getScaleDescriptions(businessType.id);
@@ -53,7 +49,7 @@ export function ScaleSelectStep({ businessType, selected, onSelect, onNext }: Pr
                 <span className={styles.scaleInfoInv}>약 {formatKRWShort(inv)}</span>
               </div>
               <span className={styles.scaleImage} aria-hidden="true">
-                {SCALE_EMOJI[desc.scale]}
+                <Icon src={SCALE_ICONS[desc.scale]} alt={desc.label} size={44} />
               </span>
             </button>
           );

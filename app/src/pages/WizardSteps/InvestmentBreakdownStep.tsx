@@ -13,6 +13,8 @@ import { getScaleSqm } from '../../lib/scale';
 import { useFranchiseCosts } from '../../hooks/useFranchiseCosts';
 import { getIndustryAverages, getIndustryTotalAvg } from '../../data/franchiseData';
 import { BUSINESS_TYPES } from '../../data/businessTypes';
+import { Icon } from '../../components/Icon/Icon';
+import { UI_ICONS } from '../../assets/icons';
 
 type Mode = 'choose' | 'franchise' | 'independent';
 type ChooseSubMode = null | 'franchise-search';
@@ -122,7 +124,9 @@ export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onCh
             type="button"
             onClick={() => setChooseSubMode('franchise-search')}
           >
-            <span className={styles.typeSelectIcon}>🏪</span>
+            <span className={styles.typeSelectIcon}>
+              <Icon src={UI_ICONS.franchise} alt="프랜차이즈" size={36} />
+            </span>
             <div className={styles.typeSelectText}>
               <span className={styles.typeSelectTitle}>프랜차이즈</span>
               <span className={styles.typeSelectSub}>브랜드 가맹점으로 시작해요</span>
@@ -133,7 +137,9 @@ export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onCh
             type="button"
             onClick={handleIndependent}
           >
-            <span className={styles.typeSelectIcon}>🛍️</span>
+            <span className={styles.typeSelectIcon}>
+              <Icon src={UI_ICONS.individual} alt="개인사업" size={36} />
+            </span>
             <div className={styles.typeSelectText}>
               <span className={styles.typeSelectTitle}>개인사업</span>
               <span className={styles.typeSelectSub}>나만의 가게를 시작해요</span>
@@ -189,7 +195,7 @@ export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onCh
               label={item.label}
               value={item.amount}
               min={0}
-              max={Math.max((defaultItems[i]?.amount ?? item.amount) * 2, 5_000_000)}
+              max={Math.min(Math.max((defaultItems[i]?.amount ?? item.amount) * 2, 5_000_000), 50_000_000)}
               step={1_000_000}
               format={formatKRWShort}
               onChange={v => handleItemChange(i, v)}
