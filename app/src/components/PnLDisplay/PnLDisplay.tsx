@@ -12,9 +12,10 @@ interface PnLRowProps {
   expandable?: boolean;
   expanded?: boolean;
   onToggle?: () => void;
+  marginPct?: number; // 이익률 표시 (optional)
 }
 
-function PnLRow({ label, value, annotation, highlight, indent, expandable, expanded, onToggle }: PnLRowProps) {
+function PnLRow({ label, value, annotation, highlight, indent, expandable, expanded, onToggle, marginPct }: PnLRowProps) {
   return (
     <div className={styles.rowGroup}>
       <div
@@ -27,6 +28,11 @@ function PnLRow({ label, value, annotation, highlight, indent, expandable, expan
         </span>
         <span className={`${styles.value} ${value < 0 ? styles.negative : ''} ${highlight ? styles.highlightValue : ''}`}>
           {formatKRW(value)}
+          {marginPct !== undefined && (
+            <span className={styles.marginPct}>
+              {` (${marginPct >= 0 ? '' : ''}${marginPct.toFixed(1)}%)`}
+            </span>
+          )}
         </span>
       </div>
       {annotation && (
@@ -190,10 +196,19 @@ export function PnLDisplay({ pnl, daily, annotations, mode }: Props) {
         onToggle={() => setSgaExpanded(!sgaExpanded)}
       />
       {sgaExpanded && <SGADetailView detail={pnl.sga_detail} revenue={pnl.revenue} />}
-      <PnLRow label="영업이익" value={pnl.operating_profit} />
+      <PnLRow
+        label="영업이익"
+        value={pnl.operating_profit}
+        marginPct={pnl.revenue > 0 ? pnl.operating_profit / pnl.revenue * 100 : 0}
+      />
       <PnLRow label="이자비용" value={-pnl.interest_expense} indent annotation={annotations.interest} />
       <PnLRow label="세금" value={-pnl.tax} indent annotation={annotations.tax} />
-      <PnLRow label="당기순이익" value={pnl.net_income} highlight />
+      <PnLRow
+        label="당기순이익"
+        value={pnl.net_income}
+        highlight
+        marginPct={pnl.revenue > 0 ? pnl.net_income / pnl.revenue * 100 : 0}
+      />
       <PnLRow label="원금상환" value={-pnl.principal_repayment} indent annotation={annotations.principal} />
       <PnLRow label="월 실제 현금흐름" value={pnl.free_cash_flow} highlight />
     </div>

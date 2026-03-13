@@ -66,6 +66,13 @@
 .negative { color: var(--color-danger); }
 .positive { color: var(--color-success); }
 
+.marginPct {
+  font-size: var(--font-size-xs);
+  font-weight: 400;
+  color: var(--color-text-tertiary);
+  margin-left: 4px;
+}
+
 .chevron {
   font-size: 10px;
   color: var(--color-text-tertiary);

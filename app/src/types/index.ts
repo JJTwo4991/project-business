@@ -160,7 +160,7 @@ export interface SimulationResult {
 
 export type StepId = 'select-industry' | 'select-scale' |
   'investment-breakdown' | 'select-region' | 'set-investment' | 'set-loan' |
-  'set-customers' | 'set-ticket' | 'set-labor' | 'set-rent' | 'confirm' |
+  'transition-operating' | 'set-customers' | 'set-ticket' | 'set-labor' | 'set-rent' | 'confirm' |
   'result-daily' | 'result-monthly' | 'result-payback' | 'set-misc' | 'result-dcf';
 
 export interface ScaleDescription {

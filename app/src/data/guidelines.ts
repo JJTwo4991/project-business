@@ -237,6 +237,40 @@ const GUIDELINES: Record<number, BusinessGuideline> = {
     ticket: '반찬가게 1인 평균 결제금액 약 15,000원',
     ticketSource: HONEST_ESTIMATE,
   },
+  // 주점
+  15: {
+    scaleInvestment: {
+      small: '소규모 주점 (33㎡/10석) 기준 초기투자 약 3,000만원',
+      medium: '중규모 주점 (66㎡/25석) 기준 초기투자 약 6,000만원',
+      large: '대규모 주점 (132㎡/50석) 기준 초기투자 약 1억원',
+    },
+    scaleSource: HONEST_ESTIMATE,
+    customers: {
+      small: '소규모 주점은 평균 일 15명이 방문해요',
+      medium: '중규모 주점은 평균 일 35명이 방문해요',
+      large: '대규모 주점은 평균 일 60명이 방문해요',
+    },
+    customersSource: HONEST_ESTIMATE,
+    ticket: '주점 1인 평균 결제금액 약 35,000원 (소주+안주 기준)',
+    ticketSource: HONEST_ESTIMATE,
+  },
+  // 무인카페
+  16: {
+    scaleInvestment: {
+      small: '소형 무인카페 (20㎡) 기준 초기투자 약 1,500만원',
+      medium: '일반 무인카페 (40㎡) 기준 초기투자 약 3,000만원',
+      large: '대형 무인카페 (66㎡) 기준 초기투자 약 5,000만원',
+    },
+    scaleSource: HONEST_ESTIMATE,
+    customers: {
+      small: '소형 무인카페는 평균 일 40명이 방문해요',
+      medium: '일반 무인카페는 평균 일 80명이 방문해요',
+      large: '대형 무인카페는 평균 일 150명이 방문해요',
+    },
+    customersSource: HONEST_ESTIMATE,
+    ticket: '무인카페 1인 평균 결제금액 약 3,500원 (자판기/무인 커피 기준)',
+    ticketSource: HONEST_ESTIMATE,
+  },
   // 무인아이스크림
   14: {
     scaleInvestment: {

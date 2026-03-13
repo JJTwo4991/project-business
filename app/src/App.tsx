@@ -13,7 +13,9 @@ import { ScaleSelectStep } from './pages/WizardSteps/ScaleSelectStep';
 import { RegionStep } from './pages/WizardSteps/RegionStep';
 import { InvestmentStep, LoanStep } from './pages/WizardSteps/InvestmentStep';
 import { InvestmentBreakdownStep } from './pages/WizardSteps/InvestmentBreakdownStep';
-import { CustomersStep, TicketStep, LaborStep, RentStep, MiscStep } from './pages/WizardSteps/OperatingParamsSteps';
+import { TicketStep, LaborStep, RentStep, MiscStep } from './pages/WizardSteps/OperatingParamsSteps';
+import { VisitorEstimationStep } from './pages/WizardSteps/VisitorEstimationStep';
+import { TossTransition } from './components/TossTransition/TossTransition';
 import { ConfirmStep } from './pages/WizardSteps/ConfirmStep';
 
 export default function App() {
@@ -87,6 +89,7 @@ export default function App() {
             scale={simulator.inputs.scale}
             breakdown={simulator.inputs.capital.investment_breakdown}
             onChange={handleInvestmentBreakdownChange}
+            onBrandSelect={simulator.setSelectedBrand}
             onNext={nav.goNext}
           />
         ) : null;
@@ -126,9 +129,24 @@ export default function App() {
           />
         ) : null;
 
+      case 'transition-operating':
+        return (
+          <TossTransition
+            emoji="👏"
+            message="수고하셨어요! 이제 장사가 얼마나 잘 될지 예상해볼까요?"
+            buttonText="준비됐어요"
+            onComplete={nav.goNext}
+          />
+        );
+
       case 'set-customers':
         return simulator.inputs ? (
-          <CustomersStep inputs={simulator.inputs} onOverride={simulator.setOverride} onNext={nav.goNext} />
+          <VisitorEstimationStep
+            onComplete={v => {
+              simulator.setOverride('daily_customers_override', v);
+              nav.goNext();
+            }}
+          />
         ) : null;
 
       case 'set-ticket':

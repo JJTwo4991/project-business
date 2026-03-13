@@ -5,10 +5,20 @@ import type {
 import { calcTotalTax, calcEffectiveTaxRate } from './tax';
 import { getCostBreakdown } from '../data/costItems';
 
+// 기타비용률 (소상공인실태조사 2023 기준, 매출 대비)
+// 외식/주점업: 약 5%, 소매: 약 4%, 서비스/카페: 약 6%
+// 출처: 소상공인실태조사 2023, 외식업체 경영실태 보고서
+export function getMiscCostRate(category: string): number {
+  if (category === '외식') return 0.05;
+  if (category === '소매') return 0.04;
+  return 0.06; // 서비스, 카페, 기타
+}
+
 // 3-C: operating days by business type
 const OPERATING_DAYS_MAP: Record<number, number> = {
   3: 30,  // 편의점 (24시간/365일)
   14: 30, // 무인아이스크림 (무인 운영)
+  16: 30, // 무인카페 (무인 운영)
 };
 const DEFAULT_OPERATING_DAYS = 26;
 
@@ -91,21 +101,24 @@ export function calcMonthlyPnL(inputs: SimulatorInputs): MonthlyPnL {
   const labor = bt.labor_cost_monthly_per_person * laborHeadcount;
   const rent = inputs.rent_monthly ?? 0;
 
-  // Cost breakdown from costItems (공과금, 배달앱수수료, 기타고정비)
+  // Cost breakdown from costItems (공과금, 배달앱수수료)
   const breakdown = getCostBreakdown(bt.id);
   const utilities = breakdown.utilities;
   const delivery_commission = breakdown.delivery;
-  const other_fixed = breakdown.other_fixed;
+
+  // 기타고정비: 매출 대비 비율 (소상공인실태조사 2023 기준)
+  const miscRate = getMiscCostRate(bt.category);
+  const other_fixed = Math.round(revenue * miscRate);
 
   // 3-D: 프랜차이즈 수수료 (변동비 — 매출 연동)
   const royalty = Math.round(revenue * params.franchise_royalty_rate);
   const advertising_fund = Math.round(revenue * params.franchise_ad_rate);
   const other_franchise_fees = Math.round(revenue * params.franchise_other_rate);
 
-  // 예비비: 월 매출의 5% (불확실성 대비)
-  const contingency = Math.round(revenue * 0.05);
+  // 예비비: 제거 (별도 버퍼로 산정하지 않음)
+  const contingency = 0;
 
-  const sg_and_a = labor + rent + utilities + delivery_commission + other_fixed + royalty + advertising_fund + other_franchise_fees + contingency;
+  const sg_and_a = labor + rent + utilities + delivery_commission + other_fixed + royalty + advertising_fund + other_franchise_fees;
   const sga_detail: SGADetail = { labor, labor_headcount: laborHeadcount, rent, utilities, delivery_commission, other_fixed, royalty, advertising_fund, other_franchise_fees, contingency };
 
   const operating_profit = gross_profit - sg_and_a;
@@ -137,8 +150,8 @@ export function generateAnnotations(inputs: SimulatorInputs): PnLAnnotation {
 
   return {
     revenue: `객단가 ${params.avg_ticket_price.toLocaleString()}원 × 일 ${dailyCustomers}명 × ${operatingDays}일`,
-    cogs: `재료비율 ${costRatioPercent}% 적용 (업종 평균 추정치, 공식 출처 미확인)`,
-    sga: `인건비 ${laborHeadcount}명 × ${(bt.labor_cost_monthly_per_person / 10000).toFixed(0)}만원 + 공과금 ${(breakdown.utilities / 10000).toFixed(0)}만원 + 배달수수료 ${(breakdown.delivery / 10000).toFixed(0)}만원 + 기타 ${(breakdown.other_fixed / 10000).toFixed(0)}만원${inputs.selected_brand && (params.franchise_royalty_rate > 0 || params.franchise_ad_rate > 0) ? ` + 상표사용료 ${(params.franchise_royalty_rate * 100).toFixed(1)}% + 광고분담금 ${(params.franchise_ad_rate * 100).toFixed(1)}%` : ''} (예비비 별도)`,
+    cogs: `재료비율 ${costRatioPercent}% 적용 (업종 평균 추정치, 외식산업실태조사, 소상공인실태조사 등 참고)`,
+    sga: `인건비 ${laborHeadcount}명 × ${(bt.labor_cost_monthly_per_person / 10000).toFixed(0)}만원 + 공과금 ${(breakdown.utilities / 10000).toFixed(0)}만원 + 배달수수료 ${(breakdown.delivery / 10000).toFixed(0)}만원 + 기타고정비 매출의 ${(getMiscCostRate(bt.category) * 100).toFixed(0)}%${inputs.selected_brand && (params.franchise_royalty_rate > 0 || params.franchise_ad_rate > 0) ? ` + 상표사용료 ${(params.franchise_royalty_rate * 100).toFixed(1)}% + 광고분담금 ${(params.franchise_ad_rate * 100).toFixed(1)}%` : ''}`,
     interest: debt > 0
       ? `대출 ${(debt / 10000).toLocaleString()}만원 × 연 ${(capital.interest_rate * 100).toFixed(1)}% ÷ 12 (초월 기준, 상환 시 점차 감소)`
       : '대출 없음',
@@ -155,8 +168,16 @@ export function calcPayback(inputs: SimulatorInputs): PaybackResult {
   const totalMonths = Math.max(1, capital.loan_term_years * 12);
   const principalPerMonth = debt > 0 ? Math.round(debt / totalMonths) : 0;
 
+  // 프랜차이즈 보증금은 돌려받을 수 있어 회수기간 계산에서 제외
+  const depositAmount = inputs.selected_brand?.deposit
+    ?? capital.investment_breakdown?.find(
+        item => item.category === 'deposit' && item.label.includes('보증금')
+      )?.amount
+    ?? 0;
+  const paybackInvestment = Math.max(0, capital.initial_investment - depositAmount);
+
   let remainingDebt = debt;
-  let cumulative = -capital.initial_investment;
+  let cumulative = -paybackInvestment;
   const cumulative_cashflow: { month: number; value: number }[] = [];
   let payback_months: number | null = null;
 

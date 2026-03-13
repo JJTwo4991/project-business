@@ -91,3 +91,39 @@
   color: var(--color-text-tertiary);
   padding: 0 2px;
 }
+
+.valueClickable {
+  cursor: pointer;
+  text-decoration: underline dotted var(--color-primary);
+  text-underline-offset: 3px;
+}
+
+.valueClickable:hover {
+  opacity: 0.75;
+}
+
+.valueOverflow {
+  color: var(--color-warning, #f59e0b);
+}
+
+.overflowIcon {
+  display: inline-block;
+  margin-left: 3px;
+  font-size: var(--font-size-xs);
+  vertical-align: super;
+  line-height: 1;
+}
+
+.valueInput {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: -0.3px;
+  width: 7ch;
+  text-align: right;
+  border: none;
+  border-bottom: 2px solid var(--color-primary);
+  background: transparent;
+  outline: none;
+  padding: 0 2px 1px;
+}

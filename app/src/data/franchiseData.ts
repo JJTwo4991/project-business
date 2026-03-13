@@ -89,3 +89,22 @@ export function getIndustryAverages(businessTypeId: number): IndustryAverages {
     interior_per_sqm: avg('interior_per_sqm'),
   };
 }
+
+/**
+ * 업종 평균 총 창업비용 (프랜차이즈 브랜드 기준, 주어진 평수로 계산)
+ */
+export function getIndustryTotalAvg(businessTypeId: number, sqm: number): number {
+  const brands = getFranchisesByType(businessTypeId);
+  if (brands.length === 0) return 0;
+  const avgField = (key: keyof Pick<FranchiseBrand, 'initial_fee' | 'education_fee' | 'deposit' | 'other_cost' | 'interior_per_sqm'>) => {
+    const vals = brands.map(b => b[key] as number);
+    return Math.round(vals.reduce((a, v) => a + v, 0) / vals.length);
+  };
+  return (
+    avgField('initial_fee') +
+    avgField('education_fee') +
+    avgField('deposit') +
+    avgField('other_cost') +
+    avgField('interior_per_sqm') * sqm
+  );
+}

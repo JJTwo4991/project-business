@@ -3,6 +3,7 @@ import styles from './FranchiseSearch.module.css';
 import { useFranchiseCosts } from '../../hooks/useFranchiseCosts';
 import type { FranchiseBrandUnified } from '../../hooks/useFranchiseCosts';
 import { formatKRWShort } from '../../lib/format';
+import type { FranchiseBrand } from '../../types';
 
 export interface FranchiseInvestment {
   franchise_name: string | null;
@@ -12,13 +13,13 @@ export interface FranchiseInvestment {
   interior: number;
   other: number;
   total: number;
+  brand: FranchiseBrand;
 }
 
 interface Props {
   businessTypeId: number;
   scaleSqm: number;
   onSelect: (investment: FranchiseInvestment) => void;
-  onIndependent: () => void;
 }
 
 // 주요 브랜드 (우선 표시)
@@ -29,17 +30,11 @@ const PRIORITY_BRANDS: Record<number, string[]> = {
 
 const PAGE_SIZE = 20;
 
-export function FranchiseSearch({ businessTypeId, scaleSqm, onSelect, onIndependent }: Props) {
+export function FranchiseSearch({ businessTypeId, scaleSqm, onSelect }: Props) {
   const [query, setQuery] = useState('');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const { search, loading, hasBrands } = useFranchiseCosts(businessTypeId);
   const listRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!loading && !hasBrands) {
-      onIndependent();
-    }
-  }, [loading, hasBrands, onIndependent]);
 
   // 검색어 바뀌면 보이는 수 초기화
   useEffect(() => {
@@ -94,6 +89,18 @@ export function FranchiseSearch({ businessTypeId, scaleSqm, onSelect, onIndepend
       interior,
       other: brand.other_cost,
       total,
+      brand: {
+        name: brand.name,
+        business_type_id: brand.business_type_id,
+        initial_fee: brand.initial_fee,
+        education_fee: brand.education_fee,
+        deposit: brand.deposit,
+        interior_per_sqm: brand.interior_per_sqm,
+        other_cost: brand.other_cost,
+        royalty_rate: brand.royalty_rate,
+        advertising_rate: brand.advertising_rate,
+        source: brand.source,
+      },
     });
   };
 
@@ -118,14 +125,6 @@ export function FranchiseSearch({ businessTypeId, scaleSqm, onSelect, onIndepend
         value={query}
         onChange={e => setQuery(e.target.value)}
       />
-
-      <button
-        className={styles.independentBtn}
-        type="button"
-        onClick={onIndependent}
-      >
-        프랜차이즈가 아니라, 개인 브랜드를 시작할 거에요
-      </button>
 
       {visibleBrands.length > 0 ? (
         <div className={styles.brandList} ref={listRef} onScroll={handleScroll}>

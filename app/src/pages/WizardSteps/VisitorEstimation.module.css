@@ -1,0 +1,443 @@
+/* ─── Wrapper ─────────────────────────────────────────── */
+
+.step {
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-lg) var(--spacing-page);
+  gap: var(--spacing-lg);
+  min-height: 0;
+}
+
+/* ─── Question container ──────────────────────────────── */
+
+.questionContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  max-width: 340px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.questionEnter {
+  animation: questionIn 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.questionExit {
+  animation: questionOut 200ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+@keyframes questionIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes questionOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+
+/* ─── Question label ──────────────────────────────────── */
+
+.questionLabel {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.3px;
+  line-height: 1.4;
+  margin: 0;
+  word-break: keep-all;
+}
+
+.questionSub {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: -8px 0 0;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
+/* ─── Number button row (for 5/6/7 day selection) ─────── */
+
+.numberBtnRow {
+  display: flex;
+  gap: 10px;
+}
+
+.numberBtn {
+  flex: 1;
+  height: 56px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s, transform 0.1s;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.numberBtn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.numberBtn:active {
+  transform: scale(0.97);
+}
+
+.numberBtnActive {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+/* ─── Time picker row ─────────────────────────────────── */
+
+.timePicker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.timePickerLabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  min-width: 24px;
+}
+
+.timePickerGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.timeAdjBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.12s, background 0.12s, color 0.12s, transform 0.1s;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+  line-height: 1;
+  padding: 0;
+}
+
+.timeAdjBtn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.timeAdjBtn:active {
+  transform: scale(0.93);
+}
+
+.timeAdjBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.timeValue {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text);
+  min-width: 44px;
+  text-align: center;
+}
+
+.timeCalc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: -8px 0 0;
+}
+
+.timeCalcHighlight {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+/* ─── Day toggle grid ─────────────────────────────────── */
+
+.dayToggleRow {
+  display: flex;
+  gap: 7px;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+}
+
+.dayToggle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s, background 0.15s, color 0.15s, transform 0.1s;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.dayToggle:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.dayToggle:active {
+  transform: scale(0.93);
+}
+
+.dayToggleActive {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+.dayToggleHint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  word-break: keep-all;
+  margin: -4px 0 0;
+}
+
+/* ─── Skip button ─────────────────────────────────────── */
+
+.skipBtn {
+  background: none;
+  border: none;
+  padding: 8px 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.skipBtn:hover {
+  color: var(--color-text);
+}
+
+/* ─── None button (for "없어요") ──────────────────────── */
+
+.noneBtn {
+  background: none;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 10px 20px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.12s, color 0.12s, background 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.noneBtn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.noneBtnActive {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+/* ─── Slider wrapper ──────────────────────────────────── */
+
+.sliderWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sliderValue {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: -0.5px;
+}
+
+.sliderUnit {
+  font-size: var(--font-size-md);
+  font-weight: 400;
+  color: var(--color-text-secondary);
+  margin-left: 4px;
+}
+
+.sliderTrack {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-border);
+  outline: none;
+  cursor: pointer;
+}
+
+.sliderTrack::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  box-shadow: 0 2px 8px rgba(49, 130, 246, 0.35);
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.sliderTrack:active::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+
+/* ─── Summary screen (inside TossTransition pattern) ──── */
+
+.summaryScreen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: var(--spacing-xl) var(--spacing-page);
+}
+
+.summaryContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-lg);
+  width: 100%;
+  max-width: 320px;
+  text-align: center;
+}
+
+.summaryEmoji {
+  font-size: 64px;
+  line-height: 1;
+  animation: emojiPop 400ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes emojiPop {
+  from { transform: scale(0.7); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.summaryTextBlock {
+  animation: slideUp 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 500ms;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.summaryMessage {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.55;
+  margin: 0;
+  word-break: keep-all;
+  white-space: pre-line;
+}
+
+.summaryBtnWrap {
+  width: 100%;
+  animation: slideUp 400ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 700ms;
+}
+
+/* ─── Next button (reuse from WizardSteps) ────────────── */
+
+.nextBtn {
+  width: 100%;
+  padding: 0;
+  height: 56px;
+  background: var(--color-primary);
+  color: white;
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  border-radius: var(--radius-md);
+  transition: background 0.2s, transform 0.1s;
+  margin-top: auto;
+  letter-spacing: -0.2px;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.nextBtn:hover {
+  background: var(--color-primary-dark);
+}
+
+.nextBtn:active {
+  background: var(--color-primary-dark);
+  transform: scale(0.99);
+}
+
+.nextBtn:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ─── Progress dots (inside multi-question step) ─────── */
+
+.progressDots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-border);
+  transition: background 0.2s, transform 0.2s;
+}
+
+.dotActive {
+  background: var(--color-primary);
+  transform: scale(1.25);
+}

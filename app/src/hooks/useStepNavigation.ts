@@ -3,7 +3,8 @@ import type { StepId } from '../types';
 
 const INPUT_STEPS: StepId[] = [
   'select-industry', 'select-region', 'select-scale',
-  'investment-breakdown', 'set-investment', 'set-loan', 'set-customers',
+  'investment-breakdown', 'set-investment', 'set-loan',
+  'transition-operating', 'set-customers',
   'set-ticket', 'set-labor', 'set-rent', 'confirm',
 ];
 
@@ -11,8 +12,8 @@ const RESULT_STEPS: StepId[] = [
   'result-daily', 'result-monthly', 'result-payback', 'set-misc', 'result-dcf',
 ];
 
-// set-misc is in result area but excluded from progress bar
-const PROGRESS_EXCLUDED: StepId[] = ['set-misc'];
+// set-misc and transition-operating are excluded from progress bar
+const PROGRESS_EXCLUDED: StepId[] = ['set-misc', 'transition-operating'];
 
 const ALL_STEPS: StepId[] = [...INPUT_STEPS, ...RESULT_STEPS];
 

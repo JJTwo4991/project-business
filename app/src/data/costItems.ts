@@ -78,6 +78,21 @@ export const COST_ITEMS: CostItem[] = [
   {id:87,business_type_id:14,cost_category:"equipment",cost_name:"냉동고/인테리어",amount_monthly_min:10000000,amount_monthly_max:35000000,is_initial_cost:true,note:null},
   {id:88,business_type_id:14,cost_category:"equipment",cost_name:"무인시스템(키오스크)",amount_monthly_min:3000000,amount_monthly_max:10000000,is_initial_cost:true,note:null},
   {id:89,business_type_id:14,cost_category:"other",cost_name:"기타 고정비",amount_monthly_min:300000,amount_monthly_max:300000,is_initial_cost:false,note:"CCTV/보안"},
+  {id:90,business_type_id:15,cost_category:"rent",cost_name:"임대료",amount_monthly_min:800000,amount_monthly_max:2500000,is_initial_cost:false,note:"상권별 편차 큼"},
+  {id:91,business_type_id:15,cost_category:"labor",cost_name:"직원 인건비",amount_monthly_min:2200000,amount_monthly_max:2200000,is_initial_cost:false,note:"1인 기준"},
+  {id:92,business_type_id:15,cost_category:"material",cost_name:"식재료비",amount_monthly_min:1500000,amount_monthly_max:8000000,is_initial_cost:false,note:"매출의 35%"},
+  {id:93,business_type_id:15,cost_category:"utilities",cost_name:"공과금",amount_monthly_min:200000,amount_monthly_max:500000,is_initial_cost:false,note:"전기/가스/수도"},
+  {id:94,business_type_id:15,cost_category:"material",cost_name:"주류비",amount_monthly_min:1000000,amount_monthly_max:5000000,is_initial_cost:false,note:"주류 매입비"},
+  {id:95,business_type_id:15,cost_category:"marketing",cost_name:"배달수수료",amount_monthly_min:200000,amount_monthly_max:1000000,is_initial_cost:false,note:"배달앱 이용 시"},
+  {id:96,business_type_id:15,cost_category:"other",cost_name:"기타 고정비",amount_monthly_min:800000,amount_monthly_max:800000,is_initial_cost:false,note:"소모품/보험 등"},
+  {id:97,business_type_id:15,cost_category:"equipment",cost_name:"인테리어/설비",amount_monthly_min:15000000,amount_monthly_max:70000000,is_initial_cost:true,note:"냉장고/주방설비 등"},
+  {id:98,business_type_id:16,cost_category:"rent",cost_name:"임대료",amount_monthly_min:400000,amount_monthly_max:1500000,is_initial_cost:false,note:"소형 점포 기준"},
+  {id:99,business_type_id:16,cost_category:"material",cost_name:"원두/재료비",amount_monthly_min:300000,amount_monthly_max:2000000,is_initial_cost:false,note:"매출의 25%"},
+  {id:100,business_type_id:16,cost_category:"utilities",cost_name:"공과금",amount_monthly_min:150000,amount_monthly_max:400000,is_initial_cost:false,note:"커피머신 전기료"},
+  {id:101,business_type_id:16,cost_category:"other",cost_name:"기기유지보수",amount_monthly_min:100000,amount_monthly_max:300000,is_initial_cost:false,note:"무인 기기 점검"},
+  {id:102,business_type_id:16,cost_category:"other",cost_name:"기타 고정비",amount_monthly_min:500000,amount_monthly_max:500000,is_initial_cost:false,note:"CCTV/소모품"},
+  {id:103,business_type_id:16,cost_category:"equipment",cost_name:"무인커피머신/키오스크",amount_monthly_min:8000000,amount_monthly_max:30000000,is_initial_cost:true,note:"무인 자동화 기기"},
+  {id:104,business_type_id:16,cost_category:"equipment",cost_name:"인테리어",amount_monthly_min:5000000,amount_monthly_max:18000000,is_initial_cost:true,note:"소형 인테리어"},
 ];
 
 export function getMiscFixedDefault(businessTypeId: number): number {

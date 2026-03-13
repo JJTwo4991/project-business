@@ -11,21 +11,26 @@ import { FranchiseSearch } from '../../components/FranchiseSearch/FranchiseSearc
 import type { FranchiseInvestment } from '../../components/FranchiseSearch/FranchiseSearch';
 import { getScaleSqm } from '../../lib/scale';
 import { useFranchiseCosts } from '../../hooks/useFranchiseCosts';
-import { getIndustryAverages } from '../../data/franchiseData';
+import { getIndustryAverages, getIndustryTotalAvg } from '../../data/franchiseData';
+import { BUSINESS_TYPES } from '../../data/businessTypes';
 
 type Mode = 'choose' | 'franchise' | 'independent';
+type ChooseSubMode = null | 'franchise-search';
 
 interface Props {
   businessTypeId: number;
   scale: BusinessScale;
   breakdown: InvestmentItem[] | undefined;
   onChange: (items: InvestmentItem[]) => void;
+  onBrandSelect?: (brand: import('../../types').FranchiseBrand | null) => void;
   onNext: () => void;
 }
 
-export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onChange, onNext }: Props) {
+export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onChange, onBrandSelect, onNext }: Props) {
   const { hasBrands: hasFranchises } = useFranchiseCosts(businessTypeId);
   const [mode, setMode] = useState<Mode>('choose');
+  const [chooseSubMode, setChooseSubMode] = useState<ChooseSubMode>(null);
+  const [franchiseName, setFranchiseName] = useState<string | null>(null);
   const benchmark = useBenchmarkData(businessTypeId, null);
   const startupGuideline = benchmark.startupCost ? {
     text: `이 업종 프랜차이즈 평균 창업비용 약 ${formatKRWShort(benchmark.startupCost.totalCost)}`,
@@ -33,6 +38,8 @@ export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onCh
   } : getGuideline(businessTypeId, scale, 'investment-breakdown');
 
   const scaleSqm = useMemo(() => getScaleSqm(scale, businessTypeId), [scale, businessTypeId]);
+  const industryAvg = useMemo(() => getIndustryTotalAvg(businessTypeId, scaleSqm), [businessTypeId, scaleSqm]);
+  const industryName = useMemo(() => BUSINESS_TYPES.find(b => b.id === businessTypeId)?.name ?? '', [businessTypeId]);
 
   const defaultItems = useMemo(
     () => getInvestmentBreakdown(businessTypeId, scale),
@@ -55,8 +62,10 @@ export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onCh
       { category: 'other', label: '기타비용', amount: investment.other, editable: true },
     ];
     onChange(franchiseItems);
+    setFranchiseName(investment.franchise_name);
+    onBrandSelect?.(investment.brand);
     setMode('franchise');
-  }, [onChange]);
+  }, [onChange, onBrandSelect]);
 
   const handleIndependent = useCallback(() => {
     const avg = getIndustryAverages(businessTypeId);
@@ -69,25 +78,68 @@ export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onCh
       { category: 'interior', label: '인테리어비', amount: interiorTotal, editable: true },
     ];
     onChange(independentItems);
+    onBrandSelect?.(null);
     setMode('independent');
-  }, [businessTypeId, scaleSqm, onChange]);
+  }, [businessTypeId, scaleSqm, onChange, onBrandSelect]);
 
   const handleResetChoice = useCallback(() => {
     setMode('choose');
+    setChooseSubMode(null);
+    setFranchiseName(null);
   }, []);
 
   if (mode === 'choose') {
+    if (chooseSubMode === 'franchise-search') {
+      return (
+        <div className={styles.step}>
+          <h2 className={styles.stepTitle}>초기투자 비용</h2>
+          <p className={styles.stepDesc}>프랜차이즈 브랜드를 선택하면 예상 투자비를 자동 계산해요</p>
+          <GuidelineBox guideline={startupGuideline} />
+          <button
+            className={styles.hint}
+            type="button"
+            onClick={() => setChooseSubMode(null)}
+            style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0, textAlign: 'left' }}
+          >
+            ← 처음으로 돌아가기
+          </button>
+          <FranchiseSearch
+            businessTypeId={businessTypeId}
+            scaleSqm={scaleSqm}
+            onSelect={handleFranchiseSelect}
+          />
+        </div>
+      );
+    }
+
     return (
       <div className={styles.step}>
         <h2 className={styles.stepTitle}>초기투자 비용</h2>
-        <p className={styles.stepDesc}>프랜차이즈 브랜드를 선택하면 예상 투자비를 자동 계산해요</p>
-        <GuidelineBox guideline={startupGuideline} />
-        <FranchiseSearch
-          businessTypeId={businessTypeId}
-          scaleSqm={scaleSqm}
-          onSelect={handleFranchiseSelect}
-          onIndependent={handleIndependent}
-        />
+        <p className={styles.stepDesc}>창업 방식을 선택해요</p>
+        <div className={styles.typeSelectGroup}>
+          <button
+            className={styles.typeSelectBtn}
+            type="button"
+            onClick={() => setChooseSubMode('franchise-search')}
+          >
+            <span className={styles.typeSelectIcon}>🏪</span>
+            <div className={styles.typeSelectText}>
+              <span className={styles.typeSelectTitle}>프랜차이즈</span>
+              <span className={styles.typeSelectSub}>브랜드 가맹점으로 시작해요</span>
+            </div>
+          </button>
+          <button
+            className={styles.typeSelectBtn}
+            type="button"
+            onClick={handleIndependent}
+          >
+            <span className={styles.typeSelectIcon}>🛍️</span>
+            <div className={styles.typeSelectText}>
+              <span className={styles.typeSelectTitle}>개인사업</span>
+              <span className={styles.typeSelectSub}>나만의 가게를 시작해요</span>
+            </div>
+          </button>
+        </div>
       </div>
     );
   }
@@ -95,8 +147,21 @@ export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onCh
   return (
     <div className={styles.step}>
       <h2 className={styles.stepTitle}>초기투자 항목별 분해</h2>
-      <p className={styles.stepDesc}>항목별 금액을 조정할 수 있어요</p>
-      <GuidelineBox guideline={startupGuideline} />
+      {mode === 'franchise' && franchiseName ? (
+        <>
+          <p style={{ fontSize: '20px', fontWeight: 'bold', margin: '0 0 8px', lineHeight: 1.4 }}>
+            "{franchiseName}의 창업비용은 평균 {formatKRWShort(total)}이에요"
+          </p>
+          {industryAvg > 0 && (
+            <p style={{ fontSize: '14px', color: '#888', margin: '0 0 16px', lineHeight: 1.5 }}>
+              {industryName} 업종 평균 창업비용 약 {formatKRWShort(industryAvg)}. 공정위 브랜드 발표자료 기준, 가맹비, 교육비, 인테리어 등 포함
+            </p>
+          )}
+        </>
+      ) : (
+        <p className={styles.stepDesc}>항목별 금액을 조정할 수 있어요</p>
+      )}
+      {mode !== 'franchise' && <GuidelineBox guideline={startupGuideline} />}
       {hasFranchises && (
         <button
           className={styles.hint}
@@ -111,6 +176,11 @@ export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onCh
         <p className={styles.hint} style={{ color: '#888', fontSize: '13px', margin: '0 0 12px' }}>
           개인 사업은 가맹비, 교육비 등이 없어요
         </p>
+      )}
+      {mode === 'franchise' && (
+        <div className={styles.hint} style={{ background: '#f5f5f5', borderRadius: '8px', padding: '10px 14px', margin: '0 0 12px', color: '#555', fontSize: '13px' }}>
+          선택하신 브랜드가 공시한 창업비용이에요. 사장님께서 조절하실 수 있어요.
+        </div>
       )}
       <div className={styles.sliderGroup}>
         {items.map((item, i) => (
