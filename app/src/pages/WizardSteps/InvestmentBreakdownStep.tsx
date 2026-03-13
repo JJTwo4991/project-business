@@ -195,7 +195,7 @@ export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onCh
               label={item.label}
               value={item.amount}
               min={0}
-              max={Math.min(Math.max((defaultItems[i]?.amount ?? item.amount) * 2, 5_000_000), 50_000_000)}
+              max={Math.min(Math.max((defaultItems[i]?.amount ?? item.amount) * 2, 5_000_000), 80_000_000)}
               step={1_000_000}
               format={formatKRWShort}
               onChange={v => handleItemChange(i, v)}
