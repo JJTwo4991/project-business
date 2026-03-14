@@ -13,7 +13,6 @@ import { getScaleSqm } from '../../lib/scale';
 import { useFranchiseCosts } from '../../hooks/useFranchiseCosts';
 import { getIndustryAverages, getIndustryTotalAvg } from '../../data/franchiseData';
 import { BUSINESS_TYPES } from '../../data/businessTypes';
-import { Icon } from '../../components/Icon/Icon';
 import { UI_ICONS } from '../../assets/icons';
 
 type Mode = 'choose' | 'franchise' | 'independent';
@@ -124,8 +123,8 @@ export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onCh
             type="button"
             onClick={() => setChooseSubMode('franchise-search')}
           >
-            <span className={styles.typeSelectIcon}>
-              <Icon src={UI_ICONS.franchise} alt="프랜차이즈" size={36} />
+            <span className={styles.typeSelectIcon} style={{ fontSize: '36px', lineHeight: 1 }} aria-hidden="true">
+              {UI_ICONS.franchise}
             </span>
             <div className={styles.typeSelectText}>
               <span className={styles.typeSelectTitle}>프랜차이즈</span>
@@ -137,8 +136,8 @@ export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onCh
             type="button"
             onClick={handleIndependent}
           >
-            <span className={styles.typeSelectIcon}>
-              <Icon src={UI_ICONS.individual} alt="개인사업" size={36} />
+            <span className={styles.typeSelectIcon} style={{ fontSize: '36px', lineHeight: 1 }} aria-hidden="true">
+              {UI_ICONS.individual}
             </span>
             <div className={styles.typeSelectText}>
               <span className={styles.typeSelectTitle}>개인사업</span>

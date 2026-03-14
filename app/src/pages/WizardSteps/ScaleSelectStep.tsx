@@ -4,7 +4,6 @@ import { getScaleDescriptions } from '../../data/scaleDescriptions';
 import { formatKRWShort } from '../../lib/format';
 import { GuidelineBox } from '../../components/GuidelineBox/GuidelineBox';
 import { getGuideline } from '../../data/guidelines';
-import { Icon } from '../../components/Icon/Icon';
 import { SCALE_ICONS } from '../../assets/icons';
 
 interface Props {
@@ -48,8 +47,8 @@ export function ScaleSelectStep({ businessType, selected, onSelect, onNext }: Pr
                 <span className={styles.scaleInfoDesc}>{desc.description}</span>
                 <span className={styles.scaleInfoInv}>약 {formatKRWShort(inv)}</span>
               </div>
-              <span className={styles.scaleImage} aria-hidden="true">
-                <Icon src={SCALE_ICONS[desc.scale]} alt={desc.label} size={44} />
+              <span className={styles.scaleImage} aria-hidden="true" style={{ fontSize: '44px', lineHeight: 1 }}>
+                {SCALE_ICONS[desc.scale]}
               </span>
             </button>
           );

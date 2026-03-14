@@ -1,8 +1,40 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
-  <rect width="48" height="48" rx="12" fill="#FF6B35"/>
-  <rect width="48" height="48" rx="12" fill="url(#g1)" opacity="0.3"/>
-  <defs><linearGradient id="g1" x1="0" y1="0" x2="48" y2="48"><stop stop-color="#fff"/><stop offset="1" stop-color="#000" stop-opacity="0"/></linearGradient></defs>
-  <!-- drumstick -->
-  <path d="M28 12c-4.4 0-8 3.6-8 8 0 1.5.4 2.9 1.1 4.1L15 30.2c-.8.8-1.2 1.8-1 2.9.2 1.1.8 2 1.8 2.5l.4.2c1 .5 2.1.5 3.1 0 .5-.3 1-.7 1.3-1.2l6.1-6.1c1.2.7 2.6 1.1 4.1 1.1 4.4 0 8-3.6 8-8s-3.2-8.6-7.6-8.6H28z" fill="#fff"/>
-  <circle cx="30" cy="18" r="2" fill="#FF6B35"/>
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF9A44" />
+      <stop offset="100%" stop-color="#FC6076" />
+    </linearGradient>
+    
+    <!-- Glossy Top Highlight Gradient -->
+    <linearGradient id="glossGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.6" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0" />
+    </linearGradient>
+
+    <!-- Inner Bottom Shadow Gradient -->
+    <linearGradient id="shadowGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.0" />
+    </linearGradient>
+
+    <!-- Drop Shadow for the Icon -->
+    <filter id="iconShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="2" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- Base Squircle -->
+  <rect width="100%" height="100%" rx="12" fill="url(#bgGrad)" />
+  
+  <!-- Inner Bottom Shadow -->
+  <rect width="100%" height="100%" rx="12" fill="url(#shadowGrad)" />
+
+  <!-- Glossy Top Highlight -->
+  <path d="M 0,12 C 0,5 5,0 12,0 L 36,0 C 43,0 48,5 48,12 C 48,24 36,28 24,28 C 12,28 0,24 0,12 Z" fill="url(#glossGrad)" />
+
+  <!-- Icon Wrapper with Drop Shadow -->
+  <g filter="url(#iconShadow)">
+    <path d="M28 12c-4.4 0-8 3.6-8 8 0 1.5.4 2.9 1.1 4.1L15 30.2c-.8.8-1.2 1.8-1 2.9.2 1.1.8 2 1.8 2.5l.4.2c1 .5 2.1.5 3.1 0 .5-.3 1-.7 1.3-1.2l6.1-6.1c1.2.7 2.6 1.1 4.1 1.1 4.4 0 8-3.6 8-8s-3.2-8.6-7.6-8.6H28z" fill="#ffffff"/><circle cx="30" cy="18" r="2" fill="#FC6076"/>
+  </g>
 </svg>

@@ -1,24 +1,40 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
-  <rect width="48" height="48" rx="12" fill="#0652DD"/>
-  <rect width="48" height="48" rx="12" fill="url(#g1)" opacity="0.2"/>
-  <defs><linearGradient id="g1" x1="0" y1="0" x2="48" y2="48"><stop stop-color="#fff"/><stop offset="1" stop-color="#000" stop-opacity="0"/></linearGradient></defs>
-  <!-- tall building -->
-  <rect x="14" y="8" width="20" height="32" rx="2" fill="#fff"/>
-  <!-- windows grid -->
-  <rect x="17" y="12" width="4" height="3" rx="0.5" fill="#0652DD" opacity="0.3"/>
-  <rect x="23" y="12" width="4" height="3" rx="0.5" fill="#0652DD" opacity="0.3"/>
-  <rect x="29" y="12" width="4" height="3" rx="0.5" fill="#0652DD" opacity="0.3"/>
-  <rect x="17" y="18" width="4" height="3" rx="0.5" fill="#0652DD" opacity="0.3"/>
-  <rect x="23" y="18" width="4" height="3" rx="0.5" fill="#0652DD" opacity="0.3"/>
-  <rect x="29" y="18" width="4" height="3" rx="0.5" fill="#0652DD" opacity="0.3"/>
-  <rect x="17" y="24" width="4" height="3" rx="0.5" fill="#0652DD" opacity="0.3"/>
-  <rect x="23" y="24" width="4" height="3" rx="0.5" fill="#0652DD" opacity="0.3"/>
-  <rect x="29" y="24" width="4" height="3" rx="0.5" fill="#0652DD" opacity="0.3"/>
-  <rect x="17" y="30" width="4" height="3" rx="0.5" fill="#0652DD" opacity="0.3"/>
-  <rect x="23" y="30" width="4" height="3" rx="0.5" fill="#0652DD" opacity="0.3"/>
-  <rect x="29" y="30" width="4" height="3" rx="0.5" fill="#0652DD" opacity="0.3"/>
-  <!-- entrance -->
-  <rect x="21" y="36" width="6" height="4" rx="1" fill="#0652DD" opacity="0.4"/>
-  <!-- roof detail -->
-  <rect x="22" y="5" width="4" height="3" rx="1" fill="#fff" opacity="0.6"/>
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#11998E" />
+      <stop offset="100%" stop-color="#38EF7D" />
+    </linearGradient>
+    
+    <!-- Glossy Top Highlight Gradient -->
+    <linearGradient id="glossGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.6" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0" />
+    </linearGradient>
+
+    <!-- Inner Bottom Shadow Gradient -->
+    <linearGradient id="shadowGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.0" />
+    </linearGradient>
+
+    <!-- Drop Shadow for the Icon -->
+    <filter id="iconShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="2" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- Base Squircle -->
+  <rect width="100%" height="100%" rx="12" fill="url(#bgGrad)" />
+  
+  <!-- Inner Bottom Shadow -->
+  <rect width="100%" height="100%" rx="12" fill="url(#shadowGrad)" />
+
+  <!-- Glossy Top Highlight -->
+  <path d="M 0,12 C 0,5 5,0 12,0 L 36,0 C 43,0 48,5 48,12 C 48,24 36,28 24,28 C 12,28 0,24 0,12 Z" fill="url(#glossGrad)" />
+
+  <!-- Icon Wrapper with Drop Shadow -->
+  <g filter="url(#iconShadow)">
+    <rect x="14" y="8" width="20" height="32" rx="2" fill="#ffffff"/><rect x="17" y="12" width="4" height="3" rx="0.5" fill="#11998E"/><rect x="23" y="12" width="4" height="3" rx="0.5" fill="#11998E"/><rect x="29" y="12" width="4" height="3" rx="0.5" fill="#11998E"/><rect x="17" y="18" width="4" height="3" rx="0.5" fill="#11998E"/><rect x="23" y="18" width="4" height="3" rx="0.5" fill="#11998E"/><rect x="29" y="18" width="4" height="3" rx="0.5" fill="#11998E"/><rect x="17" y="24" width="4" height="3" rx="0.5" fill="#11998E"/><rect x="23" y="24" width="4" height="3" rx="0.5" fill="#11998E"/><rect x="29" y="24" width="4" height="3" rx="0.5" fill="#11998E"/><rect x="17" y="30" width="4" height="3" rx="0.5" fill="#11998E"/><rect x="23" y="30" width="4" height="3" rx="0.5" fill="#11998E"/><rect x="29" y="30" width="4" height="3" rx="0.5" fill="#11998E"/><rect x="21" y="36" width="6" height="4" rx="1" fill="#11998E"/><rect x="22" y="5" width="4" height="3" rx="1" fill="#ffffff"/>
+  </g>
 </svg>

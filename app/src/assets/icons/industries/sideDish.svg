@@ -1,17 +1,40 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
-  <rect width="48" height="48" rx="12" fill="#00B894"/>
-  <rect width="48" height="48" rx="12" fill="url(#g1)" opacity="0.25"/>
-  <defs><linearGradient id="g1" x1="0" y1="0" x2="48" y2="48"><stop stop-color="#fff"/><stop offset="1" stop-color="#000" stop-opacity="0"/></linearGradient></defs>
-  <!-- three small dishes -->
-  <ellipse cx="16" cy="22" rx="7" ry="4" fill="#fff"/>
-  <ellipse cx="32" cy="22" rx="7" ry="4" fill="#fff"/>
-  <ellipse cx="24" cy="34" rx="7" ry="4" fill="#fff"/>
-  <!-- food in dishes -->
-  <ellipse cx="16" cy="20" rx="5" ry="2.5" fill="#fff" opacity="0.8"/>
-  <ellipse cx="32" cy="20" rx="5" ry="2.5" fill="#fff" opacity="0.8"/>
-  <ellipse cx="24" cy="32" rx="5" ry="2.5" fill="#fff" opacity="0.8"/>
-  <!-- dish bottoms -->
-  <path d="M9 22c0 3 3 6 7 6s7-3 7-6" stroke="#fff" stroke-width="1.5" fill="none" opacity="0.5"/>
-  <path d="M25 22c0 3 3 6 7 6s7-3 7-6" stroke="#fff" stroke-width="1.5" fill="none" opacity="0.5"/>
-  <path d="M17 34c0 3 3 6 7 6s7-3 7-6" stroke="#fff" stroke-width="1.5" fill="none" opacity="0.5"/>
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#11998E" />
+      <stop offset="100%" stop-color="#38EF7D" />
+    </linearGradient>
+    
+    <!-- Glossy Top Highlight Gradient -->
+    <linearGradient id="glossGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.6" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0" />
+    </linearGradient>
+
+    <!-- Inner Bottom Shadow Gradient -->
+    <linearGradient id="shadowGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.0" />
+    </linearGradient>
+
+    <!-- Drop Shadow for the Icon -->
+    <filter id="iconShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="2" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- Base Squircle -->
+  <rect width="100%" height="100%" rx="12" fill="url(#bgGrad)" />
+  
+  <!-- Inner Bottom Shadow -->
+  <rect width="100%" height="100%" rx="12" fill="url(#shadowGrad)" />
+
+  <!-- Glossy Top Highlight -->
+  <path d="M 0,12 C 0,5 5,0 12,0 L 36,0 C 43,0 48,5 48,12 C 48,24 36,28 24,28 C 12,28 0,24 0,12 Z" fill="url(#glossGrad)" />
+
+  <!-- Icon Wrapper with Drop Shadow -->
+  <g filter="url(#iconShadow)">
+    <ellipse cx="16" cy="22" rx="7" ry="4" fill="#ffffff"/><ellipse cx="32" cy="22" rx="7" ry="4" fill="#ffffff"/><ellipse cx="24" cy="34" rx="7" ry="4" fill="#ffffff"/><ellipse cx="16" cy="20" rx="5" ry="2.5" fill="#ffffff"/><ellipse cx="32" cy="20" rx="5" ry="2.5" fill="#ffffff"/><ellipse cx="24" cy="32" rx="5" ry="2.5" fill="#ffffff"/><path d="M9 22c0 3 3 6 7 6s7-3 7-6" stroke="#ffffff" stroke-width="2" fill="none"/><path d="M25 22c0 3 3 6 7 6s7-3 7-6" stroke="#ffffff" stroke-width="2" fill="none"/><path d="M17 34c0 3 3 6 7 6s7-3 7-6" stroke="#ffffff" stroke-width="2" fill="none"/>
+  </g>
 </svg>

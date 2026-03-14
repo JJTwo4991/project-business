@@ -1,7 +1,5 @@
 import styles from './WizardSteps.module.css';
 import type { BusinessType } from '../../types';
-import { formatKRWShort } from '../../lib/format';
-import { Icon } from '../../components/Icon/Icon';
 import { getIndustryIcon } from '../../assets/icons';
 
 interface Props {
@@ -17,11 +15,8 @@ export function IndustrySelectStep({ businessTypes, onSelect }: Props) {
       <div className={styles.grid}>
         {businessTypes.map(bt => (
           <button key={bt.id} className={styles.card} onClick={() => onSelect(bt)}>
-            <Icon src={getIndustryIcon(bt.id, bt.category)} alt={bt.name} size={34} />
+            <span style={{ fontSize: '34px', lineHeight: 1 }} aria-hidden="true">{getIndustryIcon(bt.id, bt.category)}</span>
             <span className={styles.cardName}>{bt.name}</span>
-            <span className={styles.cardDetail}>
-              {formatKRWShort(bt.avg_monthly_revenue_min)}~{formatKRWShort(bt.avg_monthly_revenue_max)}
-            </span>
           </button>
         ))}
       </div>

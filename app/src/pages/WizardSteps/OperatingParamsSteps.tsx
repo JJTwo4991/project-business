@@ -9,7 +9,6 @@ import { GuidelineBox } from '../../components/GuidelineBox/GuidelineBox';
 import { getGuideline, getRevenueGuideline } from '../../data/guidelines';
 import { useBenchmarkData } from '../../hooks/useBenchmarkData';
 import { getMenuItems } from '../../data/menuItems';
-import { getMenuIcon } from '../../assets/icons';
 
 interface StepProps {
   inputs: SimulatorInputs;
@@ -65,9 +64,7 @@ export function TicketStep({ inputs, onOverride, onNext }: StepProps) {
           {menuItems.map((item, i) => (
             <div key={i} className={styles.menuCard}>
               <div className={styles.menuEmoji}>
-                {getMenuIcon(item.emoji) ? (
-                  <img src={getMenuIcon(item.emoji)} alt={item.name} width={24} height={24} draggable={false} />
-                ) : item.emoji}
+                {item.emoji}
               </div>
               <div className={styles.menuName}>{item.name}</div>
               <div className={styles.menuPrice}>{formatKRW(item.price)}</div>

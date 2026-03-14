@@ -133,7 +133,7 @@ export default function App() {
       case 'transition-operating':
         return (
           <TossTransition
-            iconSrc={UI_ICONS.clap}
+            emoji={UI_ICONS.clap}
             message="수고하셨어요! 이제 장사가 얼마나 잘 될지 예상해볼까요?"
             buttonText="준비됐어요"
             onComplete={nav.goNext}

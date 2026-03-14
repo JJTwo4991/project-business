@@ -44,8 +44,8 @@ function TimePair({ openHour, closeHour, onChangeOpen, onChangeClose }: TimePair
         <div className={styles.timePickerGroup}>
           <button
             className={styles.timeAdjBtn}
-            onClick={() => onChangeOpen(Math.max(6, openHour - 1))}
-            disabled={openHour <= 6}
+            onClick={() => onChangeOpen(Math.max(0, openHour - 1))}
+            disabled={openHour <= 0}
             aria-label="영업 시작 시간 줄이기"
           >−</button>
           <span className={styles.timeValue}>{openHour}시</span>
@@ -74,7 +74,9 @@ function TimePair({ openHour, closeHour, onChangeOpen, onChangeClose }: TimePair
         </div>
       </div>
       <p className={styles.timeCalc}>
-        하루 <span className={styles.timeCalcHighlight}>{hours}시간</span> 영업
+        하루 <span className={styles.timeCalcHighlight}>
+          {openHour === 0 && closeHour === 24 ? '24시간' : `${hours}시간`}
+        </span> 영업
       </p>
     </div>
   );
@@ -205,7 +207,7 @@ function SummaryScreen({ data, onNext }: { data: SummaryData; onNext: () => void
     <div className={styles.summaryScreen}>
       <div className={styles.summaryContent}>
         <span className={styles.summaryEmoji} aria-hidden="true">
-          대단해요 <img src={UI_ICONS.confetti} alt="" width={28} height={28} style={{ verticalAlign: 'middle' }} draggable={false} />
+          대단해요 {UI_ICONS.confetti}
         </span>
         <div className={styles.summaryTextBlock}>
           <p className={styles.summaryMessage}>
@@ -294,6 +296,12 @@ export function VisitorEstimationStep({ onComplete }: VisitorEstimationStepProps
     setPendingQ(next);
   }, []);
 
+  const goToNow = useCallback((next: QuestionId) => {
+    setCurrentQ(next);
+    setPendingQ(null);
+    setAnimState('entering');
+  }, []);
+
   function handleExitDone() {
     if (pendingQ) {
       setCurrentQ(pendingQ);
@@ -338,7 +346,9 @@ export function VisitorEstimationStep({ onComplete }: VisitorEstimationStepProps
     const busyDaily = calcDaily(busyNoSlow, busySlowStart, busySlowEnd, busySlowRate, busyBusyRate);
     const normDaily = calcDaily(normNoSlow, normSlowStart, normSlowEnd, normSlowRate, normBusyRate);
     const weeklyTotal = busyActiveDays.length * busyDaily + normalActiveDays.length * normDaily;
-    const avgDaily = operatingDays > 0 ? Math.round(weeklyTotal / operatingDays) : normDaily;
+    // Convert weekly visitors to calendar-day average (weekly / 7),
+    // then monthly logic multiplies by business operating days.
+    const avgDaily = Math.round(weeklyTotal / 7);
     onComplete(avgDaily);
   }
 
@@ -348,7 +358,7 @@ export function VisitorEstimationStep({ onComplete }: VisitorEstimationStepProps
     const busyDaily = calcDaily(busyNoSlow, busySlowStart, busySlowEnd, busySlowRate, busyBusyRate);
     const normDaily = calcDaily(normNoSlow, normSlowStart, normSlowEnd, normSlowRate, normBusyRate);
     const weeklyTotal = busyActiveDays.length * busyDaily + normalActiveDays.length * normDaily;
-    const avgDaily = operatingDays > 0 ? Math.round(weeklyTotal / operatingDays) : normDaily;
+    const avgDaily = Math.round(weeklyTotal / 7);
     return {
       busyDays: busyActiveDays,
       normalDays: normalActiveDays,
@@ -578,7 +588,7 @@ export function VisitorEstimationStep({ onComplete }: VisitorEstimationStepProps
             emoji="🔥"
             message="장사가 잘 되는 날"
             buttonText="시작하기"
-            onComplete={() => advanceTo('q4-slow-hours-busy')}
+            onComplete={() => goToNow('q4-slow-hours-busy')}
           />
         );
 
@@ -674,7 +684,7 @@ export function VisitorEstimationStep({ onComplete }: VisitorEstimationStepProps
             emoji="☕"
             message="일반적인 날"
             buttonText="시작하기"
-            onComplete={() => advanceTo('q7-slow-hours-normal')}
+            onComplete={() => goToNow('q7-slow-hours-normal')}
           />
         );
 

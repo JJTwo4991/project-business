@@ -1,7 +1,6 @@
 import styles from './BusinessTypeCard.module.css';
 import type { BusinessType } from '../../types';
 import { formatKRWShort } from '../../lib/format';
-import { Icon } from '../Icon/Icon';
 import { getIndustryIcon } from '../../assets/icons';
 
 interface Props {
@@ -20,7 +19,7 @@ export function BusinessTypeCard({ business, onSelect }: Props) {
       onClick={() => onSelect(business)}
       aria-label={`${business.name} 선택`}
     >
-      <Icon src={icon} alt={business.name} size={32} />
+      <span style={{ fontSize: '28px', lineHeight: 1 }} aria-hidden="true">{icon}</span>
       <span className={styles.name}>{business.name}</span>
       <span className={styles.category}>{business.category}</span>
       <span className={styles.revenue}>{revenueRange}</span>
