@@ -131,21 +131,21 @@ const GUIDELINES: Record<number, BusinessGuideline> = {
     ticket: '분식점 1인 평균 결제금액 약 6,000~8,000원',
     ticketSource: HONEST_ESTIMATE,
   },
-  // 삼겹살전문점
+  // 한식전문점
   6: {
     scaleInvestment: {
-      small: '소규모 고기집 (40㎡/12평) 기준 초기투자 약 3,500만원',
-      medium: '중규모 삼겹살집 (66㎡/20평) 기준 초기투자 약 6,000만원',
-      large: '대규모 고기 전문점 (100㎡/30평) 기준 초기투자 약 1억원',
+      small: '소규모 한식당 (40㎡/12평) 기준 초기투자 약 3,500만원',
+      medium: '중규모 한식 전문점 (66㎡/20평) 기준 초기투자 약 6,000만원',
+      large: '대규모 한식 전문점 (100㎡/30평) 기준 초기투자 약 1억원',
     },
     scaleSource: HONEST_ESTIMATE,
     customers: {
-      small: '소규모 고기집은 평균 일 20명이 방문해요',
-      medium: '중규모 삼겹살집은 평균 일 45명이 방문해요',
-      large: '대규모 고기 전문점은 평균 일 80명이 방문해요',
+      small: '소규모 한식당은 평균 일 20명이 방문해요',
+      medium: '중규모 한식 전문점은 평균 일 45명이 방문해요',
+      large: '대규모 한식 전문점은 평균 일 80명이 방문해요',
     },
     customersSource: HONEST_ESTIMATE,
-    ticket: '삼겹살 1인 평균 결제금액 약 20,000~30,000원',
+    ticket: '한식 1인 평균 결제금액 약 20,000~30,000원',
     ticketSource: HONEST_ESTIMATE,
   },
   // 세탁소

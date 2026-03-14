@@ -228,13 +228,25 @@ export function calcScenarioDailyPnL(inputs: SimulatorInputs, scenario: Scenario
 export function calcScenarioMonthlyPnL(inputs: SimulatorInputs, scenario: ScenarioType): MonthlyPnL {
   const basePnl = calcMonthlyPnL(inputs);
   const mult = SCENARIO_MULTIPLIERS[scenario];
+  const { business_type: bt } = inputs;
+  const params = resolveBusinessParams(inputs);
 
   const revenue = Math.round(basePnl.revenue * mult);
   const cogs = Math.round(basePnl.cogs * mult);
   const gross_profit = revenue - cogs;
 
-  const sg_and_a = basePnl.sg_and_a;
-  const sga_detail = basePnl.sga_detail;
+  // 매출 연동 비용은 시나리오 매출 기준으로 재계산
+  const miscRate = getMiscCostRate(bt.category);
+  const other_fixed = Math.round(revenue * miscRate);
+  const royalty = Math.round(revenue * params.franchise_royalty_rate);
+  const advertising_fund = Math.round(revenue * params.franchise_ad_rate);
+  const other_franchise_fees = Math.round(revenue * params.franchise_other_rate);
+
+  // 고정비는 기본 PnL에서 가져옴
+  const { labor, labor_headcount, rent, utilities, delivery_commission, contingency } = basePnl.sga_detail;
+
+  const sg_and_a = labor + rent + utilities + delivery_commission + other_fixed + royalty + advertising_fund + other_franchise_fees;
+  const sga_detail: SGADetail = { labor, labor_headcount, rent, utilities, delivery_commission, other_fixed, royalty, advertising_fund, other_franchise_fees, contingency };
 
   const operating_profit = gross_profit - sg_and_a;
   const interest_expense = basePnl.interest_expense;
@@ -266,10 +278,21 @@ export function calcScenarioPayback(inputs: SimulatorInputs, scenario: ScenarioT
   const paybackInvestment = Math.max(0, capital.initial_investment - depositAmount);
 
   const basePnl = calcMonthlyPnL(inputs);
+  const { business_type: bt } = inputs;
+  const params = resolveBusinessParams(inputs);
   const scenarioRevenue = Math.round(basePnl.revenue * mult);
   const scenarioCogs = Math.round(basePnl.cogs * mult);
   const scenarioGrossProfit = scenarioRevenue - scenarioCogs;
-  const operating_profit = scenarioGrossProfit - basePnl.sg_and_a;
+
+  // 매출 연동 비용 재계산
+  const miscRate = getMiscCostRate(bt.category);
+  const scenarioOtherFixed = Math.round(scenarioRevenue * miscRate);
+  const scenarioRoyalty = Math.round(scenarioRevenue * params.franchise_royalty_rate);
+  const scenarioAdFund = Math.round(scenarioRevenue * params.franchise_ad_rate);
+  const scenarioOtherFranchise = Math.round(scenarioRevenue * params.franchise_other_rate);
+  const { labor, rent, utilities, delivery_commission } = basePnl.sga_detail;
+  const scenarioSGA = labor + rent + utilities + delivery_commission + scenarioOtherFixed + scenarioRoyalty + scenarioAdFund + scenarioOtherFranchise;
+  const operating_profit = scenarioGrossProfit - scenarioSGA;
 
   let remainingDebt = debt;
   let cumulative = -paybackInvestment;

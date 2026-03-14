@@ -31,11 +31,11 @@ export const SCALE_DESCRIPTIONS: Record<number, ScaleDescription[]> = {
     { scale: 'medium', label: '중형', sqm: 40, seats: 24, description: '일반 분식점' },
     { scale: 'large', label: '대형', sqm: 66, seats: 40, description: '대형 분식 프랜차이즈' },
   ],
-  // 삼겹살전문점
+  // 한식전문점
   6: [
-    { scale: 'small', label: '소형', sqm: 40, seats: 20, description: '소규모 고기집' },
-    { scale: 'medium', label: '중형', sqm: 66, seats: 40, description: '일반 삼겹살 전문점' },
-    { scale: 'large', label: '대형', sqm: 100, seats: 70, description: '대형 고기 전문점' },
+    { scale: 'small', label: '소형', sqm: 40, seats: 20, description: '소규모 한식당' },
+    { scale: 'medium', label: '중형', sqm: 66, seats: 40, description: '일반 한식 전문점' },
+    { scale: 'large', label: '대형', sqm: 100, seats: 70, description: '대형 한식 전문점' },
   ],
   // 세탁소
   7: [
@@ -72,6 +72,18 @@ export const SCALE_DESCRIPTIONS: Record<number, ScaleDescription[]> = {
     { scale: 'small', label: '소형', sqm: 16, description: '소형 무인 매장' },
     { scale: 'medium', label: '중형', sqm: 25, description: '일반 무인 매장' },
     { scale: 'large', label: '대형', sqm: 40, description: '대형 무인 매장' },
+  ],
+  // 주점
+  15: [
+    { scale: 'small', label: '소형', sqm: 33, seats: 15, description: '소규모 주점' },
+    { scale: 'medium', label: '중형', sqm: 66, seats: 30, description: '일반 주점' },
+    { scale: 'large', label: '대형', sqm: 132, seats: 60, description: '대형 주점' },
+  ],
+  // 무인카페
+  16: [
+    { scale: 'small', label: '소형', sqm: 16, description: '소형 무인카페' },
+    { scale: 'medium', label: '중형', sqm: 33, description: '일반 무인카페' },
+    { scale: 'large', label: '대형', sqm: 50, description: '대형 무인카페' },
   ],
 };
 

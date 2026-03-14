@@ -132,10 +132,17 @@ export function getInvestmentBreakdown(businessTypeId: number, scale: BusinessSc
 
   const scaleFactor = scale === 'small' ? 0.6 : scale === 'large' ? 1.4 : 1.0;
 
-  return initialItems.map(c => ({
-    category: (c.cost_category === 'equipment' ? 'equipment' : 'other') as InvestmentItem['category'],
-    label: c.cost_name,
-    amount: Math.round(((c.amount_monthly_min + c.amount_monthly_max) / 2) * scaleFactor),
-    editable: true,
-  }));
+  return initialItems.map(c => {
+    let category: InvestmentItem['category'] = 'other';
+    if (c.cost_name.includes('보증금')) category = 'deposit';
+    else if (c.cost_name.includes('인테리어')) category = 'interior';
+    else if (c.cost_name.includes('가맹비') || c.cost_name.includes('가맹')) category = 'franchise';
+    else if (c.cost_category === 'equipment') category = 'equipment';
+    return {
+      category,
+      label: c.cost_name,
+      amount: Math.round(((c.amount_monthly_min + c.amount_monthly_max) / 2) * scaleFactor),
+      editable: true,
+    };
+  });
 }
