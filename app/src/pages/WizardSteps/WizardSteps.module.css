@@ -23,28 +23,28 @@
 .stepDesc {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
-  margin: -12px 0 0;
+  margin: 0;
   line-height: 1.5;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 12px;
 }
 
 .card {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 6px;
-  padding: var(--spacing-md) var(--spacing-sm);
+  gap: 14px;
+  padding: 16px 18px;
   border-radius: var(--radius-lg);
   background: var(--color-surface);
   box-shadow: var(--shadow-md);
   transition: box-shadow 0.2s, transform 0.2s;
   cursor: pointer;
-  text-align: center;
+  text-align: left;
   border: 2px solid transparent;
 }
 
@@ -277,6 +277,79 @@
   font-weight: 700;
 }
 
+/* ─── Misc (권리금) Toss Transition ────────────────── */
+
+.miscTransScreen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: var(--spacing-xl) var(--spacing-page);
+  position: relative;
+}
+
+.miscTransEmoji {
+  font-size: 72px;
+  line-height: 1;
+  will-change: transform, opacity;
+  transition: transform 600ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  transform: translateY(0);
+}
+
+.miscTransEmojiUp {
+  transform: translateY(-48px);
+}
+
+.miscTransFadeIn {
+  animation: miscFadeIn 500ms cubic-bezier(0.25, 0.1, 0.25, 1) both;
+}
+
+.miscTransText {
+  text-align: center;
+  will-change: transform, opacity;
+}
+
+.miscTransTitle {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-text);
+  margin: 0 0 8px;
+  letter-spacing: -0.3px;
+}
+
+.miscTransSub {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  margin: 0;
+  white-space: pre-line;
+  word-break: keep-all;
+}
+
+.miscTransSlideUp {
+  animation: miscSlideUp 700ms cubic-bezier(0.25, 0.1, 0.25, 1) both;
+}
+
+.miscTransBtnWrap {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px var(--spacing-page) 60px;
+  will-change: transform, opacity;
+}
+
+@keyframes miscFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes miscSlideUp {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
 .summarySection {
   display: flex;
   flex-direction: column;
@@ -308,6 +381,20 @@
   font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--color-text);
+}
+
+.summaryRowClickable {
+  cursor: pointer;
+}
+.summaryRowClickable:active {
+  background: var(--color-bg);
+}
+
+.summaryValueLink {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-decoration-color: rgba(49, 130, 246, 0.3);
+  text-underline-offset: 2px;
 }
 
 .summaryEdit {

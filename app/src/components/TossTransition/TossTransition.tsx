@@ -10,7 +10,7 @@ export interface TossTransitionProps {
   subMessage?: string;
 }
 
-type Phase = 'emojiIn' | 'emojiOut' | 'textIn' | 'buttonIn' | 'idle';
+type Phase = 'emojiIn' | 'hold' | 'moveUp' | 'buttonWait' | 'buttonIn' | 'idle';
 
 export function TossTransition({
   emoji,
@@ -21,54 +21,41 @@ export function TossTransition({
   subMessage,
 }: TossTransitionProps) {
   const [phase, setPhase] = useState<Phase>('emojiIn');
-  const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const btnTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function handleEmojiInEnd() {
-    holdTimer.current = setTimeout(() => {
-      setPhase('emojiOut');
-    }, 500);
-  }
-
-  function handleEmojiOutEnd() {
-    setPhase('textIn');
+    setPhase('hold');
+    setTimeout(() => setPhase('moveUp'), 800);
   }
 
   function handleTextInEnd() {
-    setPhase('buttonIn');
+    setPhase('buttonWait');
+    btnTimer.current = setTimeout(() => setPhase('buttonIn'), 1000);
   }
 
-  const showEmoji = phase === 'emojiIn' || phase === 'emojiOut';
-  const showText = phase === 'textIn' || phase === 'buttonIn' || phase === 'idle';
+  const showText = phase === 'moveUp' || phase === 'buttonWait' || phase === 'buttonIn' || phase === 'idle';
   const showButton = phase === 'buttonIn' || phase === 'idle';
+  const movedUp = phase !== 'emojiIn' && phase !== 'hold';
 
   return (
     <div className={styles.screen}>
       <div className={styles.content}>
-
-        {showEmoji && (
-          <span
-            className={
-              phase === 'emojiIn'
-                ? `${styles.emoji} ${styles.emojiIn}`
-                : `${styles.emoji} ${styles.emojiOut}`
-            }
-            onAnimationEnd={
-              phase === 'emojiIn' ? handleEmojiInEnd : handleEmojiOutEnd
-            }
-            aria-hidden="true"
-          >
-            {iconSrc ? (
-              <img src={iconSrc} alt="" width={64} height={64} draggable={false} />
-            ) : (
-              emoji
-            )}
-          </span>
-        )}
+        <span
+          className={`${styles.emoji} ${movedUp ? styles.emojiUp : ''} ${phase === 'emojiIn' ? styles.fadeIn : ''}`}
+          onAnimationEnd={phase === 'emojiIn' ? handleEmojiInEnd : undefined}
+          aria-hidden="true"
+        >
+          {iconSrc ? (
+            <img src={iconSrc} alt="" width={64} height={64} draggable={false} />
+          ) : (
+            emoji
+          )}
+        </span>
 
         {showText && (
           <div
-            className={`${styles.textBlock} ${styles.slideUp}`}
-            onAnimationEnd={phase === 'textIn' ? handleTextInEnd : undefined}
+            className={`${styles.textBlock} ${styles.slideUpSoft}`}
+            onAnimationEnd={phase === 'moveUp' ? handleTextInEnd : undefined}
           >
             <p className={styles.message}>{message}</p>
             {subMessage && (
@@ -76,25 +63,22 @@ export function TossTransition({
             )}
           </div>
         )}
-
-        {showButton && (
-          <div
-            className={`${styles.buttonWrap} ${styles.buttonIn}`}
-            onAnimationEnd={
-              phase === 'buttonIn' ? () => setPhase('idle') : undefined
-            }
-          >
-            <button
-              className={styles.button}
-              onClick={onComplete}
-              type="button"
-            >
-              {buttonText}
-            </button>
-          </div>
-        )}
-
       </div>
+
+      {showButton && (
+        <div
+          className={`${styles.buttonWrap} ${styles.slideUpSoft}`}
+          onAnimationEnd={phase === 'buttonIn' ? () => setPhase('idle') : undefined}
+        >
+          <button
+            className={styles.button}
+            onClick={onComplete}
+            type="button"
+          >
+            {buttonText}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

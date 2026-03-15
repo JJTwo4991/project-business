@@ -7,6 +7,19 @@
   flex-direction: column;
 }
 
+.editBanner {
+  padding: 10px var(--spacing-md);
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+}
+.editBanner:active {
+  opacity: 0.85;
+}
+
 .header {
   display: flex;
   align-items: center;

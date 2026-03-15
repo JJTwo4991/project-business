@@ -222,6 +222,52 @@
   margin-top: var(--spacing-lg);
 }
 
+.sourcesSection {
+  margin-top: var(--spacing-sm);
+}
+
+.sourcesToggle {
+  background: none;
+  border: none;
+  color: var(--color-text-tertiary);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 8px 0;
+  opacity: 0.6;
+}
+.sourcesToggle:active {
+  opacity: 1;
+}
+
+.sourcesList {
+  padding: 4px 0 8px;
+}
+
+.sourceItem {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+.sourceItem:last-child {
+  border-bottom: none;
+}
+
+.sourceLabel {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  opacity: 0.7;
+}
+
+.sourceValue {
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+  opacity: 0.55;
+  line-height: 1.4;
+}
+
 .scenarioTabs {
   display: flex;
   gap: 8px;
@@ -253,4 +299,86 @@
   font-size: 12px;
   color: var(--color-text-secondary);
   margin: 0 0 12px 0;
+}
+
+/* Disclaimer */
+.disclaimerCard {
+  background: #FFF8F0;
+  border: 1px solid #F0DCC8;
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-top: var(--spacing-lg);
+}
+
+.disclaimerHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.disclaimerIcon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.disclaimerTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #92650A;
+}
+
+.disclaimerMain {
+  font-size: 12px;
+  color: #6B5230;
+  line-height: 1.6;
+  margin: 0 0 8px 0;
+}
+
+.disclaimerMain strong {
+  color: #92650A;
+}
+
+.disclaimerToggle {
+  background: none;
+  border: none;
+  color: #B08540;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 0;
+  font-family: inherit;
+}
+
+.disclaimerToggle:active {
+  opacity: 0.7;
+}
+
+.disclaimerFull {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #EDD9C2;
+}
+
+.disclaimerFull p {
+  font-size: 11px;
+  color: #7A5C34;
+  line-height: 1.65;
+  margin: 0 0 8px 0;
+}
+
+.disclaimerFull p:last-child {
+  margin-bottom: 0;
+}
+
+.disclaimerFull strong {
+  color: #92650A;
+}
+
+/* DCF note */
+.dcfNote {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin: 4px 0 0 0;
 }

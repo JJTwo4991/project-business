@@ -14,7 +14,10 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@apps-in-toss/web-framework": "^2.0.5",
     "@supabase/supabase-js": "^2.98.0",
+    "@testing-library/dom": "^10.4.1",
+    "@toss/tds-mobile": "^2.2.1",
     "puppeteer": "^24.39.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

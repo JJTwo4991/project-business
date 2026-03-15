@@ -1,0 +1,161 @@
+/* Common Base */
+.cover {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 40px 24px;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  z-index: 10;
+  gap: 32px;
+}
+
+/* 1-A: 미니멀 & 프로페셔널 */
+.cover1A {
+  background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
+  color: #ffffff;
+}
+.iconWrap1A {
+  filter: drop-shadow(0 0 30px rgba(56, 189, 248, 0.4));
+  animation: float 4s ease-in-out infinite;
+}
+.title1A {
+  font-size: 42px;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: -1px;
+  background: linear-gradient(to right, #fff, #94a3b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.btn1A {
+  width: 100%;
+  padding: 20px;
+  background: #38bdf8;
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 800;
+  border-radius: 16px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s;
+  z-index: 10;
+}
+.btn1A:active { transform: scale(0.98); }
+
+/* 1-B: 직관적 & 분석적 */
+.cover1B {
+  background: #ffffff;
+  color: #1e293b;
+}
+.title1B {
+  font-size: 48px;
+  font-weight: 900;
+  margin: 0;
+  letter-spacing: -1.5px;
+  color: #0f172a;
+}
+.graphMock {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  height: 140px;
+}
+.bar1, .bar2, .bar3 {
+  width: 48px;
+  border-radius: 12px 12px 0 0;
+  background: #e2e8f0;
+}
+.bar1 { height: 40%; }
+.bar2 { height: 70%; }
+.bar3 { height: 100%; background: #3b82f6; }
+.btn1B {
+  width: 100%;
+  padding: 20px;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 800;
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.3);
+  cursor: pointer;
+}
+
+/* 2-A: 대화형 & 공감 */
+.cover2A {
+  background: #fffbeb;
+  color: #451a03;
+}
+.iconWrap2A {
+  animation: bounce 2s ease-in-out infinite;
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.title2A {
+  font-size: 44px;
+  font-weight: 900;
+  margin: 0;
+  color: #78350f;
+}
+.btn2A {
+  width: 100%;
+  padding: 20px;
+  background: #f59e0b;
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 800;
+  border-radius: 100px;
+  border: none;
+  cursor: pointer;
+}
+
+/* 2-B: 감성 & 응원 */
+.cover2B {
+  background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+  color: #374151;
+}
+.floatingIcons {
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1));
+}
+.float1 {
+  animation: float 3s ease-in-out infinite;
+}
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+  100% { transform: translateY(0px); }
+}
+.title2B {
+  font-size: 42px;
+  font-weight: 800;
+  margin: 0;
+  color: #111827;
+}
+.btn2B {
+  width: 100%;
+  padding: 20px;
+  background: #10b981;
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 800;
+  border-radius: 16px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+}

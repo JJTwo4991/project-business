@@ -26,7 +26,7 @@ export function InvestmentStep({ businessType: bt, scale, capital, onChange, onN
             label="초기투자금"
             value={capital.initial_investment}
             min={0}
-            max={bt.initial_investment_max * 2}
+            max={(bt.initial_investment_max || capital.initial_investment) * 2}
             step={1_000_000}
             format={formatKRWShort}
             disabled
@@ -42,6 +42,7 @@ export function InvestmentStep({ businessType: bt, scale, capital, onChange, onN
           step={1_000_000}
           format={formatKRWShort}
           onChange={v => onChange({ ...capital, equity: v })}
+          inputUnit={{ divisor: 1_000_000, label: '백만원' }}
         />
         <SliderInput
           label="타인자본 (대출)"
@@ -51,6 +52,7 @@ export function InvestmentStep({ businessType: bt, scale, capital, onChange, onN
           step={1_000_000}
           format={formatKRWShort}
           onChange={v => onChange({ ...capital, equity: Math.max(0, capital.initial_investment - v) })}
+          inputUnit={{ divisor: 1_000_000, label: '백만원' }}
         />
       </div>
       <button className={styles.nextBtn} onClick={onNext}>다음</button>

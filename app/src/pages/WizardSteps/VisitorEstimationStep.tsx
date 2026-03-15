@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import styles from './VisitorEstimation.module.css';
 import { UI_ICONS } from '../../assets/icons';
-import { TossTransition } from '../../components/TossTransition/TossTransition';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -12,18 +11,12 @@ type QuestionId =
   | 'q1-days'
   | 'q2-hours'
   | 'q3-busy-days'
-  | 'transition-busy'
-  | 'q4-slow-hours-busy'
-  | 'q5-slow-rate-busy'
-  | 'q6-busy-rate-busy'
-  | 'transition-normal'
-  | 'q7-slow-hours-normal'
-  | 'q8-slow-rate-normal'
-  | 'q9-busy-rate-normal'
+  | 'q4-busy-visitors'
+  | 'q5-normal-visitors'
   | 'summary';
 
 interface VisitorEstimationStepProps {
-  onComplete: (dailyCustomers: number) => void;
+  onComplete: (dailyCustomers: number, monthlyOperatingDays: number) => void;
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -82,101 +75,129 @@ function TimePair({ openHour, closeHour, onChangeOpen, onChangeClose }: TimePair
   );
 }
 
-interface SlowHourPickerProps {
-  slowStart: number | null;
-  slowEnd: number | null;
-  openHour: number;
-  closeHour: number;
-  noSlow: boolean;
-  onChangeStart: (h: number) => void;
-  onChangeEnd: (h: number) => void;
-  onToggleNoSlow: () => void;
+// ─── Reality Check ────────────────────────────────────────────────────────────
+
+function getRealityColor(visitors: number): { className: string; label: string } {
+  if (visitors <= 15) return { className: styles.realityGreen, label: '여유 있는 수준' };
+  if (visitors <= 60) return { className: styles.realityBlue, label: '적당한 수준' };
+  if (visitors <= 100) return { className: styles.realityOrange, label: '꽤 바쁜 수준' };
+  return { className: styles.realityRed, label: '매우 바쁜 수준' };
 }
 
-function SlowHourPicker({
-  slowStart,
-  slowEnd,
-  openHour,
-  closeHour,
-  noSlow,
-  onChangeStart,
-  onChangeEnd,
-  onToggleNoSlow,
-}: SlowHourPickerProps) {
-  const resolvedStart = slowStart ?? openHour;
-  const resolvedEnd = slowEnd ?? Math.min(closeHour, openHour + 2);
+interface RealityCheckProps {
+  visitors: number;
+  totalHours: number;
+}
+
+function RealityCheck({ visitors, totalHours }: RealityCheckProps) {
+  const totalMinutes = totalHours * 60;
+  const minutesPerCustomer = visitors > 0 ? Math.round(totalMinutes / visitors) : 0;
+  const { className: colorClass, label } = getRealityColor(visitors);
+  const capacityPercent = Math.min(100, (visitors / 120) * 100);
 
   return (
-    <div className={styles.questionContainer} style={{ gap: 16 }}>
-      <div className={styles.timePicker} style={{ opacity: noSlow ? 0.35 : 1, pointerEvents: noSlow ? 'none' : undefined }}>
-        <span className={styles.timePickerLabel}>부터</span>
-        <div className={styles.timePickerGroup}>
-          <button
-            className={styles.timeAdjBtn}
-            onClick={() => onChangeStart(Math.max(openHour, resolvedStart - 1))}
-            disabled={resolvedStart <= openHour}
-            aria-label="한가한 시작 시간 줄이기"
-          >−</button>
-          <span className={styles.timeValue}>{resolvedStart}시</span>
-          <button
-            className={styles.timeAdjBtn}
-            onClick={() => onChangeStart(Math.min(resolvedEnd - 1, resolvedStart + 1))}
-            disabled={resolvedStart >= resolvedEnd - 1}
-            aria-label="한가한 시작 시간 늘리기"
-          >+</button>
+    <div className={styles.realityCard}>
+      <div className={styles.realityHeader}>
+        <div className={styles.realityIcon}>⏱</div>
+        <span className={styles.realityTitle}>리얼리티 체크</span>
+      </div>
+      <div className={`${styles.realityBig} ${colorClass}`}>
+        {visitors > 0 ? `약 ${minutesPerCustomer}분에 1명` : '—'}
+      </div>
+      <p className={styles.realityDesc}>
+        {totalHours}시간 영업 기준, {visitors}명이면
+        <br />
+        <strong>{minutesPerCustomer}분마다 새 손님 1명</strong>이 와야 해요
+      </p>
+      <p className={styles.realityLabel}>{label}</p>
+      <div className={styles.capacityBarWrap}>
+        <div className={styles.capacityLabelRow}>
+          <span>여유</span><span>적정</span><span>포화</span>
         </div>
-        <span className={styles.timePickerLabel} style={{ marginLeft: 16 }}>까지</span>
-        <div className={styles.timePickerGroup}>
-          <button
-            className={styles.timeAdjBtn}
-            onClick={() => onChangeEnd(Math.max(resolvedStart + 1, resolvedEnd - 1))}
-            disabled={resolvedEnd <= resolvedStart + 1}
-            aria-label="한가한 마감 시간 줄이기"
-          >−</button>
-          <span className={styles.timeValue}>{resolvedEnd}시</span>
-          <button
-            className={styles.timeAdjBtn}
-            onClick={() => onChangeEnd(Math.min(closeHour, resolvedEnd + 1))}
-            disabled={resolvedEnd >= closeHour}
-            aria-label="한가한 마감 시간 늘리기"
-          >+</button>
+        <div className={styles.capacityBar}>
+          <div
+            className={`${styles.capacityFill} ${colorClass}`}
+            style={{ width: `${capacityPercent}%` }}
+          />
         </div>
       </div>
-      <button
-        className={`${styles.noneBtn} ${noSlow ? styles.noneBtnActive : ''}`}
-        onClick={onToggleNoSlow}
-        type="button"
-      >
-        없어요
-      </button>
     </div>
   );
 }
 
-interface RateSliderProps {
-  value: number;
-  onChange: (v: number) => void;
-  label: string;
+// ─── Preset buttons ───────────────────────────────────────────────────────────
+
+const PRESETS = [
+  { label: '~20', value: 10 },
+  { label: '20~50', value: 35 },
+  { label: '50~100', value: 75 },
+  { label: '100+', value: 130 },
+];
+
+function getActivePreset(v: number): number {
+  if (v <= 20) return 0;
+  if (v <= 50) return 1;
+  if (v <= 100) return 2;
+  return 3;
 }
 
-function RateSlider({ value, onChange, label }: RateSliderProps) {
+// ─── Daily Visitor Input ──────────────────────────────────────────────────────
+
+interface DailyVisitorInputProps {
+  value: number;
+  onChange: (v: number) => void;
+  totalHours: number;
+  emoji: string;
+  title: string;
+  dayLabel: string;
+}
+
+function DailyVisitorInput({ value, onChange, totalHours, emoji, title, dayLabel }: DailyVisitorInputProps) {
+  const activePreset = getActivePreset(value);
+
   return (
-    <div className={styles.sliderWrap}>
-      <div>
-        <span className={styles.sliderValue}>{value}</span>
-        <span className={styles.sliderUnit}>명/시간</span>
+    <>
+      <div className={styles.dayCategoryHeader}>
+        <span className={styles.dayCategoryEmoji}>{emoji}</span>
+        <h2 className={styles.questionLabel}>{title}</h2>
       </div>
-      <input
-        className={styles.sliderTrack}
-        type="range"
-        min={0}
-        max={200}
-        step={1}
-        value={value}
-        onChange={e => onChange(Number(e.target.value))}
-        aria-label={label}
-      />
-    </div>
+      <p className={styles.questionSub}>
+        {dayLabel}에 하루 몇 명이 올 것 같으세요?
+      </p>
+
+      <div className={styles.presetRow}>
+        {PRESETS.map((p, i) => (
+          <button
+            key={p.label}
+            className={`${styles.presetBtn} ${i === activePreset ? styles.presetBtnActive : ''}`}
+            onClick={() => onChange(p.value)}
+            type="button"
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+
+      <div className={styles.bigNumberWrap}>
+        <span className={styles.bigNumber}>{value}</span>
+        <span className={styles.bigUnit}>명/일</span>
+      </div>
+
+      <div className={styles.visitorSliderWrap}>
+        <input
+          className={styles.sliderTrack}
+          type="range"
+          min={1}
+          max={200}
+          step={1}
+          value={value}
+          onChange={e => onChange(Number(e.target.value))}
+          aria-label={`${title} 하루 방문객`}
+        />
+      </div>
+
+      <RealityCheck visitors={value} totalHours={totalHours} />
+    </>
   );
 }
 
@@ -192,24 +213,45 @@ interface SummaryData {
 }
 
 function SummaryScreen({ data, onNext }: { data: SummaryData; onNext: () => void }) {
-  const fmt = (days: DayKey[]) => days.map(d => d + '요일').join(', ');
+  const [phase, setPhase] = useState<'emojiIn' | 'hold' | 'moveUp' | 'btnWait' | 'btnIn' | 'idle'>('emojiIn');
 
   let breakdownLine: string | null = null;
   if (data.busyDays.length > 0 && data.normalDays.length > 0) {
-    breakdownLine =
-      `${fmt(data.busyDays)} 하루 약 ${data.busyDailyVisitors}명, ` +
-      `${fmt(data.normalDays)} 하루 약 ${data.normalDailyVisitors}명`;
+    breakdownLine = `바쁜 날: 하루 ${data.busyDailyVisitors}명\n안 바쁜 날: 하루 ${data.normalDailyVisitors}명`;
   } else if (data.busyDays.length > 0) {
-    breakdownLine = `${fmt(data.busyDays)} 하루 약 ${data.busyDailyVisitors}명`;
+    breakdownLine = `하루 평균 ${data.busyDailyVisitors}명`;
   }
+
+  function handleEmojiInEnd() {
+    setPhase('hold');
+    setTimeout(() => setPhase('moveUp'), 800);
+  }
+
+  function handleTextInEnd() {
+    setPhase('btnWait');
+    setTimeout(() => setPhase('btnIn'), 1000);
+  }
+
+  const showText = phase === 'moveUp' || phase === 'btnWait' || phase === 'btnIn' || phase === 'idle';
+  const showBtn = phase === 'btnIn' || phase === 'idle';
+  const movedUp = phase !== 'emojiIn' && phase !== 'hold';
 
   return (
     <div className={styles.summaryScreen}>
-      <div className={styles.summaryContent}>
-        <span className={styles.summaryEmoji} aria-hidden="true">
-          대단해요 {UI_ICONS.confetti}
-        </span>
-        <div className={styles.summaryTextBlock}>
+      <span
+        className={`${styles.summaryEmoji} ${movedUp ? styles.summaryEmojiUp : ''} ${phase === 'emojiIn' ? styles.summaryFadeIn : ''}`}
+        onAnimationEnd={phase === 'emojiIn' ? handleEmojiInEnd : undefined}
+        aria-hidden="true"
+      >
+        {UI_ICONS.confetti}
+      </span>
+
+      {showText && (
+        <div
+          className={`${styles.summaryTextBlock} ${styles.summarySlideUp}`}
+          onAnimationEnd={phase === 'moveUp' ? handleTextInEnd : undefined}
+        >
+          <p className={styles.summaryTitle}>대단해요!</p>
           <p className={styles.summaryMessage}>
             {`일주일에 약 ${data.weeklyTotal}명이\n방문할 예정이에요!`}
           </p>
@@ -217,12 +259,17 @@ function SummaryScreen({ data, onNext }: { data: SummaryData; onNext: () => void
             <p className={styles.summaryBreakdown}>{breakdownLine}</p>
           )}
         </div>
-        <div className={styles.summaryBtnWrap}>
+      )}
+
+      {showBtn && (
+        <div className={`${styles.summaryBtnWrap} ${styles.summarySlideUp}`}
+          onAnimationEnd={phase === 'btnIn' ? () => setPhase('idle') : undefined}
+        >
           <button className={styles.nextBtn} onClick={onNext} type="button">
             다음으로
           </button>
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -230,31 +277,19 @@ function SummaryScreen({ data, onNext }: { data: SummaryData; onNext: () => void
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function VisitorEstimationStep({ onComplete }: VisitorEstimationStepProps) {
-  // Q1 – Bug #2: store actual selected days instead of a count
+  // Q1
   const [selectedDays, setSelectedDays] = useState<DayKey[]>(['월', '화', '수', '목', '금', '토']);
   // Q2
   const [openHour, setOpenHour] = useState<number>(10);
   const [closeHour, setCloseHour] = useState<number>(22);
   // Q3
   const [busyDays, setBusyDays] = useState<DayKey[]>([]);
-  // Q4 – slow hours for busy days
-  const [busySlowStart, setBusySlowStart] = useState<number | null>(null);
-  const [busySlowEnd, setBusySlowEnd] = useState<number | null>(null);
-  const [busyNoSlow, setBusyNoSlow] = useState<boolean>(false);
-  // Q5 – slow rate for busy days
-  const [busySlowRate, setBusySlowRate] = useState<number>(10);
-  // Q6 – busy rate for busy days
-  const [busyBusyRate, setBusyBusyRate] = useState<number>(30);
-  // Q7 – slow hours for normal days
-  const [normSlowStart, setNormSlowStart] = useState<number | null>(null);
-  const [normSlowEnd, setNormSlowEnd] = useState<number | null>(null);
-  const [normNoSlow, setNormNoSlow] = useState<boolean>(false);
-  // Q8 – slow rate for normal days
-  const [normSlowRate, setNormSlowRate] = useState<number>(5);
-  // Q9 – busy rate for normal days
-  const [normBusyRate, setNormBusyRate] = useState<number>(15);
+  // Q4 – 바쁜 날 하루 방문객
+  const [busyVisitors, setBusyVisitors] = useState<number>(45);
+  // Q5 – 일반 날 하루 방문객
+  const [normalVisitors, setNormalVisitors] = useState<number>(20);
 
-  // Animation state: 'entering' | 'idle' | 'exiting'
+  // Animation state
   const [animState, setAnimState] = useState<'entering' | 'idle' | 'exiting'>('entering');
   const [currentQ, setCurrentQ] = useState<QuestionId>('q1-days');
   const [pendingQ, setPendingQ] = useState<QuestionId | null>(null);
@@ -262,44 +297,15 @@ export function VisitorEstimationStep({ onComplete }: VisitorEstimationStepProps
   const totalHours = Math.max(0, closeHour - openHour);
   const operatingDays = selectedDays.length;
 
-  // Days selected in Q1 are the only operating days.
-  // Preserve order from ALL_DAYS for consistency.
   const activeDays = ALL_DAYS.filter(d => selectedDays.includes(d));
-  // Bug #3: busyDays filtered to only those in activeDays
   const busyActiveDays = busyDays.filter(d => activeDays.includes(d));
   const normalActiveDays = activeDays.filter(d => !busyActiveDays.includes(d));
-
-  // ─── Calculation helpers ──────────────────────────────────────────────────
-
-  function calcDaily(
-    noSlow: boolean,
-    slowStartH: number | null,
-    slowEndH: number | null,
-    slowRate: number,
-    busyRate: number,
-  ): number {
-    if (noSlow || slowStartH === null || slowEndH === null) {
-      // All hours are "busy"
-      return Math.round(totalHours * busyRate);
-    }
-    const resolvedStart = slowStartH ?? openHour;
-    const resolvedEnd = slowEndH ?? Math.min(closeHour, openHour + 2);
-    const slowHrs = Math.max(0, resolvedEnd - resolvedStart);
-    const busyHrs = Math.max(0, totalHours - slowHrs);
-    return Math.round(busyHrs * busyRate + slowHrs * slowRate);
-  }
 
   // ─── Navigation ───────────────────────────────────────────────────────────
 
   const advanceTo = useCallback((next: QuestionId) => {
     setAnimState('exiting');
     setPendingQ(next);
-  }, []);
-
-  const goToNow = useCallback((next: QuestionId) => {
-    setCurrentQ(next);
-    setPendingQ(null);
-    setAnimState('entering');
   }, []);
 
   function handleExitDone() {
@@ -314,113 +320,78 @@ export function VisitorEstimationStep({ onComplete }: VisitorEstimationStepProps
     setAnimState('idle');
   }
 
-  // Bug #4: back navigation map
   function goBack(from: QuestionId) {
     const backMap: Partial<Record<QuestionId, QuestionId>> = {
       'q2-hours': 'q1-days',
       'q3-busy-days': 'q2-hours',
-      'transition-busy': 'q3-busy-days',
-      'q4-slow-hours-busy': 'transition-busy',
-      'q5-slow-rate-busy': 'q4-slow-hours-busy',
-      'q6-busy-rate-busy': busyNoSlow ? 'q4-slow-hours-busy' : 'q5-slow-rate-busy',
-      'transition-normal': busyDays.length > 0 ? 'q6-busy-rate-busy' : 'q3-busy-days',
-      'q7-slow-hours-normal': busyDays.length > 0 ? 'transition-normal' : 'q3-busy-days',
-      'q8-slow-rate-normal': 'q7-slow-hours-normal',
-      'q9-busy-rate-normal': normNoSlow ? 'q7-slow-hours-normal' : 'q8-slow-rate-normal',
-      'summary': normalActiveDays.length > 0 ? 'q9-busy-rate-normal' : 'q6-busy-rate-busy',
+      'q4-busy-visitors': 'q3-busy-days',
+      'q5-normal-visitors': busyActiveDays.length > 0 ? 'q4-busy-visitors' : 'q3-busy-days',
+      'summary': normalActiveDays.length > 0 ? 'q5-normal-visitors' : 'q4-busy-visitors',
     };
     const prev = backMap[from];
     if (prev) advanceTo(prev);
   }
 
-  // ─── Q3: skip handler ─────────────────────────────────────────────────────
+  // ─── Q3: skip handler (모든 요일 비슷) ──────────────────────────────────────
 
   function handleSkipBusy() {
     setBusyDays([]);
-    advanceTo('transition-normal');
+    // 구분 없이 전체 평균 → Q5 하나만 (일반 날 = 모든 날)
+    advanceTo('q5-normal-visitors');
   }
 
-  // ─── Final submit ─────────────────────────────────────────────────────────
-
-  function handleFinish() {
-    const busyDaily = calcDaily(busyNoSlow, busySlowStart, busySlowEnd, busySlowRate, busyBusyRate);
-    const normDaily = calcDaily(normNoSlow, normSlowStart, normSlowEnd, normSlowRate, normBusyRate);
-    const weeklyTotal = busyActiveDays.length * busyDaily + normalActiveDays.length * normDaily;
-    // Convert weekly visitors to calendar-day average (weekly / 7),
-    // then monthly logic multiplies by business operating days.
-    const avgDaily = Math.round(weeklyTotal / 7);
-    onComplete(avgDaily);
-  }
-
-  // ─── Summary data ─────────────────────────────────────────────────────────
-
-  function getSummaryData(): SummaryData {
-    const busyDaily = calcDaily(busyNoSlow, busySlowStart, busySlowEnd, busySlowRate, busyBusyRate);
-    const normDaily = calcDaily(normNoSlow, normSlowStart, normSlowEnd, normSlowRate, normBusyRate);
-    const weeklyTotal = busyActiveDays.length * busyDaily + normalActiveDays.length * normDaily;
-    const avgDaily = Math.round(weeklyTotal / 7);
-    return {
-      busyDays: busyActiveDays,
-      normalDays: normalActiveDays,
-      busyDailyVisitors: busyDaily,
-      normalDailyVisitors: normDaily,
-      avgDaily,
-      weeklyTotal,
-    };
-  }
-
-  // ─── Determine next question in flow ──────────────────────────────────────
-
-  function handleQ1Next() {
-    advanceTo('q2-hours');
-  }
-
-  function handleQ2Next() {
-    advanceTo('q3-busy-days');
-  }
+  // ─── Flow ───────────────────────────────────────────────────────────────────
 
   function handleQ3Next() {
-    if (busyDays.length > 0) {
-      advanceTo('transition-busy');
+    if (busyActiveDays.length > 0) {
+      advanceTo('q4-busy-visitors');
     } else {
-      advanceTo('transition-normal');
+      advanceTo('q5-normal-visitors');
     }
   }
 
   function handleQ4Next() {
-    if (busyNoSlow) {
-      advanceTo('q6-busy-rate-busy');
-    } else {
-      advanceTo('q5-slow-rate-busy');
-    }
-  }
-
-  function handleQ5Next() {
-    advanceTo('q6-busy-rate-busy');
-  }
-
-  function handleQ6Next() {
     if (normalActiveDays.length > 0) {
-      advanceTo('transition-normal');
+      advanceTo('q5-normal-visitors');
     } else {
       advanceTo('summary');
     }
   }
 
-  function handleQ7Next() {
-    if (normNoSlow) {
-      advanceTo('q9-busy-rate-normal');
+  // ─── Final submit ─────────────────────────────────────────────────────────
+
+  function handleFinish() {
+    let avgPerOperatingDay: number;
+    if (busyActiveDays.length > 0 && normalActiveDays.length > 0) {
+      // 바쁜 날/일반 날 가중 평균
+      const total = busyActiveDays.length * busyVisitors + normalActiveDays.length * normalVisitors;
+      avgPerOperatingDay = Math.round(total / activeDays.length);
+    } else if (busyActiveDays.length > 0) {
+      avgPerOperatingDay = busyVisitors;
     } else {
-      advanceTo('q8-slow-rate-normal');
+      avgPerOperatingDay = normalVisitors;
     }
+    // 주 영업일수 → 월 영업일수 (× 4.345주)
+    const monthlyOperatingDays = Math.round(operatingDays * 4.345);
+    onComplete(avgPerOperatingDay, monthlyOperatingDays);
   }
 
-  function handleQ8Next() {
-    advanceTo('q9-busy-rate-normal');
-  }
-
-  function handleQ9Next() {
-    advanceTo('summary');
+  function getSummaryData(): SummaryData {
+    let weeklyTotal: number;
+    if (busyActiveDays.length > 0) {
+      weeklyTotal = busyActiveDays.length * busyVisitors + normalActiveDays.length * normalVisitors;
+    } else {
+      weeklyTotal = activeDays.length * normalVisitors;
+    }
+    const avgDaily = Math.round(weeklyTotal / 7);
+    return {
+      busyDays: busyActiveDays,
+      normalDays: normalActiveDays,
+      busyDailyVisitors: busyVisitors,
+      normalDailyVisitors: normalVisitors,
+      avgDaily,
+      weeklyTotal,
+    };
   }
 
   // ─── Animation class ──────────────────────────────────────────────────────
@@ -433,18 +404,6 @@ export function VisitorEstimationStep({ onComplete }: VisitorEstimationStepProps
   // ─── Render ───────────────────────────────────────────────────────────────
 
   function renderQuestion() {
-    // Bug #5: helper to render day-category headers
-    function DayHeader({ category, days }: { category: string; days: DayKey[] }) {
-      const dayStr = days.map(d => d).join(', ');
-      return (
-        <h2 className={styles.questionLabel}>
-          <strong>{category}</strong>{' '}
-          <span style={{ fontWeight: 'normal' }}>({dayStr})</span>
-        </h2>
-      );
-    }
-
-    // Back button helper (Bug #4)
     function BackButton({ q }: { q: QuestionId }) {
       return (
         <button className={styles.skipBtn} onClick={() => goBack(q)} type="button">
@@ -455,7 +414,6 @@ export function VisitorEstimationStep({ onComplete }: VisitorEstimationStepProps
 
     switch (currentQ) {
       // ── Q1: operating days ───────────────────────────────────────────────
-      // Bug #2: day toggles instead of number buttons
       case 'q1-days':
         return (
           <div className={styles.step}>
@@ -477,7 +435,6 @@ export function VisitorEstimationStep({ onComplete }: VisitorEstimationStepProps
                           const next = isActive
                             ? prev.filter(d => d !== day)
                             : [...prev, day];
-                          // Also remove from busyDays if day is deselected
                           if (isActive) {
                             setBusyDays(bd => bd.filter(d => d !== day));
                           }
@@ -497,7 +454,7 @@ export function VisitorEstimationStep({ onComplete }: VisitorEstimationStepProps
               </p>
               <button
                 className={styles.nextBtn}
-                onClick={handleQ1Next}
+                onClick={() => advanceTo('q2-hours')}
                 type="button"
                 disabled={operatingDays === 0}
               >
@@ -516,14 +473,14 @@ export function VisitorEstimationStep({ onComplete }: VisitorEstimationStepProps
               className={`${styles.questionContainer} ${animClass}`}
               onAnimationEnd={animState === 'exiting' ? handleExitDone : handleEnterDone}
             >
-              <h2 className={styles.questionLabel}>문을 여는 날에는 몇 시부터 몇 시까지 영업하실 건가요?</h2>
+              <h2 className={styles.questionLabel}>몇 시부터 몇 시까지 영업하실 건가요?</h2>
               <TimePair
                 openHour={openHour}
                 closeHour={closeHour}
                 onChangeOpen={h => setOpenHour(Math.min(h, closeHour - 1))}
                 onChangeClose={h => setCloseHour(Math.max(h, openHour + 1))}
               />
-              <button className={styles.nextBtn} onClick={handleQ2Next} type="button">
+              <button className={styles.nextBtn} onClick={() => advanceTo('q3-busy-days')} type="button">
                 다음
               </button>
               <BackButton q="q2-hours" />
@@ -532,7 +489,6 @@ export function VisitorEstimationStep({ onComplete }: VisitorEstimationStepProps
         );
 
       // ── Q3: busy days selection ──────────────────────────────────────────
-      // Bug #3: only show days from selectedDays (Q1)
       case 'q3-busy-days': {
         const allBusySelected = busyDays.filter(d => activeDays.includes(d)).length === activeDays.length;
         return (
@@ -542,17 +498,19 @@ export function VisitorEstimationStep({ onComplete }: VisitorEstimationStepProps
               className={`${styles.questionContainer} ${animClass}`}
               onAnimationEnd={animState === 'exiting' ? handleExitDone : handleEnterDone}
             >
-              <h2 className={styles.questionLabel}>장사가 잘 되는 요일이 정해져 있나요?</h2>
+              <h2 className={styles.questionLabel}>장사가 잘 되는 요일이 있나요?</h2>
+              <p className={styles.questionSub}>
+                특별히 바쁜 요일을 골라주세요.
+              </p>
               <div className={styles.dayToggleRow}>
                 {activeDays.map(day => {
                   const isActive = busyDays.includes(day);
-                  const allOthersSelected = !isActive && allBusySelected;
                   return (
                     <button
                       key={day}
-                      className={`${styles.dayToggle} ${isActive ? styles.dayToggleActive : ''}`}
+                      className={`${styles.dayToggle} ${isActive ? styles.dayToggleBusy : ''}`}
                       onClick={() => {
-                        if (allOthersSelected) return;
+                        if (!isActive && allBusySelected) return;
                         setBusyDays(prev =>
                           isActive ? prev.filter(d => d !== day) : [...prev, day]
                         );
@@ -566,14 +524,20 @@ export function VisitorEstimationStep({ onComplete }: VisitorEstimationStepProps
                   );
                 })}
               </div>
-              <p className={styles.dayToggleHint}>
-                모든 요일이 비슷하다면 그냥 건너뛰기를 눌러주세요.
-              </p>
-              <button className={styles.nextBtn} onClick={handleQ3Next} type="button">
+              {busyActiveDays.length > 0 && (
+                <p className={styles.dayToggleHint}>
+                  🔥 {busyActiveDays.join(', ')} — 바쁜 날 {busyActiveDays.length}일 선택됨
+                </p>
+              )}
+              <button
+                className={styles.nextBtn}
+                onClick={handleQ3Next}
+                type="button"
+              >
                 다음
               </button>
               <button className={styles.skipBtn} onClick={handleSkipBusy} type="button">
-                건너뛰기
+                모든 요일이 비슷해요 (건너뛰기)
               </button>
               <BackButton q="q3-busy-days" />
             </div>
@@ -581,19 +545,8 @@ export function VisitorEstimationStep({ onComplete }: VisitorEstimationStepProps
         );
       }
 
-      // ── Transition: busy days ────────────────────────────────────────────
-      case 'transition-busy':
-        return (
-          <TossTransition
-            emoji="🔥"
-            message="장사가 잘 되는 날"
-            buttonText="시작하기"
-            onComplete={() => goToNow('q4-slow-hours-busy')}
-          />
-        );
-
-      // ── Q4: slow hours (busy days) ───────────────────────────────────────
-      case 'q4-slow-hours-busy':
+      // ── Q4: 바쁜 날 하루 방문객 ──────────────────────────────────────────
+      case 'q4-busy-visitors':
         return (
           <div className={styles.step}>
             <div
@@ -601,29 +554,29 @@ export function VisitorEstimationStep({ onComplete }: VisitorEstimationStepProps
               className={`${styles.questionContainer} ${animClass}`}
               onAnimationEnd={animState === 'exiting' ? handleExitDone : handleEnterDone}
             >
-              <DayHeader category="장사가 잘 되는 날" days={busyActiveDays} />
-              <p className={styles.questionSub}>한가로운 시간은 몇 시부터 몇 시인가요? (없다고 해주셔도 돼요)</p>
-              <SlowHourPicker
-                slowStart={busySlowStart}
-                slowEnd={busySlowEnd}
-                openHour={openHour}
-                closeHour={closeHour}
-                noSlow={busyNoSlow}
-                onChangeStart={h => { setBusySlowStart(h); setBusyNoSlow(false); }}
-                onChangeEnd={h => { setBusySlowEnd(h); setBusyNoSlow(false); }}
-                onToggleNoSlow={() => setBusyNoSlow(p => !p)}
+              <DailyVisitorInput
+                value={busyVisitors}
+                onChange={setBusyVisitors}
+                totalHours={totalHours}
+                emoji="🔥"
+                title="바쁜 날"
+                dayLabel={busyActiveDays.join(', ')}
               />
               <button className={styles.nextBtn} onClick={handleQ4Next} type="button">
                 다음
               </button>
-              <BackButton q="q4-slow-hours-busy" />
+              <BackButton q="q4-busy-visitors" />
             </div>
           </div>
         );
 
-      // ── Q5: slow-hour rate (busy days) ───────────────────────────────────
-      // Bug #6: "한가할 때" → "한가한 시간대"
-      case 'q5-slow-rate-busy':
+      // ── Q5: 일반 날 하루 방문객 ──────────────────────────────────────────
+      case 'q5-normal-visitors': {
+        const isAllDaysSame = busyActiveDays.length === 0;
+        const dayLabel = isAllDaysSame
+          ? activeDays.join(', ')
+          : normalActiveDays.join(', ');
+
         return (
           <div className={styles.step}>
             <div
@@ -631,156 +584,22 @@ export function VisitorEstimationStep({ onComplete }: VisitorEstimationStepProps
               className={`${styles.questionContainer} ${animClass}`}
               onAnimationEnd={animState === 'exiting' ? handleExitDone : handleEnterDone}
             >
-              <DayHeader category="장사가 잘 되는 날" days={busyActiveDays} />
-              <p className={styles.questionSub}>한가한 시간대 시간당 몇 명이 방문할 것 같으세요?</p>
-              <p className={styles.dayToggleHint} style={{ fontSize: '13px', color: '#999' }}>
-                테이블 수, 응대 시간, 업종 크기 등을 고려해서 결정해 주세요.
-              </p>
-              <RateSlider
-                value={busySlowRate}
-                onChange={setBusySlowRate}
-                label="한가한 시간대 방문객 (바쁜 날)"
+              <DailyVisitorInput
+                value={normalVisitors}
+                onChange={setNormalVisitors}
+                totalHours={totalHours}
+                emoji={isAllDaysSame ? '👥' : '☕'}
+                title={isAllDaysSame ? '하루 방문객' : '일반적인 날'}
+                dayLabel={dayLabel}
               />
-              <button className={styles.nextBtn} onClick={handleQ5Next} type="button">
+              <button className={styles.nextBtn} onClick={() => advanceTo('summary')} type="button">
                 다음
               </button>
-              <BackButton q="q5-slow-rate-busy" />
+              <BackButton q="q5-normal-visitors" />
             </div>
           </div>
         );
-
-      // ── Q6: busy-hour rate (busy days) ───────────────────────────────────
-      // Bug #6: "바쁠 때" → "바쁜 시간대"
-      case 'q6-busy-rate-busy':
-        return (
-          <div className={styles.step}>
-            <div
-              key="q6"
-              className={`${styles.questionContainer} ${animClass}`}
-              onAnimationEnd={animState === 'exiting' ? handleExitDone : handleEnterDone}
-            >
-              <DayHeader category="장사가 잘 되는 날" days={busyActiveDays} />
-              <p className={styles.questionSub}>바쁜 시간대 시간당 몇 명이 방문할 것 같으세요?</p>
-              <p className={styles.dayToggleHint} style={{ fontSize: '13px', color: '#999' }}>
-                테이블 수, 응대 시간, 업종 크기 등을 고려해서 결정해 주세요.
-              </p>
-              <RateSlider
-                value={busyBusyRate}
-                onChange={setBusyBusyRate}
-                label="바쁜 시간대 방문객 (바쁜 날)"
-              />
-              <button className={styles.nextBtn} onClick={handleQ6Next} type="button">
-                다음
-              </button>
-              <BackButton q="q6-busy-rate-busy" />
-            </div>
-          </div>
-        );
-
-      // ── Transition: normal days ──────────────────────────────────────────
-      case 'transition-normal':
-        return (
-          <TossTransition
-            emoji="☕"
-            message="일반적인 날"
-            buttonText="시작하기"
-            onComplete={() => goToNow('q7-slow-hours-normal')}
-          />
-        );
-
-      // ── Q7: slow hours (normal days) ─────────────────────────────────────
-      case 'q7-slow-hours-normal':
-        return (
-          <div className={styles.step}>
-            <div
-              key="q7"
-              className={`${styles.questionContainer} ${animClass}`}
-              onAnimationEnd={animState === 'exiting' ? handleExitDone : handleEnterDone}
-            >
-              {normalActiveDays.length > 0
-                ? <DayHeader category="일반적인 날" days={normalActiveDays} />
-                : <h2 className={styles.questionLabel}><strong>일반적인 날</strong></h2>
-              }
-              <p className={styles.questionSub}>한가로운 시간은 몇 시부터 몇 시인가요? (없다고 해주셔도 돼요)</p>
-              <SlowHourPicker
-                slowStart={normSlowStart}
-                slowEnd={normSlowEnd}
-                openHour={openHour}
-                closeHour={closeHour}
-                noSlow={normNoSlow}
-                onChangeStart={h => { setNormSlowStart(h); setNormNoSlow(false); }}
-                onChangeEnd={h => { setNormSlowEnd(h); setNormNoSlow(false); }}
-                onToggleNoSlow={() => setNormNoSlow(p => !p)}
-              />
-              <button className={styles.nextBtn} onClick={handleQ7Next} type="button">
-                다음
-              </button>
-              <BackButton q="q7-slow-hours-normal" />
-            </div>
-          </div>
-        );
-
-      // ── Q8: slow-hour rate (normal days) ─────────────────────────────────
-      // Bug #6: "한가할 때" → "한가한 시간대"
-      case 'q8-slow-rate-normal':
-        return (
-          <div className={styles.step}>
-            <div
-              key="q8"
-              className={`${styles.questionContainer} ${animClass}`}
-              onAnimationEnd={animState === 'exiting' ? handleExitDone : handleEnterDone}
-            >
-              {normalActiveDays.length > 0
-                ? <DayHeader category="일반적인 날" days={normalActiveDays} />
-                : <h2 className={styles.questionLabel}><strong>일반적인 날</strong></h2>
-              }
-              <p className={styles.questionSub}>한가한 시간대 시간당 몇 명이 방문할 것 같으세요?</p>
-              <p className={styles.dayToggleHint} style={{ fontSize: '13px', color: '#999' }}>
-                테이블 수, 응대 시간, 업종 크기 등을 고려해서 결정해 주세요.
-              </p>
-              <RateSlider
-                value={normSlowRate}
-                onChange={setNormSlowRate}
-                label="한가한 시간대 방문객 (일반 날)"
-              />
-              <button className={styles.nextBtn} onClick={handleQ8Next} type="button">
-                다음
-              </button>
-              <BackButton q="q8-slow-rate-normal" />
-            </div>
-          </div>
-        );
-
-      // ── Q9: busy-hour rate (normal days) ─────────────────────────────────
-      // Bug #6: "바쁠 때" → "바쁜 시간대"
-      case 'q9-busy-rate-normal':
-        return (
-          <div className={styles.step}>
-            <div
-              key="q9"
-              className={`${styles.questionContainer} ${animClass}`}
-              onAnimationEnd={animState === 'exiting' ? handleExitDone : handleEnterDone}
-            >
-              {normalActiveDays.length > 0
-                ? <DayHeader category="일반적인 날" days={normalActiveDays} />
-                : <h2 className={styles.questionLabel}><strong>일반적인 날</strong></h2>
-              }
-              <p className={styles.questionSub}>바쁜 시간대 시간당 몇 명이 방문할 것 같으세요?</p>
-              <p className={styles.dayToggleHint} style={{ fontSize: '13px', color: '#999' }}>
-                테이블 수, 응대 시간, 업종 크기 등을 고려해서 결정해 주세요.
-              </p>
-              <RateSlider
-                value={normBusyRate}
-                onChange={setNormBusyRate}
-                label="바쁜 시간대 방문객 (일반 날)"
-              />
-              <button className={styles.nextBtn} onClick={handleQ9Next} type="button">
-                다음
-              </button>
-              <BackButton q="q9-busy-rate-normal" />
-            </div>
-          </div>
-        );
+      }
 
       // ── Summary ───────────────────────────────────────────────────────────
       case 'summary':

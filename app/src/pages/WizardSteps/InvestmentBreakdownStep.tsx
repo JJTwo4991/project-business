@@ -6,13 +6,11 @@ import { formatKRWShort } from '../../lib/format';
 import { SliderInput } from '../../components/SliderInput/SliderInput';
 import { GuidelineBox } from '../../components/GuidelineBox/GuidelineBox';
 import { getGuideline } from '../../data/guidelines';
-import { useBenchmarkData } from '../../hooks/useBenchmarkData';
 import { FranchiseSearch } from '../../components/FranchiseSearch/FranchiseSearch';
 import type { FranchiseInvestment } from '../../components/FranchiseSearch/FranchiseSearch';
 import { getScaleSqm } from '../../lib/scale';
 import { useFranchiseCosts } from '../../hooks/useFranchiseCosts';
-import { getIndustryAverages, getIndustryTotalAvg } from '../../data/franchiseData';
-import { BUSINESS_TYPES } from '../../data/businessTypes';
+import { getIndustryAverages } from '../../data/franchiseData';
 import { UI_ICONS } from '../../assets/icons';
 
 type Mode = 'choose' | 'franchise' | 'independent';
@@ -28,19 +26,13 @@ interface Props {
 }
 
 export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onChange, onBrandSelect, onNext }: Props) {
-  const { hasBrands: hasFranchises } = useFranchiseCosts(businessTypeId);
+  useFranchiseCosts(businessTypeId);
   const [mode, setMode] = useState<Mode>('choose');
   const [chooseSubMode, setChooseSubMode] = useState<ChooseSubMode>(null);
   const [franchiseName, setFranchiseName] = useState<string | null>(null);
-  const benchmark = useBenchmarkData(businessTypeId, null);
-  const startupGuideline = benchmark.startupCost ? {
-    text: `이 업종 프랜차이즈 평균 창업비용 약 ${formatKRWShort(benchmark.startupCost.totalCost)}`,
-    source: benchmark.startupCost.source,
-  } : getGuideline(businessTypeId, scale, 'investment-breakdown');
+  const startupGuideline = getGuideline(businessTypeId, scale, 'investment-breakdown');
 
   const scaleSqm = useMemo(() => getScaleSqm(scale, businessTypeId), [scale, businessTypeId]);
-  const industryAvg = useMemo(() => getIndustryTotalAvg(businessTypeId, scaleSqm), [businessTypeId, scaleSqm]);
-  const industryName = useMemo(() => BUSINESS_TYPES.find(b => b.id === businessTypeId)?.name ?? '', [businessTypeId]);
 
   const defaultItems = useMemo(
     () => getInvestmentBreakdown(businessTypeId, scale),
@@ -82,12 +74,6 @@ export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onCh
     onBrandSelect?.(null);
     setMode('independent');
   }, [businessTypeId, scaleSqm, onChange, onBrandSelect]);
-
-  const handleResetChoice = useCallback(() => {
-    setMode('choose');
-    setChooseSubMode(null);
-    setFranchiseName(null);
-  }, []);
 
   if (mode === 'choose') {
     if (chooseSubMode === 'franchise-search') {
@@ -151,54 +137,47 @@ export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onCh
 
   return (
     <div className={styles.step}>
-      <h2 className={styles.stepTitle}>초기투자 항목별 분해</h2>
+      <h2 className={styles.stepTitle}>초기투자 구성</h2>
       {mode === 'franchise' && franchiseName ? (
         <>
-          <p style={{ fontSize: '20px', fontWeight: 'bold', margin: '0 0 8px', lineHeight: 1.4 }}>
-            "{franchiseName}의 창업비용은 평균 {formatKRWShort(total)}이에요"
+          <p style={{ fontSize: '20px', fontWeight: 'bold', margin: '0 0 4px', lineHeight: 1.4 }}>
+            {franchiseName} 창업비용 평균 {formatKRWShort(total)}
           </p>
-          {industryAvg > 0 && (
-            <p style={{ fontSize: '14px', color: '#888', margin: '0 0 16px', lineHeight: 1.5 }}>
-              {industryName} 업종 평균 창업비용 약 {formatKRWShort(industryAvg)}. 공정위 브랜드 발표자료 기준, 가맹비, 교육비, 인테리어 등 포함
-            </p>
-          )}
+          <p style={{ fontSize: '12px', color: '#999', margin: '0 0 12px' }}>
+            (출처: 공정위 프랜차이즈 공시 시스템)
+          </p>
         </>
       ) : (
         <p className={styles.stepDesc}>항목별 금액을 조정할 수 있어요</p>
       )}
       {mode !== 'franchise' && <GuidelineBox guideline={startupGuideline} />}
-      {hasFranchises && (
-        <button
-          className={styles.hint}
-          type="button"
-          onClick={handleResetChoice}
-          style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0, textAlign: 'left' }}
-        >
-          ← 프랜차이즈 선택으로 돌아가기
-        </button>
-      )}
       {mode === 'independent' && (
         <p className={styles.hint} style={{ color: '#888', fontSize: '13px', margin: '0 0 12px' }}>
           개인 사업은 가맹비, 교육비 등이 없어요
         </p>
       )}
       {mode === 'franchise' && (
-        <div className={styles.hint} style={{ background: '#f5f5f5', borderRadius: '8px', padding: '10px 14px', margin: '0 0 12px', color: '#555', fontSize: '13px' }}>
-          선택하신 브랜드가 공시한 창업비용이에요. 사장님께서 조절하실 수 있어요.
+        <div style={{ background: 'var(--color-primary-light)', borderRadius: '10px', padding: '12px 16px', margin: '0 0 14px', color: 'var(--color-text-secondary)', fontSize: '13px', lineHeight: 1.6 }}>
+          선택하신 브랜드가 공시한 창업비용이에요.<br />
+          사장님께서 조절할 수 있어요.
         </div>
       )}
       <div className={styles.sliderGroup}>
-        {items.map((item, i) => (
+        {items.map((item, i) => {
+          const isOther = item.category === 'other';
+          const cap = isOther ? 100_000_000 : 80_000_000;
+          return (
           <div key={i}>
             <SliderInput
               label={item.label}
               value={item.amount}
               min={0}
-              max={Math.min(Math.max((defaultItems[i]?.amount ?? item.amount) * 2, 5_000_000), 80_000_000)}
+              max={Math.min(Math.max((defaultItems[i]?.amount ?? item.amount) * 2, 5_000_000), cap)}
               step={1_000_000}
               format={formatKRWShort}
               onChange={v => handleItemChange(i, v)}
               disabled={item.editable === false}
+              inputUnit={{ divisor: 1_000_000, label: '백만원' }}
             />
             {mode === 'independent' && item.editable && (
               <p style={{ color: '#aaa', fontSize: '12px', margin: '-4px 0 8px 4px' }}>
@@ -206,7 +185,8 @@ export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onCh
               </p>
             )}
           </div>
-        ))}
+          );
+        })}
       </div>
       <div className={styles.investmentTotal}>
         <span>합계</span>

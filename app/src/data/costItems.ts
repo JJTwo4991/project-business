@@ -105,8 +105,6 @@ export function getMiscFixedDefault(businessTypeId: number): number {
 }
 
 export interface CostBreakdown {
-  utilities: number;
-  delivery: number;
   other_fixed: number;
 }
 
@@ -118,11 +116,9 @@ export function getCostBreakdown(businessTypeId: number): CostBreakdown {
   const avg = (c: { amount_monthly_min: number; amount_monthly_max: number }) =>
     Math.round((c.amount_monthly_min + c.amount_monthly_max) / 2);
 
-  const utilities = items.filter(c => c.cost_category === 'utilities').reduce((s, c) => s + avg(c), 0);
-  const delivery = items.filter(c => c.cost_category === 'marketing').reduce((s, c) => s + avg(c), 0);
   const other_fixed = items.filter(c => c.cost_category === 'other').reduce((s, c) => s + avg(c), 0);
 
-  return { utilities, delivery, other_fixed };
+  return { other_fixed };
 }
 
 export function getInvestmentBreakdown(businessTypeId: number, scale: BusinessScale): InvestmentItem[] {

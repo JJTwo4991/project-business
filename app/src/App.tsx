@@ -1,4 +1,5 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { StepId } from './types';
 import styles from './App.module.css';
 import { PageTransition } from './components/PageTransition/PageTransition';
 import { StepIndicator } from './components/StepIndicator/StepIndicator';
@@ -16,26 +17,52 @@ import { InvestmentBreakdownStep } from './pages/WizardSteps/InvestmentBreakdown
 import { TicketStep, LaborStep, RentStep, MiscStep } from './pages/WizardSteps/OperatingParamsSteps';
 import { VisitorEstimationStep } from './pages/WizardSteps/VisitorEstimationStep';
 import { TossTransition } from './components/TossTransition/TossTransition';
+import { IndustryTransition } from './components/IndustryTransition/IndustryTransition';
+import { getIndustryIcon } from './assets/icons';
+
+const INDUSTRY_TAGLINES: Record<number, { tagline: string; sub: string }> = {
+  1:  { tagline: '치킨 싫어하는 사람은 없는 거 아시죠?', sub: '바삭한 치킨으로 동네 맛집이 되어볼까요' },
+  2:  { tagline: '한 잔의 커피가 만드는 일상 속 행복', sub: '향긋한 원두향이 가득한 나만의 공간' },
+  3:  { tagline: '24시간 돌아가는 동네 필수 인프라', sub: '언제나 열려있는 든든한 이웃' },
+  4:  { tagline: '손끝에서 시작되는 변신의 마법', sub: '스타일 하나로 자신감을 선물하세요' },
+  5:  { tagline: '떡볶이·김밥, 누구나 사랑하는 국민 간식', sub: '학교 앞 추억의 맛을 사장님의 손으로' },
+  6:  { tagline: '따뜻한 밥 한 끼의 힘, 한식의 저력', sub: '정성 가득한 한 상을 차려보세요' },
+  7:  { tagline: '깔끔한 옷이 주는 자신감, 세탁의 가치', sub: '빨래 고민 없는 동네를 만들어요' },
+  8:  { tagline: '도우 위에 펼쳐지는 맛의 조합', sub: '한 조각의 행복을 배달합니다' },
+  9:  { tagline: '갓 구운 빵 냄새, 그 유혹을 이길 수 있나요?', sub: '매일 아침 행복을 구워내세요' },
+  11: { tagline: '작은 손톱 위에 피어나는 나만의 개성', sub: '섬세한 손길로 아름다움을 완성해요' },
+  13: { tagline: '바쁜 현대인의 식탁을 책임지는 든든한 한 끼', sub: '집밥이 그리운 사람들의 안식처' },
+  14: { tagline: '무인으로 돌아가는 달콤한 수익 모델', sub: '사장님이 없어도 매출은 쌓여요' },
+  15: { tagline: '하루의 끝, 한 잔의 위로가 되는 공간', sub: '오늘 하루도 수고했다, 한 잔 어때요' },
+  16: { tagline: '사장 없이도 커피는 내려집니다', sub: '24시간 일하는 커피머신이 사장님 대신' },
+};
 import { ConfirmStep } from './pages/WizardSteps/ConfirmStep';
 import { UI_ICONS } from './assets/icons';
+import { TossNavBar } from './components/TossNavBar/TossNavBar';
+import { useRecentSimulations } from './hooks/useRecentSimulations';
+import type { SavedSimulation } from './hooks/useRecentSimulations';
+
+/** 토스 WebView 환경 감지 (토스 앱 내 미니앱으로 실행 중인지) */
+const isTossWebView = /TossApp/i.test(navigator.userAgent);
 
 export default function App() {
   const simulator = useSimulator();
   const { businessTypes } = useBusinessTypes();
   const rentGuide = useRentGuide();
   const nav = useStepNavigation();
+  const recentSims = useRecentSimulations();
 
   const handleSelectBusiness = useCallback((bt: BusinessType) => {
     simulator.setBusinessType(bt);
-    nav.goTo('select-region');
+    nav.goTo('industry-transition');
   }, [simulator, nav]);
 
   const handleScaleSelect = useCallback((scale: 'small' | 'medium' | 'large') => {
     simulator.setScale(scale);
   }, [simulator]);
 
-  const handleRentSelect = useCallback((rent: { sido: string; sigungu: string; rent_per_sqm: number; monthly: number }) => {
-    simulator.setRegion({ sido: rent.sido, sigungu: rent.sigungu, rent_per_sqm: rent.rent_per_sqm });
+  const handleRentSelect = useCallback((rent: { sido: string; sangkwon: string; rent_per_sqm: number; monthly: number }) => {
+    simulator.setRegion({ sido: rent.sido, sangkwon: rent.sangkwon, rent_per_sqm: rent.rent_per_sqm });
     simulator.setOverride('rent_monthly', rent.monthly);
   }, [simulator]);
 
@@ -49,8 +76,22 @@ export default function App() {
     });
   }, [simulator]);
 
+  // Save to recent simulations when a new result appears
+  const lastSavedResult = useRef<object | null>(null);
+  useEffect(() => {
+    if (simulator.result && simulator.result !== lastSavedResult.current) {
+      lastSavedResult.current = simulator.result;
+      recentSims.save(simulator.result);
+    }
+  }, [simulator.result, recentSims]);
+
   const handleCalculate = useCallback(() => {
     simulator.calculate();
+    nav.goTo('result-daily');
+  }, [simulator, nav]);
+
+  const handleRestoreSimulation = useCallback((item: SavedSimulation) => {
+    simulator.restoreResult(item.result);
     nav.goTo('result-daily');
   }, [simulator, nav]);
 
@@ -58,6 +99,22 @@ export default function App() {
     simulator.reset();
     nav.goTo('select-industry');
   }, [simulator, nav]);
+
+  // 확인 화면에서 수정 모드
+  const [editReturnStep, setEditReturnStep] = useState<StepId | null>(null);
+
+  const handleConfirmEdit = useCallback((step: StepId) => {
+    setEditReturnStep('confirm');
+    nav.goTo(step);
+  }, [nav]);
+
+  const goBackToConfirm = useCallback(() => {
+    setEditReturnStep(null);
+    nav.goTo('confirm');
+  }, [nav]);
+
+  // 수정 모드일 때 goNext 대신 confirm으로 복귀
+  const effectiveGoNext = editReturnStep ? goBackToConfirm : nav.goNext;
 
   const renderStep = () => {
     if (!simulator.inputs && nav.currentStep !== 'select-industry') {
@@ -70,8 +127,26 @@ export default function App() {
           <IndustrySelectStep
             businessTypes={businessTypes}
             onSelect={handleSelectBusiness}
+            recentSimulations={recentSims.items}
+            onRestoreSimulation={handleRestoreSimulation}
+            onRemoveSimulation={recentSims.remove}
           />
         );
+
+      case 'industry-transition': {
+        const bt = simulator.inputs?.business_type;
+        if (!bt) return null;
+        const info = INDUSTRY_TAGLINES[bt.id] ?? { tagline: bt.name, sub: '' };
+        return (
+          <IndustryTransition
+            emoji={getIndustryIcon(bt.id, bt.category)}
+            tagline={info.tagline}
+            subMessage={info.sub}
+            buttonText="시작하기"
+            onComplete={effectiveGoNext}
+          />
+        );
+      }
 
       case 'select-scale':
         return simulator.inputs ? (
@@ -79,7 +154,7 @@ export default function App() {
             businessType={simulator.inputs.business_type}
             selected={simulator.inputs.scale}
             onSelect={handleScaleSelect}
-            onNext={nav.goNext}
+            onNext={effectiveGoNext}
           />
         ) : null;
 
@@ -91,7 +166,7 @@ export default function App() {
             breakdown={simulator.inputs.capital.investment_breakdown}
             onChange={handleInvestmentBreakdownChange}
             onBrandSelect={simulator.setSelectedBrand}
-            onNext={nav.goNext}
+            onNext={effectiveGoNext}
           />
         ) : null;
 
@@ -99,12 +174,13 @@ export default function App() {
         return simulator.inputs ? (
           <RegionStep
             sidos={rentGuide.sidos}
-            getSigungus={rentGuide.getSigungus}
+            getRegions={rentGuide.getRegions}
+            getSangkwons={rentGuide.getSangkwons}
             getRent={rentGuide.getRent}
             scale={simulator.inputs.scale}
             businessTypeId={simulator.inputs.business_type.id}
             onSelect={handleRentSelect}
-            onNext={nav.goNext}
+            onNext={effectiveGoNext}
           />
         ) : null;
 
@@ -115,7 +191,7 @@ export default function App() {
             scale={simulator.inputs.scale}
             capital={simulator.inputs.capital}
             onChange={simulator.setCapital}
-            onNext={nav.goNext}
+            onNext={effectiveGoNext}
           />
         ) : null;
 
@@ -126,7 +202,7 @@ export default function App() {
             businessTypeId={simulator.inputs.business_type.id}
             capital={simulator.inputs.capital}
             onChange={simulator.setCapital}
-            onNext={nav.goNext}
+            onNext={effectiveGoNext}
           />
         ) : null;
 
@@ -136,33 +212,34 @@ export default function App() {
             emoji={UI_ICONS.clap}
             message="수고하셨어요! 이제 장사가 얼마나 잘 될지 예상해볼까요?"
             buttonText="준비됐어요"
-            onComplete={nav.goNext}
+            onComplete={effectiveGoNext}
           />
         );
 
       case 'set-customers':
         return simulator.inputs ? (
           <VisitorEstimationStep
-            onComplete={v => {
+            onComplete={(v, days) => {
               simulator.setOverride('daily_customers_override', v);
-              nav.goNext();
+              simulator.setOverride('operating_days', days);
+              effectiveGoNext();
             }}
           />
         ) : null;
 
       case 'set-ticket':
         return simulator.inputs ? (
-          <TicketStep inputs={simulator.inputs} onOverride={simulator.setOverride} onNext={nav.goNext} />
+          <TicketStep inputs={simulator.inputs} onOverride={simulator.setOverride} onNext={effectiveGoNext} />
         ) : null;
 
       case 'set-labor':
         return simulator.inputs ? (
-          <LaborStep inputs={simulator.inputs} onOverride={simulator.setOverride} onNext={nav.goNext} />
+          <LaborStep inputs={simulator.inputs} onOverride={simulator.setOverride} onNext={effectiveGoNext} />
         ) : null;
 
       case 'set-rent':
         return simulator.inputs ? (
-          <RentStep inputs={simulator.inputs} onOverride={simulator.setOverride} onNext={nav.goNext} />
+          <RentStep inputs={simulator.inputs} onOverride={simulator.setOverride} onNext={effectiveGoNext} />
         ) : null;
 
       case 'confirm':
@@ -170,6 +247,7 @@ export default function App() {
           <ConfirmStep
             inputs={simulator.inputs}
             onCalculate={handleCalculate}
+            onGoTo={handleConfirmEdit}
           />
         ) : null;
 
@@ -199,17 +277,25 @@ export default function App() {
 
   return (
     <div className={styles.root}>
-      {!nav.isFirstStep && (
+      {isTossWebView && <TossNavBar onHome={handleGoHome} />}
+      {editReturnStep && (
+        <div className={styles.editBanner} onClick={goBackToConfirm}>
+          ← 수정 완료 후 확인으로 돌아가기
+        </div>
+      )}
+      {!nav.isFirstStep && !editReturnStep && (
         <header className={styles.header}>
-          {!nav.isResultStep && (
+          {!nav.isResultStep && !isTossWebView && (
             <button className={styles.backBtn} onClick={nav.goBack} aria-label="뒤로">
               ←
             </button>
           )}
           {!nav.isResultStep && <StepIndicator progress={nav.progress} />}
-          <button className={styles.homeBtn} onClick={handleGoHome} aria-label="처음으로">
-            처음으로
-          </button>
+          {!isTossWebView && (
+            <button className={styles.homeBtn} onClick={handleGoHome} aria-label="처음으로">
+              처음으로
+            </button>
+          )}
         </header>
       )}
       <PageTransition pageKey={nav.currentStep} direction="forward">

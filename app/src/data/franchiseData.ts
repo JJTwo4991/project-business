@@ -47,9 +47,7 @@ export const FRANCHISE_BRANDS: FranchiseBrand[] = [
   { name: '파리바게뜨', business_type_id: 9, initial_fee: 10_000_000, education_fee: 5_000_000, deposit: 10_000_000, interior_per_sqm: 900_000, other_cost: 30_000_000, source: SOURCE, ...R0 },
   { name: '뚜레쥬르', business_type_id: 9, initial_fee: 8_000_000, education_fee: 4_000_000, deposit: 8_000_000, interior_per_sqm: 850_000, other_cost: 25_000_000, source: SOURCE, ...R0 },
 
-  // 무인아이스크림 (id: 14)
-  { name: '아이스베리', business_type_id: 14, initial_fee: 3_000_000, education_fee: 1_000_000, deposit: 2_000_000, interior_per_sqm: 400_000, other_cost: 8_000_000, source: SOURCE, ...R0 },
-  { name: '셀프24', business_type_id: 14, initial_fee: 2_000_000, education_fee: 1_000_000, deposit: 2_000_000, interior_per_sqm: 350_000, other_cost: 7_000_000, source: SOURCE, ...R0 },
+  // 무인아이스크림 (id: 14) — Supabase franchise_costs에서 로드 (기타도소매 중 아이스크림 브랜드)
 
   // 반찬가게 / 한식 (id: 13)
   { name: '본죽', business_type_id: 13, initial_fee: 5_000_000, education_fee: 2_000_000, deposit: 3_000_000, interior_per_sqm: 550_000, other_cost: 6_000_000, source: SOURCE, ...R0 },

@@ -132,6 +132,162 @@
   font-style: italic;
 }
 
+.miscSlider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0 8px;
+}
+
+.inlineSlider {
+  flex: 1;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--color-border);
+  border-radius: 2px;
+  outline: none;
+}
+.inlineSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  cursor: pointer;
+}
+
+.sliderLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary);
+  min-width: 32px;
+  text-align: right;
+}
+
+.cogsAnnotation {
+  padding: 0 0 10px var(--spacing-md);
+}
+
+.cogsRatioLine {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.cogsRatioLine strong {
+  color: var(--color-text);
+}
+
+.ratioInput {
+  width: 36px;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-align: center;
+  padding: 2px 4px;
+  border: 1px solid var(--color-primary);
+  border-radius: 4px;
+  background: var(--color-surface);
+  color: var(--color-primary);
+  outline: none;
+}
+
+.ratioEditBtn {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 6px;
+  margin-left: 4px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.cogsSource {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  opacity: 0.85;
+  padding-top: 3px;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+.extraCostRow {
+  padding: 6px 0;
+  border-top: 1px dashed var(--color-border);
+}
+
+.extraCostInputs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.extraCostName {
+  flex: 1;
+  font-size: 12px;
+  padding: 6px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  outline: none;
+}
+.extraCostName:focus {
+  border-color: var(--color-primary);
+}
+
+.extraCostAmount {
+  width: 90px;
+  font-size: 12px;
+  padding: 6px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-align: right;
+  outline: none;
+}
+.extraCostAmount:focus {
+  border-color: var(--color-primary);
+}
+
+.extraCostRemove {
+  background: none;
+  border: none;
+  color: var(--color-text-tertiary);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+}
+.extraCostRemove:hover {
+  color: var(--color-danger, #d4183d);
+}
+
+.addCostBtn {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-top: 8px;
+  background: none;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+}
+.addCostBtn:active {
+  background: rgba(49, 130, 246, 0.05);
+}
+
 .dailyNote {
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);

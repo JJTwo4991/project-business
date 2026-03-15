@@ -9,14 +9,15 @@ interface Props {
   inputs: SimulatorInputs;
   rentGuide: {
     sidos: string[];
-    getSigungus: (sido: string) => string[];
-    getRent: (sido: string, sigungu: string) => RentGuide | undefined;
+    getRegions: (sido: string) => string[];
+    getSangkwons: (sido: string, region: string) => string[];
+    getRent: (sido: string, sangkwon: string) => RentGuide | undefined;
     loading: boolean;
   };
   onBack: () => void;
   onScale: (scale: BusinessScale) => void;
   onCapital: (capital: CapitalStructure) => void;
-  onRentSelect: (rent: { sido: string; sigungu: string; rent_per_sqm: number; monthly: number }) => void;
+  onRentSelect: (rent: { sido: string; sangkwon: string; rent_per_sqm: number; monthly: number }) => void;
   onCalculate: () => void;
 }
 
@@ -68,7 +69,8 @@ export function InputPage({ inputs, rentGuide, onBack, onScale, onCapital, onRen
         <h3 className={styles.sectionTitle}>지역 선택</h3>
         <RegionSelector
           sidos={rentGuide.sidos}
-          getSigungus={rentGuide.getSigungus}
+          getRegions={rentGuide.getRegions}
+          getSangkwons={rentGuide.getSangkwons}
           getRent={rentGuide.getRent}
           scaleSqm={getScaleSqm(scale)}
           onSelect={onRentSelect}

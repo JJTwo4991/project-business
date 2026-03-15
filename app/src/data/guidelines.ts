@@ -1,5 +1,4 @@
 import type { BusinessScale } from '../types';
-import { formatKRWShort } from '../lib/format';
 
 export interface Guideline {
   text: string;
@@ -34,16 +33,16 @@ interface BusinessGuideline {
   ticketSource: string;
 }
 
-const HONEST_ESTIMATE = '업종 평균 추정치 (공식 출처 미확인, 사용자 직접 조정 권장)';
+const HONEST_ESTIMATE = 'AI 추정치';
 
 
 const GUIDELINES: Record<number, BusinessGuideline> = {
   // 치킨전문점
   1: {
     scaleInvestment: {
-      small: '소규모 치킨전문점 (33㎡/10평) 기준 초기투자 약 3,000만원',
-      medium: '중규모 치킨전문점 (50㎡/15평) 기준 초기투자 약 5,000만원',
-      large: '대규모 치킨전문점 (82㎡/25평) 기준 초기투자 약 8,000만원',
+      small: '소규모 치킨전문점 (33㎡/10평) 기준\n초기투자 약 3,000만원',
+      medium: '중규모 치킨전문점 (50㎡/15평) 기준\n초기투자 약 5,000만원',
+      large: '대규모 치킨전문점 (82㎡/25평) 기준\n초기투자 약 8,000만원',
     },
     scaleSource: HONEST_ESTIMATE,
     franchiseCost: '치킨전문점 프랜차이즈 평균 창업비용 약 5,852만원 (가맹비·교육비·보증금 등, 인테리어 별도)',
@@ -60,9 +59,9 @@ const GUIDELINES: Record<number, BusinessGuideline> = {
   // 커피전문점
   2: {
     scaleInvestment: {
-      small: '소규모 카페 (33㎡/10평) 기준 초기투자 약 2,500만원',
-      medium: '중규모 카페 (50㎡/15평) 기준 초기투자 약 5,000만원',
-      large: '대규모 카페 (100㎡/30평) 기준 초기투자 약 1억원',
+      small: '소규모 카페 (33㎡/10평) 기준\n초기투자 약 2,500만원',
+      medium: '중규모 카페 (50㎡/15평) 기준\n초기투자 약 5,000만원',
+      large: '대규모 카페 (100㎡/30평) 기준\n초기투자 약 1억원',
     },
     scaleSource: HONEST_ESTIMATE,
     franchiseCost: '커피 업종 프랜차이즈 평균 창업비용 약 1억 2,179만원 (가맹비·교육비·보증금 등, 인테리어 별도)',
@@ -79,9 +78,9 @@ const GUIDELINES: Record<number, BusinessGuideline> = {
   // 편의점
   3: {
     scaleInvestment: {
-      small: '소규모 편의점 (33㎡/10평) 기준 초기투자 약 4,000만원',
-      medium: '중규모 편의점 (50㎡/15평) 기준 초기투자 약 7,000만원',
-      large: '대규모 편의점 (66㎡/20평) 기준 초기투자 약 1억 2,000만원',
+      small: '소규모 편의점 (33㎡/10평) 기준\n초기투자 약 4,000만원',
+      medium: '중규모 편의점 (50㎡/15평) 기준\n초기투자 약 7,000만원',
+      large: '대규모 편의점 (66㎡/20평) 기준\n초기투자 약 1억 2,000만원',
     },
     scaleSource: HONEST_ESTIMATE,
     franchiseCost: '편의점 프랜차이즈 평균 창업비용 약 5,000~7,000만원 (본사 지원 제외)',
@@ -98,9 +97,9 @@ const GUIDELINES: Record<number, BusinessGuideline> = {
   // 미용실
   4: {
     scaleInvestment: {
-      small: '1인 미용실 (25㎡/8평) 기준 초기투자 약 1,500만원',
-      medium: '일반 미용실 (50㎡/15평) 기준 초기투자 약 3,000만원',
-      large: '대형 헤어샵 (82㎡/25평) 기준 초기투자 약 6,000만원',
+      small: '1인 미용실 (25㎡/8평) 기준\n초기투자 약 1,500만원',
+      medium: '일반 미용실 (50㎡/15평) 기준\n초기투자 약 3,000만원',
+      large: '대형 헤어샵 (82㎡/25평) 기준\n초기투자 약 6,000만원',
     },
     scaleSource: HONEST_ESTIMATE,
     customers: {
@@ -115,9 +114,9 @@ const GUIDELINES: Record<number, BusinessGuideline> = {
   // 분식점
   5: {
     scaleInvestment: {
-      small: '소규모 분식점 (25㎡/8평) 기준 초기투자 약 2,000만원',
-      medium: '중규모 분식점 (40㎡/12평) 기준 초기투자 약 3,500만원',
-      large: '대규모 분식점 (66㎡/20평) 기준 초기투자 약 6,000만원',
+      small: '소규모 분식점 (25㎡/8평) 기준\n초기투자 약 2,000만원',
+      medium: '중규모 분식점 (40㎡/12평) 기준\n초기투자 약 3,500만원',
+      large: '대규모 분식점 (66㎡/20평) 기준\n초기투자 약 6,000만원',
     },
     scaleSource: HONEST_ESTIMATE,
     franchiseCost: '분식 프랜차이즈 평균 창업비용 약 8,500만~1억 3,000만원 (인테리어 포함 추정)',
@@ -134,9 +133,9 @@ const GUIDELINES: Record<number, BusinessGuideline> = {
   // 한식전문점
   6: {
     scaleInvestment: {
-      small: '소규모 한식당 (40㎡/12평) 기준 초기투자 약 3,500만원',
-      medium: '중규모 한식 전문점 (66㎡/20평) 기준 초기투자 약 6,000만원',
-      large: '대규모 한식 전문점 (100㎡/30평) 기준 초기투자 약 1억원',
+      small: '소규모 한식당 (40㎡/12평) 기준\n초기투자 약 3,500만원',
+      medium: '중규모 한식 전문점 (66㎡/20평) 기준\n초기투자 약 6,000만원',
+      large: '대규모 한식 전문점 (100㎡/30평) 기준\n초기투자 약 1억원',
     },
     scaleSource: HONEST_ESTIMATE,
     customers: {
@@ -151,9 +150,9 @@ const GUIDELINES: Record<number, BusinessGuideline> = {
   // 세탁소
   7: {
     scaleInvestment: {
-      small: '소형 세탁소 (20㎡/6평) 기준 초기투자 약 1,500만원',
-      medium: '일반 세탁소 (33㎡/10평) 기준 초기투자 약 3,000만원',
-      large: '대형 세탁소 (50㎡/15평) 기준 초기투자 약 5,000만원',
+      small: '소형 세탁소 (20㎡/6평) 기준\n초기투자 약 1,500만원',
+      medium: '일반 세탁소 (33㎡/10평) 기준\n초기투자 약 3,000만원',
+      large: '대형 세탁소 (50㎡/15평) 기준\n초기투자 약 5,000만원',
     },
     scaleSource: HONEST_ESTIMATE,
     customers: {
@@ -168,9 +167,9 @@ const GUIDELINES: Record<number, BusinessGuideline> = {
   // 피자전문점
   8: {
     scaleInvestment: {
-      small: '소규모 피자집 (33㎡/10평) 기준 초기투자 약 3,000만원',
-      medium: '중규모 피자집 (50㎡/15평) 기준 초기투자 약 5,500만원',
-      large: '대규모 피자 레스토랑 (82㎡/25평) 기준 초기투자 약 9,000만원',
+      small: '소규모 피자집 (33㎡/10평) 기준\n초기투자 약 3,000만원',
+      medium: '중규모 피자집 (50㎡/15평) 기준\n초기투자 약 5,500만원',
+      large: '대규모 피자 레스토랑 (82㎡/25평) 기준\n초기투자 약 9,000만원',
     },
     scaleSource: HONEST_ESTIMATE,
     franchiseCost: '피자 프랜차이즈 평균 창업비용 약 1억 5,000만~5억원 (인테리어·설비 포함 추정)',
@@ -187,9 +186,9 @@ const GUIDELINES: Record<number, BusinessGuideline> = {
   // 베이커리
   9: {
     scaleInvestment: {
-      small: '소형 동네빵집 (33㎡/10평) 기준 초기투자 약 2,500만원',
-      medium: '일반 베이커리 (50㎡/15평) 기준 초기투자 약 5,000만원',
-      large: '대형 베이커리카페 (100㎡/30평) 기준 초기투자 약 9,000만원',
+      small: '소형 동네빵집 (33㎡/10평) 기준\n초기투자 약 2,500만원',
+      medium: '일반 베이커리 (50㎡/15평) 기준\n초기투자 약 5,000만원',
+      large: '대형 베이커리카페 (100㎡/30평) 기준\n초기투자 약 9,000만원',
     },
     scaleSource: HONEST_ESTIMATE,
     franchiseCost: '베이커리 프랜차이즈 평균 창업비용 약 2억 3,000~3억 3,000만원 (인테리어·설비 포함 추정)',
@@ -206,9 +205,9 @@ const GUIDELINES: Record<number, BusinessGuideline> = {
   // 네일샵
   11: {
     scaleInvestment: {
-      small: '1인 네일샵 (16㎡/5평) 기준 초기투자 약 1,000만원',
-      medium: '일반 네일샵 (33㎡/10평) 기준 초기투자 약 2,000만원',
-      large: '대형 뷰티샵 (50㎡/15평) 기준 초기투자 약 3,500만원',
+      small: '1인 네일샵 (16㎡/5평) 기준\n초기투자 약 1,000만원',
+      medium: '일반 네일샵 (33㎡/10평) 기준\n초기투자 약 2,000만원',
+      large: '대형 뷰티샵 (50㎡/15평) 기준\n초기투자 약 3,500만원',
     },
     scaleSource: HONEST_ESTIMATE,
     customers: {
@@ -223,9 +222,9 @@ const GUIDELINES: Record<number, BusinessGuideline> = {
   // 반찬가게
   13: {
     scaleInvestment: {
-      small: '소형 반찬가게 (20㎡/6평) 기준 초기투자 약 1,500만원',
-      medium: '일반 반찬가게 (33㎡/10평) 기준 초기투자 약 2,500만원',
-      large: '대형 반찬 전문점 (50㎡/15평) 기준 초기투자 약 4,000만원',
+      small: '소형 반찬가게 (20㎡/6평) 기준\n초기투자 약 1,500만원',
+      medium: '일반 반찬가게 (33㎡/10평) 기준\n초기투자 약 2,500만원',
+      large: '대형 반찬 전문점 (50㎡/15평) 기준\n초기투자 약 4,000만원',
     },
     scaleSource: HONEST_ESTIMATE,
     customers: {
@@ -240,9 +239,9 @@ const GUIDELINES: Record<number, BusinessGuideline> = {
   // 주점
   15: {
     scaleInvestment: {
-      small: '소규모 주점 (33㎡/10석) 기준 초기투자 약 3,000만원',
-      medium: '중규모 주점 (66㎡/25석) 기준 초기투자 약 6,000만원',
-      large: '대규모 주점 (132㎡/50석) 기준 초기투자 약 1억원',
+      small: '소규모 주점 (33㎡/10석) 기준\n초기투자 약 3,000만원',
+      medium: '중규모 주점 (66㎡/25석) 기준\n초기투자 약 6,000만원',
+      large: '대규모 주점 (132㎡/50석) 기준\n초기투자 약 1억원',
     },
     scaleSource: HONEST_ESTIMATE,
     customers: {
@@ -257,9 +256,9 @@ const GUIDELINES: Record<number, BusinessGuideline> = {
   // 무인카페
   16: {
     scaleInvestment: {
-      small: '소형 무인카페 (20㎡) 기준 초기투자 약 1,500만원',
-      medium: '일반 무인카페 (40㎡) 기준 초기투자 약 3,000만원',
-      large: '대형 무인카페 (66㎡) 기준 초기투자 약 5,000만원',
+      small: '소형 무인카페 (20㎡) 기준\n초기투자 약 1,500만원',
+      medium: '일반 무인카페 (40㎡) 기준\n초기투자 약 3,000만원',
+      large: '대형 무인카페 (66㎡) 기준\n초기투자 약 5,000만원',
     },
     scaleSource: HONEST_ESTIMATE,
     customers: {
@@ -274,9 +273,9 @@ const GUIDELINES: Record<number, BusinessGuideline> = {
   // 무인아이스크림
   14: {
     scaleInvestment: {
-      small: '소형 무인매장 (16㎡/5평) 기준 초기투자 약 2,000만원',
-      medium: '일반 무인매장 (25㎡/8평) 기준 초기투자 약 3,500만원',
-      large: '대형 무인매장 (40㎡/12평) 기준 초기투자 약 5,500만원',
+      small: '소형 무인매장 (16㎡/5평) 기준\n초기투자 약 2,000만원',
+      medium: '일반 무인매장 (25㎡/8평) 기준\n초기투자 약 3,500만원',
+      large: '대형 무인매장 (40㎡/12평) 기준\n초기투자 약 5,500만원',
     },
     scaleSource: HONEST_ESTIMATE,
     customers: {
@@ -297,8 +296,8 @@ const COMMON_LABOR: Guideline = {
 };
 
 const COMMON_LOAN: Guideline = {
-  text: '소상공인 정책자금: 연 3.5~4.5%, 시중은행 사업자대출: 연 4.5~7.0%',
-  source: '소상공인시장진흥공단 2025년 정책자금 융자계획 및 한국은행 기준금리 동향',
+  text: '소상공인 정책자금: 연 3.5~4.5%\n시중은행 사업자대출: 연 4.5~7.0%',
+  source: '소상공인시장진흥공단 정책자금 융자계획',
 };
 
 export function getGuideline(
@@ -360,15 +359,3 @@ export function getGuideline(
   }
 }
 
-export function getRevenueGuideline(
-  benchmarkMonthlyRevenue: number | null,
-  businessTypeName: string,
-  region: string | null
-): Guideline | null {
-  if (!benchmarkMonthlyRevenue || !region) return null;
-  const formatted = formatKRWShort(benchmarkMonthlyRevenue);
-  return {
-    text: `${region} 지역 ${businessTypeName} 프랜차이즈 평균 월매출 약 ${formatted}`,
-    source: '공정거래위원회 2024',
-  };
-}

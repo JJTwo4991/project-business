@@ -26,10 +26,10 @@ export function ScaleSelectStep({ businessType, selected, onSelect, onNext }: Pr
       <div className={styles.scaleList}>
         {descriptions.map(desc => {
           const inv = desc.scale === 'small'
-            ? businessType.initial_investment_small
+            ? (businessType.initial_investment_small ?? businessType.initial_investment_min)
             : desc.scale === 'large'
-            ? businessType.initial_investment_large
-            : businessType.initial_investment_medium;
+            ? (businessType.initial_investment_large ?? businessType.initial_investment_max)
+            : (businessType.initial_investment_medium ?? Math.round((businessType.initial_investment_min + businessType.initial_investment_max) / 2));
           const isActive = selected === desc.scale;
           return (
             <button

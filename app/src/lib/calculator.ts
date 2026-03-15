@@ -3,15 +3,22 @@ import type {
   DailyPnL, SGADetail, PnLAnnotation,
 } from '../types';
 import { calcTotalTax, calcEffectiveTaxRate } from './tax';
-import { getCostBreakdown } from '../data/costItems';
 
-// 기타비용률 (소상공인실태조사 2023 기준, 매출 대비)
-// 외식/주점업: 약 5%, 소매: 약 4%, 서비스/카페: 약 6%
-// 출처: 소상공인실태조사 2023, 외식업체 경영실태 보고서
-export function getMiscCostRate(category: string): number {
-  if (category === '외식') return 0.05;
-  if (category === '소매') return 0.04;
-  return 0.06; // 서비스, 카페, 기타
+// 배달앱 수수료: 업종별 차등 (배달의민족·요기요 평균 중개수수료율 10% 기준)
+const DELIVERY_RATES: Record<number, number> = {
+  1: 0.10,   // 치킨: 10%
+  5: 0.10,   // 분식: 10%
+  8: 0.10,   // 피자: 10%
+  2: 0.01,   // 카페: 1% (전체 주문 중 10%가 배달 가정)
+  6: 0.033,  // 한식: 3.3% (전체 주문 중 1/3이 배달 가정)
+};
+
+// 기타비용률 (매출 대비, 배달수수료 제외)
+// 외식: 기타 7.0% - 배달 1.2% ≈ 6% (외식업체 경영실태조사 2024, KREI 2025년 제6호 p.2)
+// 소매: 도소매업 기타 7.7% (소상공인실태조사 2023 p.89), 배달 없으므로 6%로 보수적 적용
+// 서비스/카페: 외식업과 유사 구조, 6% 적용 (직접 출처 없음, 추정)
+export function getMiscCostRate(_category: string): number {
+  return 0.06;
 }
 
 // 3-C: operating days by business type
@@ -44,7 +51,11 @@ export function resolveBusinessParams(inputs: SimulatorInputs): ResolvedParams {
 
   // Override chain: user override > business_type default
   const avg_ticket_price = inputs.ticket_price_override ?? bt.avg_ticket_price;
-  const material_cost_ratio = inputs.material_cost_ratio_override ?? bt.material_cost_ratio;
+  // 재료비율: 기본값에 10% 가산 (소상공인 보수적 추정, 소규모 매장은 대형 대비 구매단가 불리)
+  const baseCostRatio = inputs.material_cost_ratio_override ?? bt.material_cost_ratio;
+  const material_cost_ratio = inputs.material_cost_ratio_override != null
+    ? baseCostRatio
+    : Math.min(baseCostRatio * 1.10, 0.95);
 
   const avg_daily_customers_small = bt.avg_daily_customers_small;
   const avg_daily_customers_medium = bt.avg_daily_customers_medium;
@@ -90,7 +101,7 @@ export function calcDailyPnL(inputs: SimulatorInputs): DailyPnL {
 export function calcMonthlyPnL(inputs: SimulatorInputs): MonthlyPnL {
   const { business_type: bt, capital } = inputs;
   const params = resolveBusinessParams(inputs);
-  const operatingDays = getOperatingDays(bt.id);
+  const operatingDays = inputs.operating_days ?? getOperatingDays(bt.id);
 
   const daily = calcDailyPnL(inputs);
   const revenue = daily.daily_revenue * operatingDays;
@@ -101,39 +112,41 @@ export function calcMonthlyPnL(inputs: SimulatorInputs): MonthlyPnL {
   const labor = bt.labor_cost_monthly_per_person * laborHeadcount;
   const rent = inputs.rent_monthly ?? 0;
 
-  // Cost breakdown from costItems (공과금, 배달앱수수료)
-  const breakdown = getCostBreakdown(bt.id);
-  const utilities = breakdown.utilities;
-  const delivery_commission = breakdown.delivery;
+  const deliveryRate = DELIVERY_RATES[bt.id] ?? 0;
+  const delivery_commission = deliveryRate > 0
+    ? Math.round(revenue * deliveryRate)
+    : 0;
 
-  // 기타고정비: 매출 대비 비율 (소상공인실태조사 2023 기준)
+  // 기타 영업비용: 매출 대비 비율 (공과금, 보험료, 소모품비 등 포함)
+  // 외식: 기타 7.0% - 배달 1.2% ≈ 6% (외식업체 경영실태조사 2024, KREI p.2)
   const miscRate = getMiscCostRate(bt.category);
-  const other_fixed = Math.round(revenue * miscRate);
+  const misc_operating = Math.round(revenue * miscRate);
 
-  // 3-D: 프랜차이즈 수수료 (변동비 — 매출 연동)
+  // 프랜차이즈 수수료 (변동비 — 매출 연동)
   const royalty = Math.round(revenue * params.franchise_royalty_rate);
   const advertising_fund = Math.round(revenue * params.franchise_ad_rate);
   const other_franchise_fees = Math.round(revenue * params.franchise_other_rate);
 
-  // 예비비: 제거 (별도 버퍼로 산정하지 않음)
   const contingency = 0;
 
-  const sg_and_a = labor + rent + utilities + delivery_commission + other_fixed + royalty + advertising_fund + other_franchise_fees;
-  const sga_detail: SGADetail = { labor, labor_headcount: laborHeadcount, rent, utilities, delivery_commission, other_fixed, royalty, advertising_fund, other_franchise_fees, contingency };
+  const sg_and_a = labor + rent + delivery_commission + misc_operating + royalty + advertising_fund + other_franchise_fees;
+  const sga_detail: SGADetail = { labor, labor_headcount: laborHeadcount, rent, delivery_commission, misc_operating, misc_rate: miscRate, royalty, advertising_fund, other_franchise_fees, contingency };
 
   const operating_profit = gross_profit - sg_and_a;
   const debt = getDebt(capital);
   const interest_expense = debt > 0 ? Math.round(debt * capital.interest_rate / 12) : 0;
   const pretax_income = operating_profit - interest_expense;
+  // 부가세: (매출총이익) × 10/110 (B2C 업종, 일반과세자 기준)
+  const vat = Math.round(gross_profit * 10 / 110);
   const tax = calcTotalTax(pretax_income);
-  const net_income = pretax_income - tax;
+  const net_income = pretax_income - vat - tax;
   const loanMonths = Math.max(1, capital.loan_term_years * 12);
   const principal_repayment = debt > 0 ? Math.round(debt / loanMonths) : 0;
   const free_cash_flow = net_income - principal_repayment;
 
   return {
     revenue, cogs, gross_profit, sg_and_a, sga_detail, operating_profit,
-    interest_expense, pretax_income, tax, net_income,
+    interest_expense, pretax_income, vat, tax, net_income,
     principal_repayment, free_cash_flow,
   };
 }
@@ -142,16 +155,18 @@ export function generateAnnotations(inputs: SimulatorInputs): PnLAnnotation {
   const { business_type: bt, capital } = inputs;
   const params = resolveBusinessParams(inputs);
   const dailyCustomers = getDailyCustomers(inputs, params);
-  const operatingDays = getOperatingDays(bt.id);
+  const operatingDays = inputs.operating_days ?? getOperatingDays(bt.id);
   const laborHeadcount = inputs.labor_headcount ?? 1;
   const debt = getDebt(capital);
   const costRatioPercent = Math.round(params.material_cost_ratio * 100);
-  const breakdown = getCostBreakdown(bt.id);
+  const dRate = DELIVERY_RATES[bt.id] ?? 0;
 
   return {
     revenue: `객단가 ${params.avg_ticket_price.toLocaleString()}원 × 일 ${dailyCustomers}명 × ${operatingDays}일`,
-    cogs: `재료비율 ${costRatioPercent}% 적용 (업종 평균 추정치, 외식산업실태조사, 소상공인실태조사 등 참고)`,
-    sga: `인건비 ${laborHeadcount}명 × ${(bt.labor_cost_monthly_per_person / 10000).toFixed(0)}만원 + 공과금 ${(breakdown.utilities / 10000).toFixed(0)}만원 + 배달수수료 ${(breakdown.delivery / 10000).toFixed(0)}만원 + 기타고정비 매출의 ${(getMiscCostRate(bt.category) * 100).toFixed(0)}%${inputs.selected_brand && (params.franchise_royalty_rate > 0 || params.franchise_ad_rate > 0) ? ` + 상표사용료 ${(params.franchise_royalty_rate * 100).toFixed(1)}% + 광고분담금 ${(params.franchise_ad_rate * 100).toFixed(1)}%` : ''}`,
+    cogs: bt.id === 3
+      ? `상품 원가·본사 수수료 등 ${costRatioPercent}% 적용 (업종 평균 추정치)`
+      : `재료비율 ${costRatioPercent}% 적용 (업종 평균 추정치, 외식산업실태조사, 소상공인실태조사 등 참고)`,
+    sga: `인건비 ${laborHeadcount}명 × ${(bt.labor_cost_monthly_per_person / 10000).toFixed(0)}만원${dRate > 0 ? ` + 배달수수료 매출의 ${(dRate * 100).toFixed(dRate < 0.05 ? 1 : 0)}%` : ''} + 기타영업비용 매출의 ${(getMiscCostRate(bt.category) * 100).toFixed(0)}%${inputs.selected_brand && (params.franchise_royalty_rate > 0 || params.franchise_ad_rate > 0) ? ` + 상표사용료 ${(params.franchise_royalty_rate * 100).toFixed(1)}% + 광고분담금 ${(params.franchise_ad_rate * 100).toFixed(1)}%` : ''}`,
     interest: debt > 0
       ? `대출 ${(debt / 10000).toLocaleString()}만원 × 연 ${(capital.interest_rate * 100).toFixed(1)}% ÷ 12 (초월 기준, 상환 시 점차 감소)`
       : '대출 없음',
@@ -184,7 +199,7 @@ export function calcPayback(inputs: SimulatorInputs): PaybackResult {
   const { gross_profit, sg_and_a } = calcMonthlyPnL(inputs);
   const operating_profit = gross_profit - sg_and_a;
 
-  for (let month = 1; month <= 60; month++) {
+  for (let month = 1; month <= 120; month++) {
     const interestThisMonth = remainingDebt > 0
       ? Math.round(remainingDebt * capital.interest_rate / 12)
       : 0;
@@ -237,28 +252,29 @@ export function calcScenarioMonthlyPnL(inputs: SimulatorInputs, scenario: Scenar
 
   // 매출 연동 비용은 시나리오 매출 기준으로 재계산
   const miscRate = getMiscCostRate(bt.category);
-  const other_fixed = Math.round(revenue * miscRate);
+  const misc_operating = Math.round(revenue * miscRate);
   const royalty = Math.round(revenue * params.franchise_royalty_rate);
   const advertising_fund = Math.round(revenue * params.franchise_ad_rate);
   const other_franchise_fees = Math.round(revenue * params.franchise_other_rate);
 
   // 고정비는 기본 PnL에서 가져옴
-  const { labor, labor_headcount, rent, utilities, delivery_commission, contingency } = basePnl.sga_detail;
+  const { labor, labor_headcount, rent, delivery_commission, contingency } = basePnl.sga_detail;
 
-  const sg_and_a = labor + rent + utilities + delivery_commission + other_fixed + royalty + advertising_fund + other_franchise_fees;
-  const sga_detail: SGADetail = { labor, labor_headcount, rent, utilities, delivery_commission, other_fixed, royalty, advertising_fund, other_franchise_fees, contingency };
+  const sg_and_a = labor + rent + delivery_commission + misc_operating + royalty + advertising_fund + other_franchise_fees;
+  const sga_detail: SGADetail = { labor, labor_headcount, rent, delivery_commission, misc_operating, misc_rate: miscRate, royalty, advertising_fund, other_franchise_fees, contingency };
 
   const operating_profit = gross_profit - sg_and_a;
   const interest_expense = basePnl.interest_expense;
   const pretax_income = operating_profit - interest_expense;
+  const vat = Math.round(gross_profit * 10 / 110);
   const tax = calcTotalTax(pretax_income);
-  const net_income = pretax_income - tax;
+  const net_income = pretax_income - vat - tax;
   const principal_repayment = basePnl.principal_repayment;
   const free_cash_flow = net_income - principal_repayment;
 
   return {
     revenue, cogs, gross_profit, sg_and_a, sga_detail, operating_profit,
-    interest_expense, pretax_income, tax, net_income,
+    interest_expense, pretax_income, vat, tax, net_income,
     principal_repayment, free_cash_flow,
   };
 }
@@ -286,26 +302,27 @@ export function calcScenarioPayback(inputs: SimulatorInputs, scenario: ScenarioT
 
   // 매출 연동 비용 재계산
   const miscRate = getMiscCostRate(bt.category);
-  const scenarioOtherFixed = Math.round(scenarioRevenue * miscRate);
+  const scenarioMiscOperating = Math.round(scenarioRevenue * miscRate);
   const scenarioRoyalty = Math.round(scenarioRevenue * params.franchise_royalty_rate);
   const scenarioAdFund = Math.round(scenarioRevenue * params.franchise_ad_rate);
   const scenarioOtherFranchise = Math.round(scenarioRevenue * params.franchise_other_rate);
-  const { labor, rent, utilities, delivery_commission } = basePnl.sga_detail;
-  const scenarioSGA = labor + rent + utilities + delivery_commission + scenarioOtherFixed + scenarioRoyalty + scenarioAdFund + scenarioOtherFranchise;
+  const { labor, rent, delivery_commission } = basePnl.sga_detail;
+  const scenarioSGA = labor + rent + delivery_commission + scenarioMiscOperating + scenarioRoyalty + scenarioAdFund + scenarioOtherFranchise;
   const operating_profit = scenarioGrossProfit - scenarioSGA;
+  const scenarioVat = Math.round(scenarioGrossProfit * 10 / 110);
 
   let remainingDebt = debt;
   let cumulative = -paybackInvestment;
   const cumulative_cashflow: { month: number; value: number }[] = [];
   let payback_months: number | null = null;
 
-  for (let month = 1; month <= 60; month++) {
+  for (let month = 1; month <= 120; month++) {
     const interestThisMonth = remainingDebt > 0
       ? Math.round(remainingDebt * capital.interest_rate / 12)
       : 0;
     const pretax_income = operating_profit - interestThisMonth;
     const tax = calcTotalTax(pretax_income);
-    const net_income = pretax_income - tax;
+    const net_income = pretax_income - scenarioVat - tax;
     const monthlyFCF = net_income - (month <= totalMonths ? principalPerMonth : 0);
 
     cumulative += monthlyFCF;

@@ -329,61 +329,78 @@
   transform: scale(1.15);
 }
 
-/* ─── Summary screen (inside TossTransition pattern) ──── */
+/* ─── Summary screen (Toss transition pattern) ──── */
 
 .summaryScreen {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 60vh;
-  padding: var(--spacing-xl) var(--spacing-page);
-}
-
-.summaryContent {
-  display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-lg);
-  width: 100%;
-  max-width: 320px;
-  text-align: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: var(--spacing-xl) var(--spacing-page);
+  position: relative;
 }
 
 .summaryEmoji {
-  font-size: 64px;
+  font-size: 72px;
   line-height: 1;
-  animation: emojiPop 400ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+  transition: transform 600ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  transform: translateY(0);
 }
 
-@keyframes emojiPop {
-  from { transform: scale(0.7); opacity: 0; }
-  to   { transform: scale(1);   opacity: 1; }
+.summaryEmojiUp {
+  transform: translateY(-48px);
+}
+
+.summaryFadeIn {
+  animation: summaryFadeIn 500ms cubic-bezier(0.25, 0.1, 0.25, 1) both;
+}
+
+@keyframes summaryFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .summaryTextBlock {
-  animation: slideUp 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: 500ms;
+  text-align: center;
+  will-change: transform, opacity;
 }
 
-@keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
+.summarySlideUp {
+  animation: summarySlideUp 700ms cubic-bezier(0.25, 0.1, 0.25, 1) both;
+}
+
+@keyframes summarySlideUp {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.summaryTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin: 0 0 2px;
 }
 
 .summaryMessage {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 800;
   color: var(--color-text);
-  line-height: 1.55;
+  line-height: 1.45;
   margin: 0;
   word-break: keep-all;
   white-space: pre-line;
+  letter-spacing: -0.3px;
 }
 
 .summaryBtnWrap {
-  width: 100%;
-  animation: slideUp 400ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: 700ms;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px var(--spacing-page) 60px;
+  will-change: transform, opacity;
 }
 
 /* ─── Next button (reuse from WizardSteps) ────────────── */
@@ -440,4 +457,184 @@
 .dotActive {
   background: var(--color-primary);
   transform: scale(1.25);
+}
+
+/* ─── Day toggle busy (orange for Q3) ────────────────── */
+
+.dayToggleBusy {
+  border-color: #FF6B35;
+  background: #FFF3ED;
+  color: #FF6B35;
+  font-weight: 700;
+}
+
+/* ─── Day category header (emoji + title) ────────────── */
+
+.dayCategoryHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dayCategoryEmoji {
+  font-size: 20px;
+  line-height: 1;
+}
+
+/* ─── Preset buttons ─────────────────────────────────── */
+
+.presetRow {
+  display: flex;
+  gap: 8px;
+}
+
+.presetBtn {
+  flex: 1;
+  padding: 12px 0;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.presetBtn:active {
+  transform: scale(0.97);
+}
+
+.presetBtnActive {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* ─── Big number display ─────────────────────────────── */
+
+.bigNumberWrap {
+  text-align: center;
+}
+
+.bigNumber {
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -1px;
+}
+
+.bigUnit {
+  font-size: 18px;
+  color: var(--color-text-secondary);
+  margin-left: 4px;
+}
+
+/* ─── Visitor slider ─────────────────────────────────── */
+
+.visitorSliderWrap {
+  padding: 0 4px;
+}
+
+/* ─── Reality check card ─────────────────────────────── */
+
+.realityCard {
+  background: var(--color-bg, #F8FAFB);
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+}
+
+.realityHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.realityIcon {
+  width: 32px;
+  height: 32px;
+  background: var(--color-primary-light);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.realityTitle {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.realityBig {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.realityGreen { color: #00C471; }
+.realityBlue { color: var(--color-primary); }
+.realityOrange { color: #FF8A00; }
+.realityRed { color: #F04452; }
+
+.realityDesc {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.realityLabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin: 8px 0 0;
+  font-weight: 500;
+}
+
+/* ─── Capacity bar ───────────────────────────────────── */
+
+.capacityBarWrap {
+  margin-top: 14px;
+}
+
+.capacityLabelRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+}
+
+.capacityBar {
+  height: 8px;
+  background: var(--color-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.capacityFill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s, background 0.3s;
+}
+
+.capacityFill.realityGreen { background: #00C471; }
+.capacityFill.realityBlue { background: var(--color-primary); }
+.capacityFill.realityOrange { background: #FF8A00; }
+.capacityFill.realityRed { background: #F04452; }
+
+/* ─── Summary breakdown ─────────────────────────────── */
+
+.summaryBreakdown {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin: 4px 0 0;
+  word-break: keep-all;
+  white-space: pre-line;
 }

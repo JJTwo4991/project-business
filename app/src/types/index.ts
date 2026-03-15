@@ -71,9 +71,9 @@ export interface CapitalStructure {
 export interface RentGuide {
   id: number;
   sido: string;
-  sigungu: string;
+  region: string;
+  sangkwon: string;
   rent_per_sqm: number;
-  deposit_per_sqm: number | null;
   data_quarter: string | null;
 }
 
@@ -82,12 +82,13 @@ export interface SimulatorInputs {
   scale: BusinessScale;
   capital: CapitalStructure;
   daily_customers_override?: number;
+  operating_days?: number;          // 월 영업일수 (사용자 선택)
   ticket_price_override?: number;
   rent_monthly?: number;
   labor_headcount?: number;
   discount_rate?: number;
   growth_rate?: number;
-  region?: { sido: string; sigungu: string; rent_per_sqm: number };
+  region?: { sido: string; sangkwon: string; rent_per_sqm: number };
   material_cost_ratio_override?: number;
   misc_fixed_cost_override?: number;
   rent_deposit?: number;
@@ -104,13 +105,13 @@ export interface SGADetail {
   labor: number;
   labor_headcount: number;
   rent: number;
-  utilities: number;            // 공과금 (고정비)
   delivery_commission: number;  // 배달앱수수료 (변동비)
-  other_fixed: number;          // 소모품/보험 등 (고정비)
+  misc_operating: number;       // 기타 영업비용 (공과금, 보험료, 소모품비 등)
+  misc_rate: number;            // 기타 영업비용 비율 (매출 대비)
   royalty: number;              // 상표사용료 (변동비)
   advertising_fund: number;     // 광고분담금 (변동비)
   other_franchise_fees: number; // 기타 프랜차이즈 수수료 (변동비)
-  contingency: number;          // 예비비 (월 매출의 5%)
+  contingency: number;          // 예비비
 }
 
 export interface MonthlyPnL {
@@ -122,7 +123,8 @@ export interface MonthlyPnL {
   operating_profit: number;
   interest_expense: number;
   pretax_income: number;
-  tax: number;
+  vat: number;                  // 부가세 납부액 (매출총이익 × 10/110)
+  tax: number;                  // 종합소득세 + 지방소득세
   net_income: number;
   principal_repayment: number;
   free_cash_flow: number;
@@ -158,7 +160,7 @@ export interface SimulationResult {
   dcf: DCFResult;
 }
 
-export type StepId = 'select-industry' | 'select-scale' |
+export type StepId = 'select-industry' | 'industry-transition' | 'select-scale' |
   'investment-breakdown' | 'select-region' | 'set-investment' | 'set-loan' |
   'transition-operating' | 'set-customers' | 'set-ticket' | 'set-labor' | 'set-rent' | 'confirm' |
   'result-daily' | 'result-monthly' | 'result-payback' | 'set-misc' | 'result-dcf';

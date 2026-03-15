@@ -1,6 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import styles from './SliderInput.module.css';
 
+interface InputUnit {
+  divisor: number;
+  label: string;
+}
+
 interface Props {
   label: string;
   value: number;
@@ -11,9 +16,11 @@ interface Props {
   onChange: (v: number) => void;
   disabled?: boolean;
   referenceValue?: number;
+  /** 직접 입력 시 단위 (예: { divisor: 1_000_000, label: '백만원' }) */
+  inputUnit?: InputUnit;
 }
 
-export function SliderInput({ label, value, min: minProp, max: maxProp, step, format, onChange, disabled, referenceValue }: Props) {
+export function SliderInput({ label, value, min: minProp, max: maxProp, step, format, onChange, disabled, referenceValue, inputUnit }: Props) {
   const [editing, setEditing] = useState(false);
   const [inputText, setInputText] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -35,14 +42,21 @@ export function SliderInput({ label, value, min: minProp, max: maxProp, step, fo
 
   function startEditing() {
     if (disabled) return;
-    setInputText(String(value));
+    if (inputUnit) {
+      setInputText(String(Math.round(value / inputUnit.divisor)));
+    } else {
+      setInputText(String(value));
+    }
     setEditing(true);
   }
 
   function commitEdit() {
     const parsed = Number(inputText.replace(/,/g, ''));
     if (!Number.isNaN(parsed)) {
-      onChange(parsed);
+      let final = inputUnit ? parsed * inputUnit.divisor : parsed;
+      // step이 정수면 결과도 정수로 반올림 (직원 수 등)
+      if (step >= 1 && Number.isInteger(step)) final = Math.round(final);
+      onChange(final);
     }
     setEditing(false);
   }
@@ -57,16 +71,22 @@ export function SliderInput({ label, value, min: minProp, max: maxProp, step, fo
       <div className={styles.header}>
         <span className={styles.label}>{label}</span>
         {editing ? (
-          <input
-            ref={inputRef}
-            type="text"
-            inputMode="numeric"
-            className={styles.valueInput}
-            value={inputText}
-            onChange={e => setInputText(e.target.value)}
-            onBlur={commitEdit}
-            onKeyDown={handleKeyDown}
-          />
+          <span className={styles.editGroup}>
+            <input
+              ref={inputRef}
+              type="text"
+              inputMode="numeric"
+              className={styles.valueInput}
+              value={inputText}
+              onChange={e => setInputText(e.target.value)}
+              onBlur={commitEdit}
+              onKeyDown={handleKeyDown}
+            />
+            {inputUnit && <span className={styles.unitLabel}>{inputUnit.label}</span>}
+            {inputUnit && inputText && !Number.isNaN(Number(inputText.replace(/,/g, ''))) && (
+              <span className={styles.unitPreview}>= {format(Number(inputText.replace(/,/g, '')) * inputUnit.divisor)}</span>
+            )}
+          </span>
         ) : (
           <span
             className={`${styles.value} ${isOverflow ? styles.valueOverflow : ''} ${disabled ? '' : styles.valueClickable}`}

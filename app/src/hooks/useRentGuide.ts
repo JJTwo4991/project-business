@@ -7,8 +7,9 @@ interface UseRentGuideResult {
   loading: boolean;
   error: string | null;
   sidos: string[];
-  getSigungus: (sido: string) => string[];
-  getRent: (sido: string, sigungu: string) => RentGuide | undefined;
+  getRegions: (sido: string) => string[];
+  getSangkwons: (sido: string, region: string) => string[];
+  getRent: (sido: string, sangkwon: string) => RentGuide | undefined;
 }
 
 export function useRentGuide(): UseRentGuideResult {
@@ -28,15 +29,20 @@ export function useRentGuide(): UseRentGuideResult {
     [rentGuides]
   );
 
-  const getSigungus = useCallback((sido: string) =>
-    rentGuides.filter(r => r.sido === sido).map(r => r.sigungu).sort(),
+  const getRegions = useCallback((sido: string) =>
+    [...new Set(rentGuides.filter(r => r.sido === sido).map(r => r.region))].sort(),
     [rentGuides]
   );
 
-  const getRent = useCallback((sido: string, sigungu: string) =>
-    rentGuides.find(r => r.sido === sido && r.sigungu === sigungu),
+  const getSangkwons = useCallback((sido: string, region: string) =>
+    rentGuides.filter(r => r.sido === sido && r.region === region).map(r => r.sangkwon).sort(),
     [rentGuides]
   );
 
-  return { rentGuides, loading, error, sidos, getSigungus, getRent };
+  const getRent = useCallback((sido: string, sangkwon: string) =>
+    rentGuides.find(r => r.sido === sido && r.sangkwon === sangkwon),
+    [rentGuides]
+  );
+
+  return { rentGuides, loading, error, sidos, getRegions, getSangkwons, getRent };
 }
