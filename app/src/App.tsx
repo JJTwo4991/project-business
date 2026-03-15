@@ -41,6 +41,7 @@ import { UI_ICONS } from './assets/icons';
 import { TossNavBar } from './components/TossNavBar/TossNavBar';
 import { useRecentSimulations } from './hooks/useRecentSimulations';
 import type { SavedSimulation } from './hooks/useRecentSimulations';
+import { useFullScreenAd } from './hooks/useFullScreenAd';
 
 /** 토스 WebView 환경 감지 (토스 앱 내 미니앱으로 실행 중인지) */
 const isTossWebView = /TossApp/i.test(navigator.userAgent);
@@ -51,6 +52,7 @@ export default function App() {
   const rentGuide = useRentGuide();
   const nav = useStepNavigation();
   const recentSims = useRecentSimulations();
+  const ad = useFullScreenAd();
 
   const handleSelectBusiness = useCallback((bt: BusinessType) => {
     simulator.setBusinessType(bt);
@@ -85,10 +87,12 @@ export default function App() {
     }
   }, [simulator.result, recentSims]);
 
-  const handleCalculate = useCallback(() => {
+  const handleCalculate = useCallback(async () => {
     simulator.calculate();
+    // 광고가 준비됐으면 보여주고, 아니면 바로 결과로
+    await ad.showAd();
     nav.goTo('result-daily');
-  }, [simulator, nav]);
+  }, [simulator, nav, ad]);
 
   const handleRestoreSimulation = useCallback((item: SavedSimulation) => {
     simulator.restoreResult(item.result);

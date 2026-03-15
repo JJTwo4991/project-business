@@ -375,6 +375,14 @@
   color: #92650A;
 }
 
+/* Banner Ad */
+.bannerAd {
+  margin-top: var(--spacing-lg);
+  min-height: 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
 /* DCF note */
 .dcfNote {
   font-size: var(--font-size-xs);

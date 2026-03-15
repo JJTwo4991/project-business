@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import styles from './ResultPage.module.css';
 import { CashFlowChart } from '../../components/CashFlowChart/CashFlowChart';
 import { PnLDisplay } from '../../components/PnLDisplay/PnLDisplay';
@@ -11,6 +11,7 @@ import {
   resolveBusinessParams,
   type ScenarioType,
 } from '../../lib/calculator';
+import { useFullScreenAd } from '../../hooks/useFullScreenAd';
 
 type ResultView = 'result-daily' | 'result-monthly' | 'result-payback' | 'result-dcf';
 
@@ -126,11 +127,66 @@ function DisclaimerSection() {
   );
 }
 
+const BANNER_AD_GROUP_ID = 'ait-ad-test-banner-id';
+
+function BannerAdSlot() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const bannerRef = useRef<{ destroy: () => void } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function init() {
+      try {
+        const { TossAds } = await import('@apps-in-toss/web-framework');
+        if (cancelled || !TossAds?.initialize?.isSupported?.() || !containerRef.current) return;
+
+        TossAds.initialize({
+          callbacks: {
+            onInitialized: () => {
+              if (cancelled || !containerRef.current) return;
+              bannerRef.current = TossAds.attachBanner(
+                BANNER_AD_GROUP_ID,
+                containerRef.current,
+                {
+                  theme: 'light',
+                  variant: 'card',
+                  callbacks: {
+                    onAdRendered: () => {},
+                    onNoFill: () => {},
+                  },
+                },
+              );
+            },
+            onInitializationFailed: () => {},
+          },
+        });
+      } catch {
+        // 미지원 환경
+      }
+    }
+
+    init();
+    return () => {
+      cancelled = true;
+      bannerRef.current?.destroy();
+    };
+  }, []);
+
+  return <div ref={containerRef} className={styles.bannerAd} />;
+}
+
 export function ResultPage({ result, view, onBack, onNext, onGoTo }: Props) {
   const { annotations, payback, dcf, inputs } = result;
   const [scenario, setScenario] = useState<ScenarioType>('base');
   const cogsLabel = inputs.business_type.id === 3 ? '상품 원가' : undefined;
   const materialCostRatio = resolveBusinessParams(inputs).material_cost_ratio;
+  const ad = useFullScreenAd();
+
+  const handleEdit = useCallback(async () => {
+    await ad.showAd();
+    onGoTo('confirm');
+  }, [ad, onGoTo]);
 
   const isLastResult = view === 'result-dcf';
 
@@ -177,7 +233,7 @@ export function ResultPage({ result, view, onBack, onNext, onGoTo }: Props) {
             />
             <button
               className={styles.editBtn}
-              onClick={() => onGoTo('confirm')}
+              onClick={handleEdit}
             >
               수정하기
             </button>
@@ -235,6 +291,7 @@ export function ResultPage({ result, view, onBack, onNext, onGoTo }: Props) {
           </div>
         )}
 
+        <BannerAdSlot />
         <DisclaimerSection />
         <DataSourcesSection businessType={inputs.business_type} />
       </div>
