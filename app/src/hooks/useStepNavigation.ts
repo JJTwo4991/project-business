@@ -80,13 +80,15 @@ export function useStepNavigation(): UseStepNavigationResult {
     setCurrentStep(step);
   }, []);
 
-  // Android 뒤로가기 버튼 → 이전 단계로 이동
+  // Android 뒤로가기 버튼 / 토스 네이티브 뒤로가기 → 이전 단계로 이동
   useEffect(() => {
     const handlePopState = () => {
       const idx = activeSteps.indexOf(currentStep);
       if (idx > 0) {
         setCurrentStep(activeSteps[idx - 1]);
       }
+      // 히스토리 스택 보충 — 다음 뒤로가기에서 앱 종료 방지
+      history.pushState({ step: '_guard' }, '', '');
     };
     window.addEventListener('popstate', handlePopState);
     // 초기 히스토리 엔트리 추가 (첫 뒤로가기에서 앱 종료 방지)

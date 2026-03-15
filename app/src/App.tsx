@@ -289,7 +289,7 @@ export default function App() {
       )}
       {!nav.isFirstStep && !editReturnStep && (
         <header className={styles.header}>
-          {!nav.isResultStep && !isTossWebView && (
+          {!nav.isResultStep && (
             <button className={styles.backBtn} onClick={nav.goBack} aria-label="뒤로">
               ←
             </button>
