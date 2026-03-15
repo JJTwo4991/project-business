@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calcMonthlyPnL, calcPayback, calcDCF, runSimulation, calcDailyPnL, generateAnnotations, resolveBusinessParams } from '../src/lib/calculator';
+import { calcMonthlyPnL, calcPayback, calcDCF, runSimulation, calcDailyPnL, generateAnnotations } from '../src/lib/calculator';
 import type { BusinessType, CapitalStructure, SimulatorInputs } from '../src/types';
 
 const mockBusiness: BusinessType = {
@@ -20,9 +20,6 @@ const mockBusiness: BusinessType = {
   initial_investment_large: 80_000_000,
   avg_monthly_revenue_min: 10_000_000,
   avg_monthly_revenue_max: 30_000_000,
-  closure_rate_1yr: 0.2,
-  closure_rate_3yr: 0.5,
-  closure_rate_5yr: 0.7,
   data_sources: [],
 };
 
@@ -50,9 +47,10 @@ describe('calcMonthlyPnL', () => {
     expect(pnl.revenue).toBe(expectedRevenue);
   });
 
-  it('매출원가 = 매출 × 재료비비율', () => {
+  it('매출원가 = 매출 × 재료비비율 × 1.10 (소상공인 보수적 가산)', () => {
     const pnl = calcMonthlyPnL(mockInputs);
-    const expectedCogs = Math.round(pnl.revenue * 0.35);
+    const adjustedRatio = Math.min(0.35 * 1.10, 0.95);
+    const expectedCogs = Math.round(pnl.revenue * adjustedRatio);
     expect(pnl.cogs).toBe(expectedCogs);
   });
 
@@ -61,10 +59,10 @@ describe('calcMonthlyPnL', () => {
     expect(pnl.gross_profit).toBe(pnl.revenue - pnl.cogs);
   });
 
-  it('판매관리비 = 인건비 + 임대료 + 공과금 + 배달수수료 + 기타고정비 + 프랜차이즈수수료 + 예비비', () => {
+  it('판매관리비 = 인건비 + 임대료 + 배달수수료 + 기타영업비용 + 프랜차이즈수수료', () => {
     const pnl = calcMonthlyPnL(mockInputs);
-    const { labor, rent, utilities, delivery_commission, other_fixed, royalty, advertising_fund, other_franchise_fees, contingency } = pnl.sga_detail;
-    expect(pnl.sg_and_a).toBe(labor + rent + utilities + delivery_commission + other_fixed + royalty + advertising_fund + other_franchise_fees + contingency);
+    const { labor, rent, delivery_commission, misc_operating, royalty, advertising_fund, other_franchise_fees } = pnl.sga_detail;
+    expect(pnl.sg_and_a).toBe(labor + rent + delivery_commission + misc_operating + royalty + advertising_fund + other_franchise_fees);
   });
 
   it('영업이익 = 매출총이익 - 판관비', () => {
@@ -84,9 +82,14 @@ describe('calcMonthlyPnL', () => {
     expect(pnl.pretax_income).toBe(pnl.operating_profit - pnl.interest_expense);
   });
 
-  it('세후이익 = 세전이익 - 세금', () => {
+  it('세후이익 = 세전이익 - 부가세 - 종합소득세', () => {
     const pnl = calcMonthlyPnL(mockInputs);
-    expect(pnl.net_income).toBe(pnl.pretax_income - pnl.tax);
+    expect(pnl.net_income).toBe(pnl.pretax_income - pnl.vat - pnl.tax);
+  });
+
+  it('부가세 = 매출총이익 × 10/110', () => {
+    const pnl = calcMonthlyPnL(mockInputs);
+    expect(pnl.vat).toBe(Math.round(pnl.gross_profit * 10 / 110));
   });
 
   it('원금상환 = 대출금 / (기간년 × 12)', () => {
@@ -113,9 +116,9 @@ describe('calcMonthlyPnL', () => {
 });
 
 describe('calcPayback', () => {
-  it('60개월 누적 현금흐름 배열 반환', () => {
+  it('120개월 누적 현금흐름 배열 반환', () => {
     const result = calcPayback(mockInputs);
-    expect(result.cumulative_cashflow).toHaveLength(60);
+    expect(result.cumulative_cashflow).toHaveLength(120);
   });
 
   it('첫 번째 달의 누적 = 초기투자금의 음수 + 첫달 현금흐름', () => {
@@ -127,7 +130,7 @@ describe('calcPayback', () => {
 
   it('매월 이자 감소 반영 (잔액 기준)', () => {
     const result = calcPayback(mockInputs);
-    const last = result.cumulative_cashflow[59].value;
+    const last = result.cumulative_cashflow[119].value;
     const first = result.cumulative_cashflow[0].value;
     expect(last).toBeGreaterThan(first);
   });
@@ -173,10 +176,25 @@ describe('runSimulation', () => {
 });
 
 describe('sga_detail', () => {
-  it('sga_detail breaks down all cost components including franchise fees', () => {
+  it('sga_detail breaks down all cost components', () => {
     const pnl = calcMonthlyPnL(mockInputs);
-    const { labor, rent, utilities, delivery_commission, other_fixed, royalty, advertising_fund, other_franchise_fees, contingency } = pnl.sga_detail;
-    expect(labor + rent + utilities + delivery_commission + other_fixed + royalty + advertising_fund + other_franchise_fees + contingency).toBe(pnl.sg_and_a);
+    const { labor, rent, delivery_commission, misc_operating, royalty, advertising_fund, other_franchise_fees } = pnl.sga_detail;
+    expect(labor + rent + delivery_commission + misc_operating + royalty + advertising_fund + other_franchise_fees).toBe(pnl.sg_and_a);
+  });
+
+  it('misc_operating = 매출 × 6%', () => {
+    const pnl = calcMonthlyPnL(mockInputs);
+    expect(pnl.sga_detail.misc_operating).toBe(Math.round(pnl.revenue * 0.06));
+  });
+
+  it('misc_rate = 0.06', () => {
+    const pnl = calcMonthlyPnL(mockInputs);
+    expect(pnl.sga_detail.misc_rate).toBe(0.06);
+  });
+
+  it('delivery_commission = 매출 × 10% (치킨)', () => {
+    const pnl = calcMonthlyPnL(mockInputs);
+    expect(pnl.sga_detail.delivery_commission).toBe(Math.round(pnl.revenue * 0.10));
   });
 
   it('franchise fees are applied when selected_brand has rates', () => {

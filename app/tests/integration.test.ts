@@ -20,9 +20,6 @@ const realBusiness: BusinessType = {
   initial_investment_large: 80_000_000,
   avg_monthly_revenue_min: 10_000_000,
   avg_monthly_revenue_max: 35_000_000,
-  closure_rate_1yr: 0.22,
-  closure_rate_3yr: 0.52,
-  closure_rate_5yr: 0.72,
   data_sources: [],
 };
 
@@ -59,9 +56,9 @@ describe('runSimulation - integration', () => {
     expect(result.pnl.tax).toBeGreaterThanOrEqual(0);
   });
 
-  it('60개월 누적 현금흐름 배열이 반환되어야 한다', () => {
+  it('120개월 누적 현금흐름 배열이 반환되어야 한다', () => {
     const result = runSimulation(inputs);
-    expect(result.payback.cumulative_cashflow).toHaveLength(60);
+    expect(result.payback.cumulative_cashflow).toHaveLength(120);
   });
 
   it('사업체가치는 숫자여야 한다', () => {

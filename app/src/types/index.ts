@@ -18,9 +18,6 @@ export interface BusinessType {
   initial_investment_large: number;
   avg_monthly_revenue_min: number;
   avg_monthly_revenue_max: number;
-  closure_rate_1yr: number;
-  closure_rate_3yr: number;
-  closure_rate_5yr: number;
   survival_rate_3yr?: number;
   data_sources: string[];
 }

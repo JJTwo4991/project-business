@@ -196,8 +196,9 @@ export function calcPayback(inputs: SimulatorInputs): PaybackResult {
   const cumulative_cashflow: { month: number; value: number }[] = [];
   let payback_months: number | null = null;
 
-  const { gross_profit, sg_and_a } = calcMonthlyPnL(inputs);
-  const operating_profit = gross_profit - sg_and_a;
+  const basePnl = calcMonthlyPnL(inputs);
+  const operating_profit = basePnl.gross_profit - basePnl.sg_and_a;
+  const vat = Math.round(basePnl.gross_profit * 10 / 110);
 
   for (let month = 1; month <= 120; month++) {
     const interestThisMonth = remainingDebt > 0
@@ -205,7 +206,7 @@ export function calcPayback(inputs: SimulatorInputs): PaybackResult {
       : 0;
     const pretax_income = operating_profit - interestThisMonth;
     const tax = calcTotalTax(pretax_income);
-    const net_income = pretax_income - tax;
+    const net_income = pretax_income - vat - tax;
     const monthlyFCF = net_income - (month <= totalMonths ? principalPerMonth : 0);
 
     cumulative += monthlyFCF;
@@ -257,8 +258,10 @@ export function calcScenarioMonthlyPnL(inputs: SimulatorInputs, scenario: Scenar
   const advertising_fund = Math.round(revenue * params.franchise_ad_rate);
   const other_franchise_fees = Math.round(revenue * params.franchise_other_rate);
 
-  // 고정비는 기본 PnL에서 가져옴
-  const { labor, labor_headcount, rent, delivery_commission, contingency } = basePnl.sga_detail;
+  // 고정비는 기본 PnL에서 가져옴, 배달수수료는 매출 연동 재계산
+  const { labor, labor_headcount, rent, contingency } = basePnl.sga_detail;
+  const deliveryRate = DELIVERY_RATES[bt.id] ?? 0;
+  const delivery_commission = deliveryRate > 0 ? Math.round(revenue * deliveryRate) : 0;
 
   const sg_and_a = labor + rent + delivery_commission + misc_operating + royalty + advertising_fund + other_franchise_fees;
   const sga_detail: SGADetail = { labor, labor_headcount, rent, delivery_commission, misc_operating, misc_rate: miscRate, royalty, advertising_fund, other_franchise_fees, contingency };
@@ -306,8 +309,10 @@ export function calcScenarioPayback(inputs: SimulatorInputs, scenario: ScenarioT
   const scenarioRoyalty = Math.round(scenarioRevenue * params.franchise_royalty_rate);
   const scenarioAdFund = Math.round(scenarioRevenue * params.franchise_ad_rate);
   const scenarioOtherFranchise = Math.round(scenarioRevenue * params.franchise_other_rate);
-  const { labor, rent, delivery_commission } = basePnl.sga_detail;
-  const scenarioSGA = labor + rent + delivery_commission + scenarioMiscOperating + scenarioRoyalty + scenarioAdFund + scenarioOtherFranchise;
+  const { labor, rent } = basePnl.sga_detail;
+  const scenarioDeliveryRate = DELIVERY_RATES[bt.id] ?? 0;
+  const scenarioDelivery = scenarioDeliveryRate > 0 ? Math.round(scenarioRevenue * scenarioDeliveryRate) : 0;
+  const scenarioSGA = labor + rent + scenarioDelivery + scenarioMiscOperating + scenarioRoyalty + scenarioAdFund + scenarioOtherFranchise;
   const operating_profit = scenarioGrossProfit - scenarioSGA;
   const scenarioVat = Math.round(scenarioGrossProfit * 10 / 110);
 

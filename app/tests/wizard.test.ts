@@ -21,9 +21,6 @@ const mockBusiness: BusinessType = {
   initial_investment_large: 80000000,
   avg_monthly_revenue_min: 10000000,
   avg_monthly_revenue_max: 35000000,
-  closure_rate_1yr: 0.22,
-  closure_rate_3yr: 0.52,
-  closure_rate_5yr: 0.72,
   data_sources: [],
 };
 
@@ -40,7 +37,7 @@ describe('useStepNavigation', () => {
   it('goNext로 다음 스텝 이동', () => {
     const { result } = renderHook(() => useStepNavigation());
     act(() => result.current.goNext());
-    expect(result.current.currentStep).toBe('select-region');
+    expect(result.current.currentStep).toBe('industry-transition');
   });
 
   it('goTo로 특정 스텝 이동', () => {
@@ -51,9 +48,9 @@ describe('useStepNavigation', () => {
 
   it('goBack으로 이전 스텝 이동', () => {
     const { result } = renderHook(() => useStepNavigation());
-    act(() => result.current.goTo('select-scale'));
+    act(() => result.current.goTo('select-region'));
     act(() => result.current.goBack());
-    expect(result.current.currentStep).toBe('select-region');
+    expect(result.current.currentStep).toBe('industry-transition');
   });
 
   it('reset으로 처음으로', () => {

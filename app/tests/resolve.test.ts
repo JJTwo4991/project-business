@@ -20,7 +20,8 @@ describe('resolveBusinessParams', () => {
     };
     const params = resolveBusinessParams(inputs);
     expect(params.avg_ticket_price).toBe(chicken.avg_ticket_price);
-    expect(params.material_cost_ratio).toBe(chicken.material_cost_ratio);
+    // 기본값은 × 1.10 가산
+    expect(params.material_cost_ratio).toBeCloseTo(chicken.material_cost_ratio * 1.10, 4);
   });
 
   it('사용자 오버라이드 > BusinessType 우선순위', () => {
