@@ -56,6 +56,11 @@ export default function App() {
 
   const customBackRef = useRef<(() => boolean) | null>(null);
 
+  // 스텝 전환 시 스크롤을 상단으로 리셋
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [nav.currentStep]);
+
   const handleSelectBusiness = useCallback((bt: BusinessType) => {
     simulator.setBusinessType(bt);
     nav.goTo('industry-transition');

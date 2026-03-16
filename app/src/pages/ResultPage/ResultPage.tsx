@@ -404,7 +404,7 @@ export function ResultPage({ result, view, onBack, onNext, onGoTo }: Props) {
       </div>
 
       {!isLastResult && (
-        <button className={styles.nextBtn} onClick={handleNext}>
+        <button className={styles.nextBtn} onClick={view === 'result-daily' ? onNext : handleNext}>
           {view === 'result-daily' ? '월 손익 확인하기' : view === 'result-monthly' ? '원금 회수기간 계산하기' : view === 'result-payback' ? '사업 가치 계산하기' : '다음'}
         </button>
       )}
