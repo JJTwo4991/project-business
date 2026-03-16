@@ -58,7 +58,11 @@ const INDUSTRY_SUB_TO_BT_ID: Record<string, number> = {
   '세탁': 7,
   '피자': 8,
   '제과': 9, '베이커리': 9,
+  '네일': 11, '이미용': 11,
+  '반찬': 13,
   '무인아이스크림': 14,
+  '주점': 15, '호프': 15, '포차': 15,
+  '무인카페': 16,
 };
 
 function mapIndustrySubToBusinessTypeId(industrySub: string): number | null {
