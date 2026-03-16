@@ -37,21 +37,7 @@ interface UseStepNavigationResult {
 }
 
 export function useStepNavigation(): UseStepNavigationResult {
-  const [currentStep, setCurrentStep] = useState<StepId>(() => {
-    try {
-      const saved = localStorage.getItem(STEP_STORAGE_KEY);
-      if (saved && ALL_STEPS.includes(saved as StepId)) {
-        return saved as StepId;
-      }
-    } catch { /* ignore */ }
-    return 'select-industry';
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(STEP_STORAGE_KEY, currentStep);
-    } catch { /* ignore */ }
-  }, [currentStep]);
+  const [currentStep, setCurrentStep] = useState<StepId>('select-industry');
 
   const activeSteps = useMemo(() => {
     return ALL_STEPS;
