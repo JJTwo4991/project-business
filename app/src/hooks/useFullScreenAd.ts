@@ -4,42 +4,43 @@ import { useEffect, useState, useCallback, useRef } from 'react';
  * 앱인토스 리워드 광고 훅
  *
  * - Toss WebView 환경에서만 동작, 그 외에는 skip
- * - 사전 로딩 → 유저 액션 시 show → dismissed 후 콜백
- * - 공식 API: GoogleAdMob.loadAppsInTossAdMob / GoogleAdMob.showAppsInTossAdMob
+ * - GoogleAdMob API 우선, 없으면 loadFullScreenAd fallback
  */
 
-// 테스트용 adGroupId (개발 중에만 사용, 프로덕션 배포 시 콘솔에서 발급받은 ID로 교체)
 const AD_GROUP_ID_REWARDED = 'ait-ad-test-rewarded-id';
 
+interface AdSDK {
+  load: (params: any) => any;
+  show: (params: any) => any;
+}
+
 interface UseFullScreenAdReturn {
-  /** 광고가 로드되어 보여줄 준비가 됐는지 */
   isReady: boolean;
-  /** 광고 SDK를 지원하는 환경인지 */
   isSupported: boolean;
-  /** 광고 표시. dismissed 되면 resolve, 실패/미지원 시에도 resolve (never reject) */
   showAd: () => Promise<{ rewarded: boolean }>;
 }
 
 export function useFullScreenAd(): UseFullScreenAdReturn {
   const [isReady, setIsReady] = useState(false);
   const [isSupported, setIsSupported] = useState(false);
-  const admobRef = useRef<any>(null);
+  const sdkRef = useRef<AdSDK | null>(null);
+  const readyRef = useRef(false);
 
   const loadAd = useCallback(() => {
-    const GoogleAdMob = admobRef.current;
-    if (!GoogleAdMob) return;
+    const sdk = sdkRef.current;
+    if (!sdk) return;
 
-    const cleanup = GoogleAdMob.loadAppsInTossAdMob({
+    const cleanup = sdk.load({
       options: { adGroupId: AD_GROUP_ID_REWARDED },
       onEvent: (event: { type: string; data?: any }) => {
-        switch (event.type) {
-          case 'loaded':
-            setIsReady(true);
-            cleanup?.();
-            break;
+        if (event.type === 'loaded') {
+          readyRef.current = true;
+          setIsReady(true);
+          cleanup?.();
         }
       },
       onError: () => {
+        readyRef.current = false;
         setIsReady(false);
         cleanup?.();
       },
@@ -54,13 +55,27 @@ export function useFullScreenAd(): UseFullScreenAdReturn {
         const sdk = await import('@apps-in-toss/web-framework');
         if (cancelled) return;
 
-        const GoogleAdMob = sdk.GoogleAdMob;
-        if (!GoogleAdMob?.loadAppsInTossAdMob?.isSupported?.()) return;
-        if (!GoogleAdMob?.showAppsInTossAdMob?.isSupported?.()) return;
+        // 방법 1: GoogleAdMob API (공식 문서)
+        const gam = (sdk as any).GoogleAdMob;
+        if (gam?.loadAppsInTossAdMob?.isSupported?.() && gam?.showAppsInTossAdMob?.isSupported?.()) {
+          sdkRef.current = {
+            load: gam.loadAppsInTossAdMob.bind(gam),
+            show: gam.showAppsInTossAdMob.bind(gam),
+          };
+          setIsSupported(true);
+          loadAd();
+          return;
+        }
 
-        admobRef.current = GoogleAdMob;
-        setIsSupported(true);
-        loadAd();
+        // 방법 2: 통합 SDK API (loadFullScreenAd/showFullScreenAd)
+        const load = (sdk as any).loadFullScreenAd;
+        const show = (sdk as any).showFullScreenAd;
+        if (load?.isSupported?.() && show?.isSupported?.()) {
+          sdkRef.current = { load, show };
+          setIsSupported(true);
+          loadAd();
+          return;
+        }
       } catch {
         // SDK 미지원 환경
       }
@@ -71,18 +86,19 @@ export function useFullScreenAd(): UseFullScreenAdReturn {
   }, [loadAd]);
 
   const showAd = useCallback((): Promise<{ rewarded: boolean }> => {
-    const GoogleAdMob = admobRef.current;
+    const sdk = sdkRef.current;
 
-    if (!GoogleAdMob || !isReady) {
+    if (!sdk || !readyRef.current) {
       return Promise.resolve({ rewarded: false });
     }
 
+    readyRef.current = false;
     setIsReady(false);
 
     return new Promise((resolve) => {
       let rewarded = false;
 
-      GoogleAdMob.showAppsInTossAdMob({
+      sdk.show({
         options: { adGroupId: AD_GROUP_ID_REWARDED },
         onEvent: (event: { type: string; data?: any }) => {
           switch (event.type) {
@@ -105,7 +121,7 @@ export function useFullScreenAd(): UseFullScreenAdReturn {
         },
       });
     });
-  }, [loadAd, isReady]);
+  }, [loadAd]);
 
   return { isReady, isSupported, showAd };
 }
