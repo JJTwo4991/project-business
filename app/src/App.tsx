@@ -54,6 +54,8 @@ export default function App() {
   const recentSims = useRecentSimulations();
   const ad = useFullScreenAd();
 
+  const customBackRef = useRef<(() => boolean) | null>(null);
+
   const handleSelectBusiness = useCallback((bt: BusinessType) => {
     simulator.setBusinessType(bt);
     nav.goTo('industry-transition');
@@ -89,8 +91,9 @@ export default function App() {
 
   const handleCalculate = useCallback(async () => {
     simulator.calculate();
-    // 광고가 준비됐으면 보여주고, 아니면 바로 결과로
-    await ad.showAd();
+    if (ad.isSupported) {
+      await ad.showAd();
+    }
     nav.goTo('result-daily');
   }, [simulator, nav, ad]);
 
@@ -171,6 +174,7 @@ export default function App() {
             onChange={handleInvestmentBreakdownChange}
             onBrandSelect={simulator.setSelectedBrand}
             onNext={effectiveGoNext}
+            registerBackHandler={h => { customBackRef.current = h; }}
           />
         ) : null;
 
@@ -228,6 +232,7 @@ export default function App() {
               simulator.setOverride('operating_days', days);
               effectiveGoNext();
             }}
+            registerBackHandler={h => { customBackRef.current = h; }}
           />
         ) : null;
 
@@ -257,7 +262,7 @@ export default function App() {
 
       case 'set-misc':
         return simulator.inputs ? (
-          <MiscStep inputs={simulator.inputs} onOverride={simulator.setOverride} onNext={nav.goNext} />
+          <MiscStep inputs={simulator.inputs} onOverride={simulator.setOverride} onNext={() => { simulator.calculate(); nav.goTo('result-dcf'); }} registerBackHandler={h => { customBackRef.current = h; }} />
         ) : null;
 
       case 'result-daily':
@@ -289,8 +294,11 @@ export default function App() {
       )}
       {!nav.isFirstStep && !editReturnStep && (
         <header className={styles.header}>
-          {!nav.isResultStep && (
-            <button className={styles.backBtn} onClick={nav.goBack} aria-label="뒤로">
+          {(!nav.isResultStep || nav.currentStep === 'set-misc') && (
+            <button className={styles.backBtn} onClick={() => {
+              if (customBackRef.current?.()) return;
+              nav.goBack();
+            }} aria-label="뒤로">
               ←
             </button>
           )}

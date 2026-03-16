@@ -17,6 +17,9 @@ const RESULT_STEPS: StepId[] = [
 // set-misc and transition-operating are excluded from progress bar
 const PROGRESS_EXCLUDED: StepId[] = ['set-misc', 'transition-operating', 'industry-transition'];
 
+// 뒤로가기 시 건너뛸 전환 화면 (애니메이션만 있는 화면)
+const TRANSITION_STEPS: StepId[] = ['industry-transition', 'transition-operating'];
+
 const ALL_STEPS: StepId[] = [...INPUT_STEPS, ...RESULT_STEPS];
 
 interface UseStepNavigationResult {
@@ -69,9 +72,14 @@ export function useStepNavigation(): UseStepNavigationResult {
   }, [activeSteps, currentStep]);
 
   const goBack = useCallback(() => {
-    const idx = activeSteps.indexOf(currentStep);
+    let idx = activeSteps.indexOf(currentStep);
     if (idx > 0) {
-      setCurrentStep(activeSteps[idx - 1]);
+      idx -= 1;
+      // 전환 화면(애니메이션만 있는 화면)은 건너뛰기
+      while (idx > 0 && TRANSITION_STEPS.includes(activeSteps[idx])) {
+        idx -= 1;
+      }
+      setCurrentStep(activeSteps[idx]);
     }
   }, [activeSteps, currentStep]);
 
@@ -80,13 +88,74 @@ export function useStepNavigation(): UseStepNavigationResult {
     setCurrentStep(step);
   }, []);
 
-  // Android 뒤로가기 버튼 / 토스 네이티브 뒤로가기 → 이전 단계로 이동
+  // 뒤로가기 공통 로직
+  const handleBack = useCallback(() => {
+    let idx = activeSteps.indexOf(currentStep);
+    if (idx > 0) {
+      idx -= 1;
+      while (idx > 0 && TRANSITION_STEPS.includes(activeSteps[idx])) {
+        idx -= 1;
+      }
+      setCurrentStep(activeSteps[idx]);
+    }
+  }, [activeSteps, currentStep]);
+
+  // 토스 네이티브 backEvent (공식 API) — 토스 앱 환경에서 우선 사용
+  useEffect(() => {
+    let unsubscribe: (() => void) | null = null;
+
+    async function initBackEvent() {
+      try {
+        const { graniteEvent } = await import('@apps-in-toss/web-framework');
+        if (!graniteEvent?.addEventListener) return;
+
+        unsubscribe = graniteEvent.addEventListener('backEvent', {
+          onEvent: () => {
+            handleBack();
+          },
+          onError: (error: unknown) => {
+            console.error('backEvent 에러:', error);
+          },
+        });
+      } catch {
+        // SDK 미지원 환경 — popstate fallback 사용
+      }
+    }
+
+    initBackEvent();
+    return () => { unsubscribe?.(); };
+  }, [handleBack]);
+
+  // 토스 네이티브 homeEvent (공식 API) — 홈 버튼 클릭 시 첫 화면으로
+  useEffect(() => {
+    let unsubscribe: (() => void) | null = null;
+
+    async function initHomeEvent() {
+      try {
+        const { graniteEvent } = await import('@apps-in-toss/web-framework');
+        if (!graniteEvent?.addEventListener) return;
+
+        unsubscribe = graniteEvent.addEventListener('homeEvent', {
+          onEvent: () => {
+            setCurrentStep('select-industry');
+          },
+          onError: (error: unknown) => {
+            console.error('homeEvent 에러:', error);
+          },
+        });
+      } catch {
+        // SDK 미지원 환경
+      }
+    }
+
+    initHomeEvent();
+    return () => { unsubscribe?.(); };
+  }, []);
+
+  // popstate fallback — 비토스 환경 (로컬 dev, 일반 브라우저) + 히스토리 스택 보충
   useEffect(() => {
     const handlePopState = () => {
-      const idx = activeSteps.indexOf(currentStep);
-      if (idx > 0) {
-        setCurrentStep(activeSteps[idx - 1]);
-      }
+      handleBack();
       // 히스토리 스택 보충 — 다음 뒤로가기에서 앱 종료 방지
       history.pushState({ step: '_guard' }, '', '');
     };
@@ -97,7 +166,7 @@ export function useStepNavigation(): UseStepNavigationResult {
       history.pushState({ step: currentStep }, '', '');
     }
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [activeSteps, currentStep]);
+  }, [handleBack, currentStep]);
 
   const reset = useCallback(() => {
     setCurrentStep('select-industry');

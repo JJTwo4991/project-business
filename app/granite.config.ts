@@ -10,7 +10,7 @@ export default defineConfig({
   permissions: [],
   navigationBar: {
     withBackButton: true,
-    withHomeButton: false,
+    withHomeButton: true,
   },
   web: {
     port: 5173,
@@ -18,5 +18,9 @@ export default defineConfig({
       dev: 'vite --host',
       build: 'tsc -b && vite build',
     },
+  },
+  outdir: 'dist',
+  webViewProps: {
+    type: 'partner',
   },
 });

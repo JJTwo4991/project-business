@@ -19,7 +19,7 @@ const TITLES: Record<ResultView, string> = {
   'result-daily': '일 손익',
   'result-monthly': '월 손익',
   'result-payback': '투자회수기간',
-  'result-dcf': '권리금 (사업체 추정 가치)',
+  'result-dcf': '추정 사업가치',
 };
 
 const SCENARIO_DESCS: Record<ScenarioType, string> = {
@@ -66,8 +66,8 @@ function DataSourcesSection({ businessType }: { businessType: { id: number; name
   const toggle = useCallback(() => setOpen(v => !v), []);
 
   const sources = [
-    { label: '비용 구조 (기타영업비용)', value: '외식업체 경영실태조사 2024 (한국농촌경제연구원, KREI 2025년 제6호 p.2)' },
-    { label: '기타영업비용 교차검증', value: '소상공인실태조사 2023 (중소벤처기업부 p.89)' },
+    { label: '비용 구조 (기타영업비용)', value: '외식업체 경영실태조사 2024 (한국농촌경제연구원, KREI)' },
+    { label: '기타영업비용 교차검증', value: '소상공인실태조사 2023 (중소벤처기업부)' },
     { label: '종합소득세', value: '2025년 종합소득세 8단계 누진세율 (국세청)' },
     { label: '부가세', value: '매출총이익 × 10/110 (B2C 일반과세자 기준)' },
     { label: '재료비율', value: `업종 기본값 × 1.1 (소상공인 보수적 가산, AI 추정치)` },
@@ -106,7 +106,7 @@ function DisclaimerSection() {
         <span className={styles.disclaimerTitle}>시뮬레이션 결과 안내</span>
       </div>
       <p className={styles.disclaimerMain}>
-        본 결과는 <strong>AI 기반 추정치</strong>이며, 실제 창업 시 수익을 보장하지 않습니다. 투자 의사결정의 근거로 사용할 수 없습니다.
+        이 결과는 <strong>정부 공시 자료와 업계 자료를 활용한 AI 기반 추정치</strong>이며, 실제 창업 시 수익을 보장하지 않아요. 투자를 결정하는 근거로 사용할 수 없어요.
       </p>
       <button
         className={styles.disclaimerToggle}
@@ -116,13 +116,111 @@ function DisclaimerSection() {
       </button>
       {expanded && (
         <div className={styles.disclaimerFull}>
-          <p>1. 본 시뮬레이션의 모든 수치(매출, 비용, 손익, 투자회수기간, 사업체 가치 등)는 통계 데이터와 AI 추정치를 기반으로 산출한 <strong>참고용 예측값</strong>이며, 실제 영업 결과와 상이할 수 있습니다.</p>
-          <p>2. 객단가, 일 방문객 수, 원가율 등 핵심 변수는 공식 통계가 아닌 <strong>AI 추정치</strong>를 포함하고 있으며, 실제 값은 입지, 경쟁 환경, 운영 역량, 시장 변동 등에 따라 크게 달라질 수 있습니다.</p>
-          <p>3. 본 서비스는 <strong>정보 제공 목적</strong>으로만 제작되었으며, 재무·투자·법률·세무 자문을 대체하지 않습니다. 실제 창업 및 투자 결정 시 반드시 전문가와 상담하시기 바랍니다.</p>
-          <p>4. 세금 계산(종합소득세, 부가세)은 간이 추정이며 개인별 공제, 감면, 신고 방식에 따라 실제 세액과 차이가 있을 수 있습니다. 정확한 세금은 세무사에게 문의하세요.</p>
-          <p>5. 서비스 제공자는 본 시뮬레이션 결과를 근거로 한 <strong>어떠한 경제적 손실에 대해서도 책임을 지지 않습니다.</strong></p>
+          <p>1. 이 시뮬레이션의 모든 수치(매출, 비용, 손익, 투자금 회수 기간, 사업체 가치 등)는 통계 데이터와 AI 추정치를 기반으로 산출한 <strong>참고용 예측값</strong>이며, 실제 영업 결과와 다를 수 있어요.</p>
+          <p>2. 객단가, 일 방문객 수, 원가율 등 핵심 변수는 공식 통계가 아닌 <strong>AI 추정치</strong>를 포함하고 있으며, 실제 값은 입지, 경쟁 환경, 운영 역량, 시장 변동 등에 따라 크게 달라질 수 있어요.</p>
+          <p>3. 이 서비스는 <strong>정보 제공 목적</strong>으로만 만들었으며, 재무·투자·법률·세무 자문을 대체하지 않아요. 실제 창업 및 투자 결정 시 반드시 전문가와 상담해 주세요.</p>
+          <p>4. 세금 계산(종합소득세, 부가세)은 간이 추정이며 개인별 공제, 감면, 신고 방식에 따라 실제 세액과 차이가 있을 수 있어요. 정확한 세금은 세무사에게 문의하세요.</p>
+          <p>5. 서비스 제공자는 이 시뮬레이션 결과를 근거로 한 <strong>어떠한 경제적 손실에 대해서도 책임지지 않아요.</strong></p>
         </div>
       )}
+    </div>
+  );
+}
+
+function DcfLimitationsSection() {
+  const [openItems, setOpenItems] = useState<Record<string, boolean>>({});
+  const toggle = useCallback((key: string) => {
+    setOpenItems(prev => ({ ...prev, [key]: !prev[key] }));
+  }, []);
+
+  const items = [
+    {
+      key: 'model',
+      icon: '🧮',
+      title: '영구 현금흐름 모델 (Gordon Growth Model)',
+      summary: '이 사업이 영원히 지속된다는 가정하에 계산된 이론적 가치예요',
+      detail: '사업가치 추정에 사용된 DCF(Discounted Cash Flow) 모델은 현재 수익이 무한히 지속된다고 가정해요. 실제 자영업의 평균 존속 기간은 3~5년이며, 업종·입지에 따라 크게 달라요. 사업이 오래 유지될수록 이 추정치에 가까워지지만, 단기 운영을 계획한다면 실제 가치는 훨씬 낮을 수 있어요.',
+    },
+    {
+      key: 'assumption',
+      icon: '🎯',
+      title: '모든 예측이 맞아야 성립하는 숫자',
+      summary: '입력하신 매출·비용이 그대로 실현되었을 때의 가상 시나리오예요',
+      detail: '방문객 수, 객단가, 원가율, 임대료 등 사장님이 입력한 모든 조건이 매달 동일하게 유지된다고 가정해요. 현실에서는 계절 변동, 경쟁점 출점, 원자재 가격 변동, 임대료 인상 등 수많은 변수가 작용해요. 하나의 변수만 바뀌어도 결과는 크게 달라질 수 있어요.',
+    },
+    {
+      key: 'market',
+      icon: '🤝',
+      title: '실제 거래 가격과는 다릅니다',
+      summary: '실제 사업 양도 금액은 협상, 입지, 시장 상황 등 복합 요인에 따라 달라져요',
+      detail: '실제 양도 가격은 상권의 유동인구, 건물 조건, 인테리어 상태, 단골 고객 수, 브랜드 인지도, 계약 잔여 기간, 임대인 동의 여부, 매수자의 협상력 등 이 시뮬레이터가 반영하지 못하는 수많은 요소에 따라 달라져요.',
+    },
+    {
+      key: 'rate',
+      icon: '📊',
+      title: '할인율과 성장률에 극도로 민감',
+      summary: '할인율 1%p 차이로 추정 가치가 수천만 원 변할 수 있어요',
+      detail: '현재 할인율 15%, 성장률 0%로 설정되어 있어요. 할인율을 10%로 낮추면 추정 가치가 50% 상승하고, 20%로 높이면 25% 하락해요. 이 파라미터는 투자 위험도와 기대 수익률을 반영하는 주관적 수치이므로, 절대적인 정답은 없어요.',
+    },
+    {
+      key: 'tax',
+      icon: '📋',
+      title: '세금·부채 구조 단순화',
+      summary: '개인별 공제·감면·부채 상황에 따라 실제 현금흐름은 달라집니다',
+      detail: '종합소득세는 8단계 누진세율 기본 계산만 적용했으며, 개인별 소득공제·세액공제·감면·4대보험 등은 반영하지 않았어요. 또한 대출 상환 구조, 추가 차입, 운전자금 필요량 등 자금 흐름의 복잡성을 단순화했어요.',
+    },
+    {
+      key: 'guidance',
+      icon: '💡',
+      title: '이 숫자, 이렇게 활용하세요',
+      summary: '절대적 가치가 아닌, 상대적 감(感)을 잡는 도구로 사용하세요',
+      detail: '이 추정치는 "이 사업이 잘 되면 대략 이 정도 가치가 있을 수 있겠구나" 하는 감각을 제공하기 위한 거예요. 업종 간 비교, 투자 규모 대비 기대 가치 파악, 협상 시 출발점 설정 등의 용도로 활용하세요. 실제 매매 시에는 반드시 공인중개사, 세무사, 변호사 등 전문가와 상담해 주세요.',
+    },
+  ];
+
+  return (
+    <div className={styles.dcfLimitations}>
+      <div className={styles.dcfLimHeader}>
+        <span className={styles.dcfLimBadge}>꼭 읽어보세요</span>
+        <h3 className={styles.dcfLimTitle}>추정 사업가치의 한계</h3>
+        <p className={styles.dcfLimSubtitle}>
+          아래 내용을 이해하신 후 결과를 참고해주세요
+        </p>
+      </div>
+
+      <div className={styles.dcfLimList}>
+        {items.map(item => (
+          <div
+            key={item.key}
+            className={`${styles.dcfLimItem} ${openItems[item.key] ? styles.dcfLimItemOpen : ''}`}
+          >
+            <button
+              className={styles.dcfLimItemBtn}
+              onClick={() => toggle(item.key)}
+              aria-expanded={!!openItems[item.key]}
+            >
+              <span className={styles.dcfLimItemIcon}>{item.icon}</span>
+              <div className={styles.dcfLimItemText}>
+                <span className={styles.dcfLimItemTitle}>{item.title}</span>
+                <span className={styles.dcfLimItemSummary}>{item.summary}</span>
+              </div>
+              <span className={styles.dcfLimChevron}>
+                {openItems[item.key] ? '−' : '+'}
+              </span>
+            </button>
+            {openItems[item.key] && (
+              <div className={styles.dcfLimItemDetail}>
+                <p>{item.detail}</p>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className={styles.dcfLimFooter}>
+        <p>이 추정치를 투자·매매·계약의 근거로 사용하지 마세요.</p>
+        <p>실제 거래할 때는 전문가와 꼭 상담해 주세요.</p>
+      </div>
     </div>
   );
 }
@@ -184,9 +282,18 @@ export function ResultPage({ result, view, onBack, onNext, onGoTo }: Props) {
   const ad = useFullScreenAd();
 
   const handleEdit = useCallback(async () => {
-    await ad.showAd();
+    if (ad.isSupported) {
+      await ad.showAd();
+    }
     onGoTo('confirm');
   }, [ad, onGoTo]);
+
+  const handleNext = useCallback(async () => {
+    if (ad.isSupported) {
+      await ad.showAd();
+    }
+    onNext();
+  }, [ad, onNext]);
 
   const isLastResult = view === 'result-dcf';
 
@@ -235,7 +342,7 @@ export function ResultPage({ result, view, onBack, onNext, onGoTo }: Props) {
               className={styles.editBtn}
               onClick={handleEdit}
             >
-              수정하기
+              결과 수정하기
             </button>
           </div>
         )}
@@ -258,20 +365,17 @@ export function ResultPage({ result, view, onBack, onNext, onGoTo }: Props) {
         {view === 'result-dcf' && (
           <div className={styles.dcfSection}>
             <div className={styles.summaryCard}>
-              <p className={styles.summaryLabel}>권리금 (사업체 추정 가치)</p>
+              <p className={styles.summaryLabel}>추정 사업가치</p>
               {dcf.business_value !== null ? (
                 <>
                   <p className={styles.summaryValue}>
-                    추정 권리금: ~{formatKRWShort(dcf.business_value)}
-                  </p>
-                  <p className={styles.summarySubtext}>
-                    ({formatKRWShort(dcf.business_value * 0.9)} ~ {formatKRWShort(dcf.business_value * 1.1)})
+                    <strong>{formatKRWShort(dcf.business_value * 0.9)} ~ {formatKRWShort(dcf.business_value * 1.1)}</strong>
                   </p>
                 </>
               ) : (
-                <p className={styles.summaryValue}>산정 불가</p>
+                <p className={styles.summaryValue}>아직 산정하기 어려워요</p>
               )}
-              <p className={styles.summarySubtext}>연 FCF {formatKRWShort(dcf.fcf_annual)}</p>
+              <p className={styles.summarySubtext}>연 현금흐름 {formatKRWShort(dcf.fcf_annual)}</p>
             </div>
 
             <div className={styles.card}>
@@ -285,11 +389,14 @@ export function ResultPage({ result, view, onBack, onNext, onGoTo }: Props) {
               </div>
             </div>
 
-            <p className={styles.dcfNote}>
-              인테리어, 비품 승계 등에 따라 실제 권리금은 달라질 수 있습니다
+            <p style={{ fontSize: '12px', color: 'var(--color-text-tertiary)', textAlign: 'center', margin: '12px 0 0' }}>
+              이 계산 결과는 향후 권리금 산정의 근거가 될 수 있습니다
             </p>
+
           </div>
         )}
+
+        {view === 'result-dcf' && <DcfLimitationsSection />}
 
         <BannerAdSlot />
         <DisclaimerSection />
@@ -297,8 +404,8 @@ export function ResultPage({ result, view, onBack, onNext, onGoTo }: Props) {
       </div>
 
       {!isLastResult && (
-        <button className={styles.nextBtn} onClick={onNext}>
-          {view === 'result-monthly' ? '원금회수기간 계산' : '다음'}
+        <button className={styles.nextBtn} onClick={handleNext}>
+          {view === 'result-daily' ? '월 손익 확인하기' : view === 'result-monthly' ? '원금 회수기간 계산하기' : view === 'result-payback' ? '사업 가치 계산하기' : '다음'}
         </button>
       )}
     </div>

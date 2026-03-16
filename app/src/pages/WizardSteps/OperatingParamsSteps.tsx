@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+
+import { getIndustryIcon } from '../../assets/icons';
 import styles from './WizardSteps.module.css';
 import { SliderInput } from '../../components/SliderInput/SliderInput';
 import type { SimulatorInputs } from '../../types';
@@ -187,11 +189,127 @@ export function RentStep({ inputs, onOverride, onNext }: StepProps) {
   );
 }
 
+// ─── Discount Story (토스식 순차 텍스트 애니메이션) ──────────────────────────
+
+function DiscountStoryPhase({ inputs, purchasePrice, onChangePurchase, onDone }: {
+  inputs: SimulatorInputs;
+  purchasePrice: number;
+  onChangePurchase: (v: number) => void;
+  onDone: () => void;
+}) {
+  const [visibleLines, setVisibleLines] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const bt = inputs.business_type;
+  const btIcon = getIndustryIcon(bt.id, bt.category);
+  const gap = 1_000_000 - purchasePrice;
+
+  // group: 같은 그룹이면 줄 간격 좁게 (4px), 다른 그룹이면 넓게 (16px)
+  // 문단 내 ×0.8, 문단 간 ×1.2
+  const LINES = [
+    { text: '우리 한번 생각해봐요! 🤔', delay: 1500, group: 0 },           // 문단 간
+    { text: '사장님 생각에 이 사업이 1년 동안', delay: 900, group: 1 },     // 문단 내
+    { text: '백만원을 벌 것 같다고 해볼게요. (순이익 기준)', delay: 1500, group: 1 }, // 문단 간
+    { text: '하지만 사업이 실패할 위험도 있죠.', delay: 900, group: 2 },    // 문단 내
+    { text: `${bt.name}은(는) 경쟁이 심한 시장이에요. ${btIcon}`, delay: 900, group: 2 }, // 문단 내
+    { text: '그리고 사업에 들어간 대출금 이자도 내셔야 하죠.', delay: 1500, group: 2 }, // 문단 간
+    { text: '그런데 누군가 찾아와서,', delay: 900, group: 3 },             // 문단 내
+    { text: '이 사업에서 1년 동안 나올 순이익을', delay: 900, group: 3 },   // 문단 내
+    { text: '지금 당장 현금으로 사겠다고 합니다.', delay: 1500, group: 3 }, // 문단 간
+    { text: 'ask', delay: 1500, group: 4 },                               // 문단 간
+  ];
+
+  useEffect(() => {
+    if (visibleLines >= LINES.length) return;
+    timerRef.current = setTimeout(() => {
+      setVisibleLines(v => v + 1);
+    }, LINES[visibleLines]?.delay ?? 1000);
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+  }, [visibleLines]);
+
+  const [showSlider, setShowSlider] = useState(false);
+  const allLinesShown = visibleLines >= LINES.length;
+
+  useEffect(() => {
+    if (!allLinesShown) return;
+    const t = setTimeout(() => setShowSlider(true), 1000);
+    return () => clearTimeout(t);
+  }, [allLinesShown]);
+
+  return (
+    <div className={styles.step} style={{ gap: '20px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        {LINES.slice(0, visibleLines).map((line, i) => {
+          const prevGroup = i > 0 ? LINES[i - 1].group : -1;
+          const sameGroup = line.group === prevGroup;
+          const marginTop = i === 0 ? '0' : sameGroup ? '4px' : '16px';
+
+          if (line.text === 'ask') {
+            return (
+              <p key={i} style={{
+                fontSize: '18px', fontWeight: 800, color: 'var(--color-text)',
+                lineHeight: 1.5, margin: 0, marginTop,
+                animation: 'storyFadeIn 0.5s ease',
+              }}>
+                얼마를 받고 넘기시겠어요? 💵
+              </p>
+            );
+          }
+          return (
+            <p key={i} style={{
+              fontSize: '15px', color: 'var(--color-text)',
+              lineHeight: 1.65, margin: 0, marginTop,
+              animation: 'storyFadeIn 0.5s ease',
+            }}>
+              {line.text}
+            </p>
+          );
+        })}
+      </div>
+
+      {showSlider && (
+        <div style={{ animation: 'storyFadeIn 0.5s ease' }}>
+          <div className={styles.sliderGroup}>
+            <SliderInput
+              label="지금 받을 금액"
+              value={purchasePrice}
+              min={500_000}
+              max={990_000}
+              step={10_000}
+              format={formatKRW}
+              onChange={onChangePurchase}
+            />
+          </div>
+          <p style={{ textAlign: 'center', color: 'var(--color-text-tertiary)', fontSize: '13px', margin: '12px 0' }}>
+            {formatKRWShort(gap)}을 사업 위험과 기다림의 비용으로 생각하셨네요
+          </p>
+          <button className={styles.nextBtn} onClick={onDone}>이 금액으로 결정하기</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 type MiscPhase = 'intro' | 'growth' | 'discount' | 'done';
 
-export function MiscStep({ inputs, onOverride, onNext }: StepProps) {
+export function MiscStep({ inputs, onOverride, onNext, registerBackHandler }: StepProps & { registerBackHandler?: (handler: (() => boolean) | null) => void }) {
   const [phase, setPhase] = useState<MiscPhase>('intro');
   const [transPhase, setTransPhase] = useState<'emojiIn' | 'hold' | 'moveUp' | 'btnWait' | 'btnIn' | 'idle'>('emojiIn');
+
+  // 내부 phase 뒤로가기
+  useEffect(() => {
+    if (!registerBackHandler) return;
+    const handler = () => {
+      const backMap: Partial<Record<MiscPhase, MiscPhase>> = {
+        'growth': 'intro',
+        'discount': 'growth',
+      };
+      const prev = backMap[phase];
+      if (prev) { setPhase(prev); return true; }
+      return false; // intro → 일반 뒤로가기
+    };
+    registerBackHandler(handler);
+    return () => registerBackHandler(null);
+  }, [registerBackHandler, phase]);
 
   const growthRate = inputs.growth_rate ?? 0.00;
   const discountRate = inputs.discount_rate ?? 0.15;
@@ -226,11 +344,13 @@ export function MiscStep({ inputs, onOverride, onNext }: StepProps) {
             className={`${styles.miscTransText} ${styles.miscTransSlideUp}`}
             onAnimationEnd={transPhase === 'moveUp' ? handleTextInEnd : undefined}
           >
-            <p className={styles.miscTransTitle}>권리금을 계산해볼까요?</p>
+            <p className={styles.miscTransTitle}>내 사업의 가치를{'\n'}계산해볼까요?</p>
             <p className={styles.miscTransSub}>
-              현재의 돈은 미래의 돈보다 가치가 높아요.
-              {'\n'}이자도 내야 하고, 예상만큼 못 벌 수도 있으니까요.
-              {'\n\n'}두 가지만 여쭤볼게요.
+              사장님이 예상한 대로 매달 돈을 번다면,
+              {'\n'}이 사업체는 얼마의 가치가 있을까요?
+              {'\n\n'}이 금액이 나중에 가게를 넘길 때
+              {'\n'}권리금의 기준이 될 수 있어요.
+              {'\n\n'}간단한 두 가지만 물어볼게요.
             </p>
           </div>
         )}
@@ -244,18 +364,28 @@ export function MiscStep({ inputs, onOverride, onNext }: StepProps) {
   }
 
   if (phase === 'growth') {
+    const growthHint = growthRate < 0
+      ? '경기나 업종 상황이 어려울 것 같다면 보수적으로 잡아보세요'
+      : growthRate === 0
+      ? '꾸준히 현재 매출을 유지하는 것도 대단한 일이에요'
+      : growthRate <= 0.03
+      ? '안정적인 성장을 기대하고 계시네요'
+      : '공격적인 성장 목표네요! 기대됩니다';
     return (
       <div className={styles.step}>
         <h2 className={styles.stepTitle}>내년도 매출 성장률</h2>
-        <p className={styles.stepDesc}>이 사업이 내년에 얼마나 성장할까요?</p>
+        <p className={styles.stepDesc}>사장님의 사업 매출이 내년에는 얼마나 오를까요?</p>
+        <div className={styles.disclaimer} style={{ textAlign: 'center', color: 'var(--color-primary)', marginBottom: '8px' }}>
+          {growthHint}
+        </div>
         <div className={styles.sliderGroup}>
           <SliderInput
             label="연간 매출 성장률"
             value={growthRate}
-            min={-0.05}
+            min={-0.10}
             max={0.10}
             step={0.01}
-            format={v => `${(v * 100).toFixed(0)}%`}
+            format={v => `${v > 0 ? '+' : ''}${(v * 100).toFixed(0)}%`}
             onChange={v => onOverride('growth_rate', v)}
           />
         </div>
@@ -265,45 +395,12 @@ export function MiscStep({ inputs, onOverride, onNext }: StepProps) {
   }
 
   if (phase === 'discount') {
-    return (
-      <div className={styles.step}>
-        <h2 className={styles.stepTitle}>지금의 가치</h2>
-        <p className={styles.stepDesc}>
-          누군가 와서 이렇게 말했어요.
-        </p>
-        <div style={{
-          background: 'var(--color-primary-light)',
-          borderRadius: '12px',
-          padding: '16px 20px',
-          margin: '0 0 16px',
-          lineHeight: 1.7,
-          fontSize: '14px',
-          color: 'var(--color-text)',
-        }}>
-          "지금 <strong>{formatKRW(purchasePrice)}</strong>을 줄 테니,
-          {'\n'}1년 뒤에 이 사업에서 벌어들일
-          {'\n'}<strong>100만원</strong>을 저한테 주세요."
-        </div>
-        <p className={styles.questionText} style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 12px' }}>
-          사장님은 얼마에 파실 건가요?
-        </p>
-        <div className={styles.sliderGroup}>
-          <SliderInput
-            label="지금 받을 금액"
-            value={purchasePrice}
-            min={500_000}
-            max={990_000}
-            step={10_000}
-            format={formatKRW}
-            onChange={v => onOverride('discount_rate', calcDiscount(v))}
-          />
-          <p className={styles.discountResult}>
-            할인율 <strong>{(discountRate * 100).toFixed(1)}%</strong>
-          </p>
-        </div>
-        <button className={styles.nextBtn} onClick={() => setPhase('done')}>다음</button>
-      </div>
-    );
+    return <DiscountStoryPhase
+      inputs={inputs}
+      purchasePrice={purchasePrice}
+      onChangePurchase={v => onOverride('discount_rate', calcDiscount(v))}
+      onDone={onNext}
+    />;
   }
 
   // done

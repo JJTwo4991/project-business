@@ -58,7 +58,7 @@ export function CashFlowChart({ payback, highPayback, lowPayback }: Props) {
           ))}
           {legends.length === 0 && (
             <span className={styles.legendItem} style={{ color: '#999' }}>
-              60개월 내 회수 불가
+              투자금 회수에 60개월 넘게 걸릴 수 있어요
             </span>
           )}
         </div>
