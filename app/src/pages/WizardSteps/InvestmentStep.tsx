@@ -13,13 +13,12 @@ interface InvestmentProps {
   onNext: () => void;
 }
 
-export function InvestmentStep({ businessType: bt, scale, capital, onChange, onNext }: InvestmentProps) {
+export function InvestmentStep({ businessType: bt, scale: _scale, capital, onChange, onNext }: InvestmentProps) {
   const debt = Math.max(0, capital.initial_investment - capital.equity);
 
   return (
     <div className={styles.step}>
       <h2 className={styles.stepTitle}>자본 구조를 설정하세요</h2>
-      <GuidelineBox guideline={getGuideline(bt.id, scale, 'set-investment')} />
       <div className={styles.sliderGroup}>
         <div style={{ background: '#f5f5f5', borderRadius: '8px', padding: '8px', opacity: 0.7 }}>
           <SliderInput
@@ -74,8 +73,10 @@ export function LoanStep({ scale, businessTypeId, capital, onChange, onNext }: L
   return (
     <div className={styles.step}>
       <h2 className={styles.stepTitle}>대출 조건을 설정하세요</h2>
-      <p className={styles.stepDesc}>대출금: {formatKRWShort(debt)}<br />시중은행 사업자대출</p>
-      <GuidelineBox guideline={getGuideline(businessTypeId, scale, 'set-loan')} />
+      <GuidelineBox guideline={{
+        text: `대출금: ${formatKRWShort(debt)}\n${getGuideline(businessTypeId, scale, 'set-loan')?.text ?? ''}`,
+        source: getGuideline(businessTypeId, scale, 'set-loan')?.source ?? '',
+      }} />
       <div className={styles.sliderGroup}>
         <SliderInput
           label="금리"

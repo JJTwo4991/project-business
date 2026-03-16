@@ -40,27 +40,24 @@
   gap: 14px;
   padding: 16px 18px;
   border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-md);
-  transition: box-shadow 0.2s, transform 0.2s;
+  background: var(--color-bg);
+  transition: background 0.2s, border-color 0.2s;
   cursor: pointer;
   text-align: left;
   border: 2px solid transparent;
 }
 
 .card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-1px);
+  background: var(--color-border);
 }
 
 .card:active {
-  transform: translateY(0);
+  background: var(--color-border);
 }
 
 .cardActive {
   border-color: var(--color-primary);
   background: var(--color-primary-light);
-  box-shadow: 0 0 0 0 transparent;
 }
 
 .cardName {
@@ -85,26 +82,23 @@
   gap: var(--spacing-md);
   padding: var(--spacing-md);
   border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-md);
-  transition: box-shadow 0.2s, transform 0.2s;
+  background: var(--color-bg);
+  transition: background 0.2s, border-color 0.2s;
   cursor: pointer;
   border: 2px solid transparent;
 }
 
 .listCard:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-1px);
+  background: var(--color-border);
 }
 
 .listCard:active {
-  transform: translateY(0);
+  background: var(--color-border);
 }
 
 .listCardActive {
   border-color: var(--color-primary);
   background: var(--color-primary-light);
-  box-shadow: none;
 }
 
 .listCardInfo {
@@ -146,29 +140,26 @@
   flex-direction: row;
   align-items: center;
   padding: 16px;
-  border-radius: 12px;
-  border: 1.5px solid #E5E8EB;
-  background: var(--color-surface);
-  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-lg);
+  border: 1.5px solid transparent;
+  background: var(--color-bg);
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s, transform 0.15s;
+  transition: border-color 0.15s, background 0.15s;
   text-align: left;
   width: 100%;
 }
 
 .scaleCard:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-1px);
+  background: var(--color-border);
 }
 
 .scaleCard:active {
-  transform: translateY(0);
+  background: var(--color-border);
 }
 
 .scaleCardActive {
   border-color: var(--color-primary);
   background: rgba(49, 130, 246, 0.04);
-  box-shadow: 0 0 0 0 transparent;
 }
 
 .scaleLabel {
@@ -223,7 +214,7 @@
   color: white;
   font-size: var(--font-size-md);
   font-weight: 700;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   transition: background 0.2s, transform 0.1s;
   margin-top: auto;
   letter-spacing: -0.2px;
@@ -292,13 +283,13 @@
 .miscTransEmoji {
   font-size: 72px;
   line-height: 1;
-  will-change: transform, opacity;
+  will-change: transform;
   transition: transform 600ms cubic-bezier(0.25, 0.1, 0.25, 1);
-  transform: translateY(0);
+  transform: translate3d(0, 0, 0);
 }
 
 .miscTransEmojiUp {
-  transform: translateY(-48px);
+  transform: translate3d(0, -48px, 0);
 }
 
 .miscTransFadeIn {
@@ -354,9 +345,8 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-  background: var(--color-surface);
+  background: var(--color-bg);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
   overflow: hidden;
 }
 
@@ -365,11 +355,6 @@
   justify-content: space-between;
   align-items: center;
   padding: 14px var(--spacing-md);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.summaryRow:last-child {
-  border-bottom: none;
 }
 
 .summaryLabel {
@@ -416,9 +401,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px var(--spacing-md);
-  background: var(--color-surface);
+  background: var(--color-bg);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
 }
 
 .investmentLabel {
@@ -466,16 +450,15 @@
   gap: 16px;
   padding: 24px;
   border-radius: 16px;
-  border: 1px solid #E5E8EB;
-  background: var(--color-surface);
+  border: 1px solid transparent;
+  background: var(--color-bg);
   cursor: pointer;
   text-align: left;
-  transition: box-shadow 0.2s, border-color 0.2s, background 0.2s;
+  transition: border-color 0.2s, background 0.2s;
   font-family: inherit;
 }
 
 .typeSelectBtn:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10);
   border-color: var(--color-primary);
   background: var(--color-primary-light);
 }

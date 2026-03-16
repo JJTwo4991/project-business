@@ -1,11 +1,9 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import styles from './WizardSteps.module.css';
 import type { InvestmentItem, BusinessScale } from '../../types';
 import { getInvestmentBreakdown } from '../../data/costItems';
 import { formatKRWShort } from '../../lib/format';
 import { SliderInput } from '../../components/SliderInput/SliderInput';
-import { GuidelineBox } from '../../components/GuidelineBox/GuidelineBox';
-import { getGuideline } from '../../data/guidelines';
 import { FranchiseSearch } from '../../components/FranchiseSearch/FranchiseSearch';
 import type { FranchiseInvestment } from '../../components/FranchiseSearch/FranchiseSearch';
 import { getScaleSqm } from '../../lib/scale';
@@ -23,16 +21,36 @@ interface Props {
   onChange: (items: InvestmentItem[]) => void;
   onBrandSelect?: (brand: import('../../types').FranchiseBrand | null) => void;
   onNext: () => void;
+  /** 커스텀 뒤로가기 핸들러 등록 — true 반환 시 내부에서 처리됨 */
+  registerBackHandler?: (handler: (() => boolean) | null) => void;
 }
 
-export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onChange, onBrandSelect, onNext }: Props) {
+export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onChange, onBrandSelect, onNext, registerBackHandler }: Props) {
   useFranchiseCosts(businessTypeId);
   const [mode, setMode] = useState<Mode>('choose');
   const [chooseSubMode, setChooseSubMode] = useState<ChooseSubMode>(null);
   const [franchiseName, setFranchiseName] = useState<string | null>(null);
-  const startupGuideline = getGuideline(businessTypeId, scale, 'investment-breakdown');
 
   const scaleSqm = useMemo(() => getScaleSqm(scale, businessTypeId), [scale, businessTypeId]);
+
+  // 서브모드에서 뒤로가기 시 choose로 돌아가기
+  useEffect(() => {
+    if (!registerBackHandler) return;
+    const handler = () => {
+      if (mode === 'franchise' || mode === 'independent') {
+        setMode('choose');
+        setChooseSubMode(null);
+        return true; // 내부에서 처리됨
+      }
+      if (chooseSubMode === 'franchise-search') {
+        setChooseSubMode(null);
+        return true;
+      }
+      return false; // 일반 뒤로가기
+    };
+    registerBackHandler(handler);
+    return () => registerBackHandler(null);
+  }, [registerBackHandler, mode, chooseSubMode]);
 
   const defaultItems = useMemo(
     () => getInvestmentBreakdown(businessTypeId, scale),
@@ -79,9 +97,8 @@ export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onCh
     if (chooseSubMode === 'franchise-search') {
       return (
         <div className={styles.step}>
-          <h2 className={styles.stepTitle}>초기투자 비용</h2>
-          <p className={styles.stepDesc}>프랜차이즈 브랜드를 선택하면 예상 투자비를 자동 계산해요</p>
-          <GuidelineBox guideline={startupGuideline} />
+          <h2 className={styles.stepTitle}>프랜차이즈 브랜드를 선택하세요</h2>
+          <p className={styles.stepDesc}>브랜드를 선택하면 예상 투자비를 자동 계산해요</p>
           <button
             className={styles.hint}
             type="button"
@@ -101,8 +118,7 @@ export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onCh
 
     return (
       <div className={styles.step}>
-        <h2 className={styles.stepTitle}>초기투자 비용</h2>
-        <p className={styles.stepDesc}>창업 방식을 선택해요</p>
+        <h2 className={styles.stepTitle}>창업 방식을 선택하세요</h2>
         <div className={styles.typeSelectGroup}>
           <button
             className={styles.typeSelectBtn}
@@ -137,31 +153,21 @@ export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onCh
 
   return (
     <div className={styles.step}>
-      <h2 className={styles.stepTitle}>초기투자 구성</h2>
-      {mode === 'franchise' && franchiseName ? (
-        <>
-          <p style={{ fontSize: '20px', fontWeight: 'bold', margin: '0 0 4px', lineHeight: 1.4 }}>
-            {franchiseName} 창업비용 평균 {formatKRWShort(total)}
-          </p>
-          <p style={{ fontSize: '12px', color: '#999', margin: '0 0 12px' }}>
-            (출처: 공정위 프랜차이즈 공시 시스템)
-          </p>
-        </>
-      ) : (
-        <p className={styles.stepDesc}>항목별 금액을 조정할 수 있어요</p>
-      )}
-      {mode !== 'franchise' && <GuidelineBox guideline={startupGuideline} />}
-      {mode === 'independent' && (
-        <p className={styles.hint} style={{ color: '#888', fontSize: '13px', margin: '0 0 12px' }}>
-          개인 사업은 가맹비, 교육비 등이 없어요
-        </p>
-      )}
-      {mode === 'franchise' && (
-        <div style={{ background: 'var(--color-primary-light)', borderRadius: '10px', padding: '12px 16px', margin: '0 0 14px', color: 'var(--color-text-secondary)', fontSize: '13px', lineHeight: 1.6 }}>
-          선택하신 브랜드가 공시한 창업비용이에요.<br />
-          사장님께서 조절할 수 있어요.
-        </div>
-      )}
+      <h2 className={styles.stepTitle}>개업 비용을 추정해보세요</h2>
+      <div className={styles.disclaimer}>
+        {mode === 'franchise' && franchiseName ? (
+          <>
+            <strong>{franchiseName}</strong> 창업비용 평균 <strong>{formatKRWShort(total)}</strong><br />
+            선택하신 브랜드가 공시한 창업비용이에요. 사장님께서 조절할 수 있어요.<br />
+            <span style={{ fontSize: '11px', color: 'var(--color-text-tertiary)' }}>출처: 공정위 프랜차이즈 공시 시스템</span>
+          </>
+        ) : (
+          <>
+            항목별 금액을 조정할 수 있어요<br />
+            {mode === 'independent' && '개인 사업은 가맹비, 교육비 등이 없어요'}
+          </>
+        )}
+      </div>
       <div className={styles.sliderGroup}>
         {items.map((item, i) => {
           const isOther = item.category === 'other';

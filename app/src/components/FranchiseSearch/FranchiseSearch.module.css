@@ -62,23 +62,19 @@
   gap: var(--spacing-md);
   padding: var(--spacing-md);
   border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-md);
-  transition: box-shadow 0.2s, transform 0.2s;
+  background: var(--color-bg);
+  transition: background 0.2s, border-color 0.2s;
   cursor: pointer;
   border: 2px solid transparent;
 }
 
 .brandItem:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-1px);
+  background: var(--color-border);
 }
 
 .brandItemActive {
   border-color: var(--color-primary);
   background: var(--color-primary-light);
-  box-shadow: none;
-  transform: none;
 }
 
 .brandInfo {
@@ -139,9 +135,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px var(--spacing-md);
-  background: var(--color-surface);
+  background: var(--color-bg);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
 }
 
 .breakdownLabel {

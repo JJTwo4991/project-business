@@ -2,7 +2,7 @@
   max-width: 480px;
   margin: 0 auto;
   min-height: 100dvh;
-  background: var(--color-bg);
+  background: var(--color-surface);
   display: flex;
   flex-direction: column;
 }
@@ -26,7 +26,7 @@
   gap: var(--spacing-sm);
   padding: 14px var(--spacing-page);
   background: var(--color-surface);
-  box-shadow: 0 1px 0 rgba(0,0,0,0.06);
+  box-shadow: none;
   position: sticky;
   top: 0;
   z-index: 10;

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import styles from './VisitorEstimation.module.css';
 import { UI_ICONS } from '../../assets/icons';
 
@@ -17,6 +17,7 @@ type QuestionId =
 
 interface VisitorEstimationStepProps {
   onComplete: (dailyCustomers: number, monthlyOperatingDays: number) => void;
+  registerBackHandler?: (handler: (() => boolean) | null) => void;
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -108,6 +109,8 @@ function RealityCheck({ visitors, totalHours }: RealityCheckProps) {
         {totalHours}시간 영업 기준, {visitors}명이면
         <br />
         <strong>{minutesPerCustomer}분마다 새 손님 1명</strong>이 와야 해요
+        <br />
+        <span style={{ fontSize: '12px', color: 'var(--color-text-tertiary)' }}>(바쁜 시간과 한가한 시간 전체 평균)</span>
       </p>
       <p className={styles.realityLabel}>{label}</p>
       <div className={styles.capacityBarWrap}>
@@ -276,7 +279,7 @@ function SummaryScreen({ data, onNext }: { data: SummaryData; onNext: () => void
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export function VisitorEstimationStep({ onComplete }: VisitorEstimationStepProps) {
+export function VisitorEstimationStep({ onComplete, registerBackHandler }: VisitorEstimationStepProps) {
   // Q1
   const [selectedDays, setSelectedDays] = useState<DayKey[]>(['월', '화', '수', '목', '금', '토']);
   // Q2
@@ -293,6 +296,26 @@ export function VisitorEstimationStep({ onComplete }: VisitorEstimationStepProps
   const [animState, setAnimState] = useState<'entering' | 'idle' | 'exiting'>('entering');
   const [currentQ, setCurrentQ] = useState<QuestionId>('q1-days');
   const [pendingQ, setPendingQ] = useState<QuestionId | null>(null);
+
+  // 헤더 뒤로가기 시 내부 서브스텝으로 이동
+  useEffect(() => {
+    if (!registerBackHandler) return;
+    const handler = () => {
+      if (currentQ === 'q1-days') return false; // 첫 질문이면 일반 뒤로가기
+      const backMap: Partial<Record<QuestionId, QuestionId>> = {
+        'q2-hours': 'q1-days',
+        'q3-busy-days': 'q2-hours',
+        'q4-busy-visitors': 'q3-busy-days',
+        'q5-normal-visitors': 'q3-busy-days',
+        'summary': 'q5-normal-visitors',
+      };
+      const prev = backMap[currentQ];
+      if (prev) { advanceTo(prev); return true; }
+      return false;
+    };
+    registerBackHandler(handler);
+    return () => registerBackHandler(null);
+  }, [registerBackHandler, currentQ]);
 
   const totalHours = Math.max(0, closeHour - openHour);
   const operatingDays = selectedDays.length;
@@ -588,7 +611,7 @@ export function VisitorEstimationStep({ onComplete }: VisitorEstimationStepProps
                 value={normalVisitors}
                 onChange={setNormalVisitors}
                 totalHours={totalHours}
-                emoji={isAllDaysSame ? '👥' : '☕'}
+                emoji={isAllDaysSame ? '👥' : '🙂'}
                 title={isAllDaysSame ? '하루 방문객' : '일반적인 날'}
                 dayLabel={dayLabel}
               />

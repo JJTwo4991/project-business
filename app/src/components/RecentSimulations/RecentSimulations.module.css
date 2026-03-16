@@ -24,18 +24,17 @@
   gap: 12px;
   padding: 14px 16px;
   border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-  border: 1.5px solid var(--color-border);
+  background: var(--color-bg);
+  border: 1.5px solid transparent;
   cursor: pointer;
   text-align: left;
-  transition: box-shadow 0.15s, border-color 0.15s;
+  transition: background 0.15s, border-color 0.15s;
   width: 100%;
 }
 
 .card:hover {
-  box-shadow: var(--shadow-md);
   border-color: var(--color-primary);
+  background: var(--color-primary-light);
 }
 
 .card:active {

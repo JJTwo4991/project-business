@@ -2,7 +2,6 @@
   background: var(--color-surface);
   border-radius: var(--radius-lg);
   padding: var(--spacing-md);
-  box-shadow: var(--shadow-md);
 }
 
 .rowGroup {

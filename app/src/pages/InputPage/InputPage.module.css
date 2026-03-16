@@ -11,7 +11,6 @@
   gap: var(--spacing-md);
   padding: var(--spacing-md) var(--spacing-page);
   background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -33,7 +32,6 @@
 
 .section {
   padding: var(--spacing-lg) var(--spacing-page);
-  border-bottom: 1px solid var(--color-border);
 }
 
 .sectionTitle {
@@ -105,7 +103,6 @@
   margin: 0 auto;
   padding: var(--spacing-md) var(--spacing-page);
   background: var(--color-surface);
-  box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
 }
 
 .calcBtn {
@@ -115,7 +112,7 @@
   color: white;
   font-size: var(--font-size-lg);
   font-weight: 700;
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   transition: background 0.15s;
 }
 

@@ -5,7 +5,7 @@
   --color-primary: #3182F6;
   --color-primary-dark: #1B64DA;
   --color-primary-light: #EBF3FE;
-  --color-bg: #F4F4F4;
+  --color-bg: #F2F4F6;
   --color-surface: #FFFFFF;
   --color-text: #191F28;
   --color-text-secondary: #8B95A1;
@@ -66,3 +66,8 @@ button {
 }
 
 input[type="range"] { cursor: pointer; }
+
+@keyframes storyFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
