@@ -208,6 +208,7 @@ export const Result_Daily: StoryObj = {
       onBack={() => alert('Back')}
       onNext={() => alert('Next')}
       onGoTo={() => {}}
+      ad={{ isSupported: false, showAd: () => Promise.resolve({ rewarded: false }) }}
     />
   ),
 };
@@ -221,6 +222,7 @@ export const Result_Monthly: StoryObj = {
       onBack={() => alert('Back')}
       onNext={() => alert('Next')}
       onGoTo={() => {}}
+      ad={{ isSupported: false, showAd: () => Promise.resolve({ rewarded: false }) }}
     />
   ),
 };
@@ -234,6 +236,7 @@ export const Result_Payback: StoryObj = {
       onBack={() => alert('Back')}
       onNext={() => alert('Next')}
       onGoTo={() => {}}
+      ad={{ isSupported: false, showAd: () => Promise.resolve({ rewarded: false }) }}
     />
   ),
 };
@@ -247,6 +250,7 @@ export const Result_DCF: StoryObj = {
       onBack={() => alert('Back')}
       onNext={() => alert('Next')}
       onGoTo={() => {}}
+      ad={{ isSupported: false, showAd: () => Promise.resolve({ rewarded: false }) }}
     />
   ),
 };

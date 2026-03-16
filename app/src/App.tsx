@@ -281,6 +281,7 @@ export default function App() {
             onBack={nav.goBack}
             onNext={nav.goNext}
             onGoTo={nav.goTo}
+            ad={ad}
           />
         ) : null;
 

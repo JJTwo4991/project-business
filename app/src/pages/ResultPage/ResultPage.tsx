@@ -11,8 +11,6 @@ import {
   resolveBusinessParams,
   type ScenarioType,
 } from '../../lib/calculator';
-import { useFullScreenAd } from '../../hooks/useFullScreenAd';
-
 type ResultView = 'result-daily' | 'result-monthly' | 'result-payback' | 'result-dcf';
 
 const TITLES: Record<ResultView, string> = {
@@ -34,6 +32,7 @@ interface Props {
   onBack: () => void;
   onNext: () => void;
   onGoTo: (step: StepId) => void;
+  ad: { isSupported: boolean; showAd: () => Promise<{ rewarded: boolean }> };
 }
 
 function ScenarioTabs({ scenario, onChange }: { scenario: ScenarioType; onChange: (s: ScenarioType) => void }) {
@@ -274,12 +273,11 @@ function BannerAdSlot() {
   return <div ref={containerRef} className={styles.bannerAd} />;
 }
 
-export function ResultPage({ result, view, onBack, onNext, onGoTo }: Props) {
+export function ResultPage({ result, view, onBack, onNext, onGoTo, ad }: Props) {
   const { annotations, payback, dcf, inputs } = result;
   const [scenario, setScenario] = useState<ScenarioType>('base');
   const cogsLabel = inputs.business_type.id === 3 ? '상품 원가' : undefined;
   const materialCostRatio = resolveBusinessParams(inputs).material_cost_ratio;
-  const ad = useFullScreenAd();
 
   const handleEdit = useCallback(async () => {
     if (ad.isSupported) {
