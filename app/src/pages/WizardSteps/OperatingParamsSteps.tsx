@@ -214,7 +214,7 @@ function DiscountStoryPhase({ inputs, purchasePrice, onChangePurchase, onDone }:
     { text: '그리고 사업에 들어간 대출금 이자도 내셔야 하죠.', delay: 1500, group: 2 }, // 문단 간
     { text: '그런데 누군가 찾아와서,', delay: 900, group: 3 },             // 문단 내
     { text: '이 사업에서 1년 동안 나올 순이익을', delay: 900, group: 3 },   // 문단 내
-    { text: '지금 당장 현금으로 사겠다고 합니다.', delay: 1500, group: 3 }, // 문단 간
+    { text: '지금 당장 현금으로 사겠다고 해요.', delay: 1500, group: 3 }, // 문단 간
     { text: 'ask', delay: 1500, group: 4 },                               // 문단 간
   ];
 
@@ -250,7 +250,7 @@ function DiscountStoryPhase({ inputs, purchasePrice, onChangePurchase, onDone }:
                 lineHeight: 1.5, margin: 0, marginTop,
                 animation: 'storyFadeIn 0.5s ease',
               }}>
-                얼마를 받고 넘기시겠어요? 💵
+                얼마를 받고 넘길 건가요? 💵
               </p>
             );
           }

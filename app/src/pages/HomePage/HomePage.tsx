@@ -33,7 +33,7 @@ export function HomePage({ onSelect }: Props) {
 
       {!loading && !error && businessTypes.length === 0 && (
         <div className={styles.center}>
-          <p>업종 데이터가 없습니다.</p>
+          <p>업종 데이터가 없어요.</p>
         </div>
       )}
 

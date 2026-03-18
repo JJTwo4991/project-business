@@ -1,13 +1,13 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 
 /**
- * 앱인토스 리워드 광고 훅
+ * 앱인토스 전면(interstitial) 광고 훅
  *
  * - Toss WebView 환경에서만 동작, 그 외에는 skip
  * - GoogleAdMob API 우선, 없으면 loadFullScreenAd fallback
  */
 
-const AD_GROUP_ID_REWARDED = 'ait-ad-test-rewarded-id';
+const AD_GROUP_ID = 'ait-ad-test-interstitial-id';
 
 interface AdSDK {
   load: (params: any) => any;
@@ -17,7 +17,7 @@ interface AdSDK {
 interface UseFullScreenAdReturn {
   isReady: boolean;
   isSupported: boolean;
-  showAd: () => Promise<{ rewarded: boolean }>;
+  showAd: () => Promise<void>;
 }
 
 export function useFullScreenAd(): UseFullScreenAdReturn {
@@ -31,7 +31,7 @@ export function useFullScreenAd(): UseFullScreenAdReturn {
     if (!sdk) return;
 
     const cleanup = sdk.load({
-      options: { adGroupId: AD_GROUP_ID_REWARDED },
+      options: { adGroupId: AD_GROUP_ID },
       onEvent: (event: { type: string; data?: any }) => {
         if (event.type === 'loaded') {
           readyRef.current = true;
@@ -85,39 +85,28 @@ export function useFullScreenAd(): UseFullScreenAdReturn {
     return () => { cancelled = true; };
   }, [loadAd]);
 
-  const showAd = useCallback((): Promise<{ rewarded: boolean }> => {
+  const showAd = useCallback((): Promise<void> => {
     const sdk = sdkRef.current;
 
     if (!sdk || !readyRef.current) {
-      return Promise.resolve({ rewarded: false });
+      return Promise.resolve();
     }
 
     readyRef.current = false;
     setIsReady(false);
 
     return new Promise((resolve) => {
-      let rewarded = false;
-
       sdk.show({
-        options: { adGroupId: AD_GROUP_ID_REWARDED },
-        onEvent: (event: { type: string; data?: any }) => {
-          switch (event.type) {
-            case 'userEarnedReward':
-              rewarded = true;
-              break;
-            case 'dismissed':
-              loadAd();
-              resolve({ rewarded });
-              break;
-            case 'failedToShow':
-              loadAd();
-              resolve({ rewarded: false });
-              break;
+        options: { adGroupId: AD_GROUP_ID },
+        onEvent: (event: { type: string }) => {
+          if (event.type === 'dismissed' || event.type === 'failedToShow') {
+            loadAd();
+            resolve();
           }
         },
         onError: () => {
           loadAd();
-          resolve({ rewarded: false });
+          resolve();
         },
       });
     });

@@ -32,7 +32,7 @@ interface Props {
   onBack: () => void;
   onNext: () => void;
   onGoTo: (step: StepId) => void;
-  ad: { isSupported: boolean; showAd: () => Promise<{ rewarded: boolean }> };
+  ad: { isSupported: boolean; showAd: () => Promise<void> };
 }
 
 function ScenarioTabs({ scenario, onChange }: { scenario: ScenarioType; onChange: (s: ScenarioType) => void }) {
@@ -388,7 +388,7 @@ export function ResultPage({ result, view, onBack, onNext, onGoTo, ad }: Props) 
             </div>
 
             <p style={{ fontSize: '12px', color: 'var(--color-text-tertiary)', textAlign: 'center', margin: '12px 0 0' }}>
-              이 계산 결과는 향후 권리금 산정의 근거가 될 수 있습니다
+              이 계산 결과는 향후 권리금 산정의 근거가 될 수 있어요
             </p>
 
           </div>

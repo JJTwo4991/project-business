@@ -156,7 +156,7 @@ export function FranchiseSearch({ businessTypeId, scaleSqm, onSelect }: Props) {
           )}
         </div>
       ) : query.trim() ? (
-        <div className={styles.emptyMsg}>검색 결과가 없습니다</div>
+        <div className={styles.emptyMsg}>검색 결과가 없어요</div>
       ) : null}
     </div>
   );

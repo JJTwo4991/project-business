@@ -5,7 +5,7 @@ export default defineConfig({
   brand: {
     displayName: '사장 될 결심',
     primaryColor: '#3182F6',
-    icon: '',
+    icon: 'https://static.toss.im/icons/png/4x/icon-toss-logo.png',
   },
   permissions: [],
   navigationBar: {
@@ -13,6 +13,7 @@ export default defineConfig({
     withHomeButton: true,
   },
   web: {
+    host: 'localhost',
     port: 5173,
     commands: {
       dev: 'vite --host',
