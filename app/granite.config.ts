@@ -5,7 +5,7 @@ export default defineConfig({
   brand: {
     displayName: '사장 될 결심',
     primaryColor: '#3182F6',
-    icon: 'https://static.toss.im/icons/png/4x/icon-toss-logo.png',
+    icon: 'https://static.toss.im/appsintoss/25433/630ee2ef-972a-4d26-acaa-7292bffebbbd.png',
   },
   permissions: [],
   navigationBar: {

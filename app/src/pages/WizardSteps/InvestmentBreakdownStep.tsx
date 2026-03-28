@@ -8,10 +8,10 @@ import { FranchiseSearch } from '../../components/FranchiseSearch/FranchiseSearc
 import type { FranchiseInvestment } from '../../components/FranchiseSearch/FranchiseSearch';
 import { getScaleSqm } from '../../lib/scale';
 import { useFranchiseCosts } from '../../hooks/useFranchiseCosts';
-import { getIndustryAverages } from '../../data/franchiseData';
+import { getIndustryAverages, hasNoFranchise } from '../../data/franchiseData';
 import { UI_ICONS } from '../../assets/icons';
 
-type Mode = 'choose' | 'franchise' | 'independent';
+type Mode = 'choose' | 'franchise' | 'independent' | 'no-franchise-msg';
 type ChooseSubMode = null | 'franchise-search';
 
 interface Props {
@@ -32,12 +32,13 @@ export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onCh
   const [franchiseName, setFranchiseName] = useState<string | null>(null);
 
   const scaleSqm = useMemo(() => getScaleSqm(scale, businessTypeId), [scale, businessTypeId]);
+  const noFranchise = hasNoFranchise(businessTypeId);
 
   // 서브모드에서 뒤로가기 시 choose로 돌아가기
   useEffect(() => {
     if (!registerBackHandler) return;
     const handler = () => {
-      if (mode === 'franchise' || mode === 'independent') {
+      if (mode === 'franchise' || mode === 'independent' || mode === 'no-franchise-msg') {
         setMode('choose');
         setChooseSubMode(null);
         return true; // 내부에서 처리됨
@@ -93,6 +94,16 @@ export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onCh
     setMode('independent');
   }, [businessTypeId, scaleSqm, onChange, onBrandSelect]);
 
+  if (mode === 'no-franchise-msg') {
+    return (
+      <div className={styles.step}>
+        <h2 className={styles.stepTitle}>프랜차이즈를 찾기 어려워요</h2>
+        <p className={styles.stepDesc}>개인사업으로 진행해 주세요</p>
+        <button className={styles.nextBtn} onClick={() => { setMode('choose'); }}>돌아가기</button>
+      </div>
+    );
+  }
+
   if (mode === 'choose') {
     if (chooseSubMode === 'franchise-search') {
       return (
@@ -123,7 +134,7 @@ export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onCh
           <button
             className={styles.typeSelectBtn}
             type="button"
-            onClick={() => setChooseSubMode('franchise-search')}
+            onClick={() => { noFranchise ? setMode('no-franchise-msg') : setChooseSubMode('franchise-search'); }}
           >
             <span className={styles.typeSelectIcon} style={{ fontSize: '36px', lineHeight: 1 }} aria-hidden="true">
               {UI_ICONS.franchise}
@@ -187,7 +198,7 @@ export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onCh
             />
             {mode === 'independent' && item.editable && (
               <p style={{ color: '#aaa', fontSize: '12px', margin: '-4px 0 8px 4px' }}>
-                같은 업종 평균값이에요. 조정할 수 있어요
+                {noFranchise ? '임의의 값이에요. 조정할 수 있어요' : '같은 업종 평균값이에요. 조정할 수 있어요'}
               </p>
             )}
           </div>

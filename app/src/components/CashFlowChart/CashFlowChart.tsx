@@ -96,9 +96,9 @@ export function CashFlowChart({ payback, highPayback, lowPayback }: Props) {
             />
             <Tooltip
               contentStyle={{ fontSize: 12, padding: '6px 10px', borderRadius: 8, border: '1px solid #E5E8EB' }}
-              formatter={(v: number | undefined, name: string | undefined) => {
+              formatter={(v, name) => {
                 const label = name === 'high' ? '낙관' : name === 'low' ? '보수' : '기본';
-                return [formatKRWShort(v ?? 0), label];
+                return [formatKRWShort(Number(v ?? 0)), label];
               }}
               labelFormatter={(l) => `${l}개월째`}
             />
@@ -185,7 +185,7 @@ export function CashFlowChart({ payback, highPayback, lowPayback }: Props) {
           />
           <Tooltip
             contentStyle={{ fontSize: 12, padding: '6px 10px', borderRadius: 8, border: '1px solid #E5E8EB' }}
-            formatter={(v: number | undefined) => [formatKRWShort(v ?? 0), '누적 현금흐름']}
+            formatter={(v) => [formatKRWShort(Number(v ?? 0)), '누적 현금흐름']}
             labelFormatter={(l) => `${l}개월째`}
           />
           <ReferenceLine y={0} stroke="#C8CCD0" strokeWidth={1} />

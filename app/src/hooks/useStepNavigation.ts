@@ -77,13 +77,20 @@ export function useStepNavigation(): UseStepNavigationResult {
   // 뒤로가기 공통 로직
   const handleBack = useCallback(() => {
     let idx = activeSteps.indexOf(currentStep);
-    if (idx > 0) {
-      idx -= 1;
-      while (idx > 0 && TRANSITION_STEPS.includes(activeSteps[idx])) {
-        idx -= 1;
-      }
-      setCurrentStep(activeSteps[idx]);
+    if (idx <= 0) {
+      // 첫 화면 — 미니앱 종료
+      import('@apps-in-toss/web-bridge').then(({ closeView }) => {
+        closeView();
+      }).catch(() => {
+        // SDK 미지원 환경 (로컬 dev 등) — 무시
+      });
+      return;
     }
+    idx -= 1;
+    while (idx > 0 && TRANSITION_STEPS.includes(activeSteps[idx])) {
+      idx -= 1;
+    }
+    setCurrentStep(activeSteps[idx]);
   }, [activeSteps, currentStep]);
 
   // 토스 네이티브 backEvent (공식 API) — 토스 앱 환경에서 우선 사용

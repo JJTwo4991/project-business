@@ -67,25 +67,42 @@ export function searchFranchises(query: string, businessTypeId: number): Franchi
   );
 }
 
-/** 업종별 평균값 (개인 가게 디폴트용) */
 export interface IndustryAverages {
   other_cost: number;
   interior_per_sqm: number;
+  is_estimated: boolean;  // true = 하드코딩 임의값 (반찬가게, 무인카페)
 }
 
+// Supabase franchise_costs 기반 업종별 평균 (FTC 정보공개서 2024년)
+const SUPABASE_INDUSTRY_AVG: Record<number, { other_cost: number; interior_per_sqm: number }> = {
+  1:  { other_cost: 48_023_000, interior_per_sqm: 524_242 },   // 치킨 (300건)
+  2:  { other_cost: 106_693_000, interior_per_sqm: 719_091 },  // 커피 (300건)
+  3:  { other_cost: 39_649_000, interior_per_sqm: 383_939 },   // 편의점 (34건)
+  4:  { other_cost: 105_157_000, interior_per_sqm: 668_485 },  // 미용실 (300건)
+  5:  { other_cost: 55_105_000, interior_per_sqm: 606_061 },   // 분식 (295건)
+  6:  { other_cost: 78_937_000, interior_per_sqm: 527_273 },   // 한식 (247건)
+  7:  { other_cost: 70_977_000, interior_per_sqm: 519_394 },   // 세탁소 (31건)
+  8:  { other_cost: 56_492_000, interior_per_sqm: 541_515 },   // 피자 (224건)
+  9:  { other_cost: 113_276_000, interior_per_sqm: 787_273 },  // 베이커리 (120건)
+  11: { other_cost: 105_157_000, interior_per_sqm: 668_485 },  // 네일 (이미용 공유)
+  14: { other_cost: 20_480_000, interior_per_sqm: 93_333 },    // 무인아이스크림 (4건)
+  15: { other_cost: 93_228_000, interior_per_sqm: 658_182 },   // 주점 (479건)
+};
+
+const HARDCODED_BT_IDS = new Set([13, 16]); // 반찬가게, 무인카페
+
 export function getIndustryAverages(businessTypeId: number): IndustryAverages {
-  const brands = getFranchisesByType(businessTypeId);
-  if (brands.length === 0) {
-    return { other_cost: 10_000_000, interior_per_sqm: 500_000 };
+  if (HARDCODED_BT_IDS.has(businessTypeId)) {
+    return { other_cost: 10_000_000, interior_per_sqm: 500_000, is_estimated: true };
   }
-  const avg = (key: 'other_cost' | 'interior_per_sqm') => {
-    const vals = brands.map(b => b[key]).filter(v => v > 0);
-    return vals.length > 0 ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : 0;
-  };
-  return {
-    other_cost: avg('other_cost'),
-    interior_per_sqm: avg('interior_per_sqm'),
-  };
+  const avg = SUPABASE_INDUSTRY_AVG[businessTypeId];
+  if (avg) return { ...avg, is_estimated: false };
+  return { other_cost: 10_000_000, interior_per_sqm: 500_000, is_estimated: true };
+}
+
+/** 프랜차이즈 데이터가 없는 업종인지 확인 */
+export function hasNoFranchise(businessTypeId: number): boolean {
+  return HARDCODED_BT_IDS.has(businessTypeId);
 }
 
 /**
