@@ -75,31 +75,41 @@ export function BusinessMbtiPage({ result, onShareSuccess, onSkip }: Props) {
         return;
       }
 
-      // 2) navigator.share (파일 공유) 시도
+      // 2) navigator.share (파일 공유) — canShare 체크 없이 바로 시도
       const file = new File([blob], 'boss-card.png', { type: 'image/png' });
-      if (navigator.share && navigator.canShare?.({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: '사장 될 결심',
-          text: card.tagline.replace(/\n/g, ' '),
-        });
-        setIsCapturing(false);
-        return;
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: '사장 될 결심',
+            text: card.tagline.replace(/\n/g, ' '),
+          });
+          setIsCapturing(false);
+          return;
+        } catch (shareErr) {
+          // AbortError = 사용자 취소, 그 외 = 미지원 → fallback으로
+          if (shareErr instanceof Error && shareErr.name === 'AbortError') {
+            setIsCapturing(false);
+            return;
+          }
+        }
       }
 
-      // 3) Fallback: 토스 share API (텍스트만)
+      // 3) Fallback: 이미지 저장 + 토스 텍스트 공유
       try {
         const sdk = await import('@apps-in-toss/web-framework');
+        const dataUrl = canvas.toDataURL('image/png');
+
+        // 이미지를 갤러리에 저장 시도
+        const saveFn = (sdk as any).saveBase64Data;
+        if (typeof saveFn === 'function') {
+          try {
+            await saveFn({ base64: dataUrl.split(',')[1], fileName: 'boss-card.png', mimeType: 'image/png' });
+          } catch { /* 저장 실패 */ }
+        }
+
         const shareFn = (sdk as any).share;
         if (typeof shareFn === 'function') {
-          // 이미지는 저장, 텍스트로 공유
-          const dataUrl = canvas.toDataURL('image/png');
-          try {
-            const saveFn = (sdk as any).saveBase64Data;
-            if (typeof saveFn === 'function') {
-              await saveFn({ base64: dataUrl.split(',')[1], fileName: 'boss-card.png', mimeType: 'image/png' });
-            }
-          } catch { /* 저장 실패해도 계속 */ }
           await shareFn({ message: `[사장 될 결심] ${card.tagline.replace(/\n/g, ' ')}\n내 사장님 유형 확인하기!` });
           setIsCapturing(false);
           return;
