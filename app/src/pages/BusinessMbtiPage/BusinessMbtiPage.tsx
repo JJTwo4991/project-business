@@ -58,39 +58,68 @@ export function BusinessMbtiPage({ result, onShareSuccess, onSkip }: Props) {
     trackClick('사장님_유형_이미지공유', { mbti_type: card.tagline, business_type: result.inputs.business_type.name });
 
     try {
+      // 1) 카드 → Canvas → Blob
       const canvas = await html2canvas(cardRef.current, {
-        backgroundColor: null,
+        backgroundColor: card.bgColor,
         scale: 2,
-        useCORS: true,
+        logging: false,
+        allowTaint: true,
+        useCORS: false,
       });
 
       const blob = await new Promise<Blob | null>(resolve =>
         canvas.toBlob(resolve, 'image/png')
       );
-      if (!blob) { setIsCapturing(false); return; }
+      if (!blob) {
+        setIsCapturing(false);
+        return;
+      }
 
+      // 2) navigator.share (파일 공유) 시도
       const file = new File([blob], 'boss-card.png', { type: 'image/png' });
-
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({
           files: [file],
-          title: '사장 될 결심 - 나의 사장님 유형',
+          title: '사장 될 결심',
           text: card.tagline.replace(/\n/g, ' '),
         });
-      } else {
-        // Fallback: 이미지 다운로드
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'boss-card.png';
-        a.click();
-        URL.revokeObjectURL(url);
+        setIsCapturing(false);
+        return;
       }
-    } catch {
-      // 사용자가 공유 취소하거나 에러
+
+      // 3) Fallback: 토스 share API (텍스트만)
+      try {
+        const sdk = await import('@apps-in-toss/web-framework');
+        const shareFn = (sdk as any).share;
+        if (typeof shareFn === 'function') {
+          // 이미지는 저장, 텍스트로 공유
+          const dataUrl = canvas.toDataURL('image/png');
+          try {
+            const saveFn = (sdk as any).saveBase64Data;
+            if (typeof saveFn === 'function') {
+              await saveFn({ base64: dataUrl.split(',')[1], fileName: 'boss-card.png', mimeType: 'image/png' });
+            }
+          } catch { /* 저장 실패해도 계속 */ }
+          await shareFn({ message: `[사장 될 결심] ${card.tagline.replace(/\n/g, ' ')}\n내 사장님 유형 확인하기!` });
+          setIsCapturing(false);
+          return;
+        }
+      } catch { /* SDK 없음 */ }
+
+      // 4) 최종 Fallback: 이미지 다운로드
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'boss-card.png';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('이미지 공유 실패:', err);
     }
     setIsCapturing(false);
-  }, [card.tagline, result.inputs.business_type.name, isCapturing]);
+  }, [card.tagline, card.bgColor, result.inputs.business_type.name, isCapturing]);
 
   return (
     <div className={styles.page}>
@@ -110,7 +139,6 @@ export function BusinessMbtiPage({ result, onShareSuccess, onSkip }: Props) {
             className={styles.illustImg}
             src={BOSS_IMAGES[card.personaId]}
             alt={card.tagline}
-            crossOrigin="anonymous"
           />
         </div>
 
