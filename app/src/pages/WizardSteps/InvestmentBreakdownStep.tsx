@@ -10,6 +10,7 @@ import { getScaleSqm } from '../../lib/scale';
 import { useFranchiseCosts } from '../../hooks/useFranchiseCosts';
 import { getIndustryAverages, hasNoFranchise } from '../../data/franchiseData';
 import { UI_ICONS } from '../../assets/icons';
+import { trackClick } from '../../lib/analytics';
 
 type Mode = 'choose' | 'franchise' | 'independent' | 'no-franchise-msg';
 type ChooseSubMode = null | 'franchise-search';
@@ -134,7 +135,7 @@ export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onCh
           <button
             className={styles.typeSelectBtn}
             type="button"
-            onClick={() => { noFranchise ? setMode('no-franchise-msg') : setChooseSubMode('franchise-search'); }}
+            onClick={() => { trackClick('창업_방식을_선택하세요', { type: '프랜차이즈' }); noFranchise ? setMode('no-franchise-msg') : setChooseSubMode('franchise-search'); }}
           >
             <span className={styles.typeSelectIcon} style={{ fontSize: '36px', lineHeight: 1 }} aria-hidden="true">
               {UI_ICONS.franchise}
@@ -147,7 +148,7 @@ export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onCh
           <button
             className={styles.typeSelectBtn}
             type="button"
-            onClick={handleIndependent}
+            onClick={() => { trackClick('창업_방식을_선택하세요', { type: '개인사업' }); handleIndependent(); }}
           >
             <span className={styles.typeSelectIcon} style={{ fontSize: '36px', lineHeight: 1 }} aria-hidden="true">
               {UI_ICONS.individual}
@@ -209,7 +210,7 @@ export function InvestmentBreakdownStep({ businessTypeId, scale, breakdown, onCh
         <span>합계</span>
         <span>{formatKRWShort(total)}</span>
       </div>
-      <button className={styles.nextBtn} onClick={onNext}>다음</button>
+      <button className={styles.nextBtn} onClick={() => { trackClick('개업_비용을_추정해보세요', { mode, total_investment: total, brand_name: franchiseName }); onNext(); }}>다음</button>
     </div>
   );
 }

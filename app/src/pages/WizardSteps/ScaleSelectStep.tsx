@@ -5,6 +5,7 @@ import { formatKRWShort } from '../../lib/format';
 import { GuidelineBox } from '../../components/GuidelineBox/GuidelineBox';
 import { getGuideline } from '../../data/guidelines';
 import { SCALE_ICONS } from '../../assets/icons';
+import { trackClick } from '../../lib/analytics';
 
 interface Props {
   businessType: BusinessType;
@@ -54,7 +55,7 @@ export function ScaleSelectStep({ businessType, selected, onSelect, onNext }: Pr
           );
         })}
       </div>
-      <button className={styles.nextBtn} onClick={onNext}>다음</button>
+      <button className={styles.nextBtn} onClick={() => { trackClick('매장_규모를_선택하세요', { business_type: businessType.name, scale: selected }); onNext(); }}>다음</button>
     </div>
   );
 }

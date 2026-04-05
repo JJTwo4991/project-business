@@ -4,6 +4,7 @@ import { CashFlowChart } from '../../components/CashFlowChart/CashFlowChart';
 import { PnLDisplay } from '../../components/PnLDisplay/PnLDisplay';
 import type { SimulationResult, StepId } from '../../types';
 import { formatKRWShort, formatPercent, formatMonths } from '../../lib/format';
+import { AiAnalysis } from '../../components/AiAnalysis/AiAnalysis';
 import {
   calcScenarioDailyPnL,
   calcScenarioMonthlyPnL,
@@ -11,6 +12,7 @@ import {
   resolveBusinessParams,
   type ScenarioType,
 } from '../../lib/calculator';
+import { trackScreen, trackClick } from '../../lib/analytics';
 type ResultView = 'result-daily' | 'result-monthly' | 'result-payback' | 'result-dcf';
 
 const TITLES: Record<ResultView, string> = {
@@ -35,24 +37,28 @@ interface Props {
   ad: { isSupported: boolean; showAd: () => Promise<void> };
 }
 
-function ScenarioTabs({ scenario, onChange }: { scenario: ScenarioType; onChange: (s: ScenarioType) => void }) {
+function ScenarioTabs({ scenario, onChange, view }: { scenario: ScenarioType; onChange: (s: ScenarioType) => void; view: string }) {
+  const handleChange = (s: ScenarioType) => {
+    trackClick(`${TITLES[view as ResultView]}_시나리오_변경`, { scenario: s });
+    onChange(s);
+  };
   return (
     <div className={styles.scenarioTabs}>
       <button
         className={`${styles.scenarioTab} ${scenario === 'high' ? styles.scenarioTabActive : ''}`}
-        onClick={() => onChange('high')}
+        onClick={() => handleChange('high')}
       >
         📈 High
       </button>
       <button
         className={`${styles.scenarioTab} ${scenario === 'base' ? styles.scenarioTabActive : ''}`}
-        onClick={() => onChange('base')}
+        onClick={() => handleChange('base')}
       >
         😎 Base
       </button>
       <button
         className={`${styles.scenarioTab} ${scenario === 'low' ? styles.scenarioTabActive : ''}`}
-        onClick={() => onChange('low')}
+        onClick={() => handleChange('low')}
       >
         🛡️ Low
       </button>
@@ -78,7 +84,7 @@ function DataSourcesSection({ businessType }: { businessType: { id: number; name
 
   return (
     <div className={styles.sourcesSection}>
-      <button className={styles.sourcesToggle} onClick={toggle}>
+      <button className={styles.sourcesToggle} onClick={() => { if (!open) trackClick('출처_보기', { business_type: businessType.name }); toggle(); }}>
         {open ? '▼' : '▶'} 데이터 출처
       </button>
       {open && (
@@ -129,7 +135,10 @@ function DisclaimerSection() {
 function DcfLimitationsSection() {
   const [openItems, setOpenItems] = useState<Record<string, boolean>>({});
   const toggle = useCallback((key: string) => {
-    setOpenItems(prev => ({ ...prev, [key]: !prev[key] }));
+    setOpenItems(prev => {
+      if (!prev[key]) trackClick('사업가치_한계점_열기', { item: key });
+      return { ...prev, [key]: !prev[key] };
+    });
   }, []);
 
   const items = [
@@ -276,6 +285,22 @@ function BannerAdSlot() {
 export function ResultPage({ result, view, onBack, onNext, onGoTo, ad }: Props) {
   const { annotations, payback, dcf, inputs } = result;
   const [scenario, setScenario] = useState<ScenarioType>('base');
+  const [showAiAnalysis, setShowAiAnalysis] = useState(false);
+
+  // 결과 화면 진입 시 screen 이벤트
+  useEffect(() => {
+    const bt = inputs.business_type.name;
+    const sc = inputs.scale;
+    if (view === 'result-daily') {
+      trackScreen('일_손익', { business_type: bt, scale: sc });
+    } else if (view === 'result-monthly') {
+      trackScreen('월_손익', { business_type: bt, scale: sc });
+    } else if (view === 'result-payback') {
+      trackScreen('투자회수기간', { business_type: bt, payback_months: payback.payback_months });
+    } else if (view === 'result-dcf') {
+      trackScreen('추정_사업가치', { business_type: bt, business_value: dcf.business_value });
+    }
+  }, [view, inputs.business_type.name, inputs.scale, payback.payback_months, dcf.business_value]);
   const cogsLabel = inputs.business_type.id === 3 ? '상품 원가' : undefined;
   const materialCostRatio = resolveBusinessParams(inputs).material_cost_ratio;
 
@@ -311,7 +336,7 @@ export function ResultPage({ result, view, onBack, onNext, onGoTo, ad }: Props) 
       <div className={styles.content}>
         {view === 'result-daily' && (
           <div className={styles.pnlSection}>
-            <ScenarioTabs scenario={scenario} onChange={setScenario} />
+            <ScenarioTabs scenario={scenario} onChange={setScenario} view={view} />
             <p className={styles.scenarioDesc}>{SCENARIO_DESCS[scenario]}</p>
             <PnLDisplay
               pnl={scenarioPnl}
@@ -324,9 +349,9 @@ export function ResultPage({ result, view, onBack, onNext, onGoTo, ad }: Props) 
           </div>
         )}
 
-        {view === 'result-monthly' && (
+        {view === 'result-monthly' && !showAiAnalysis && (
           <div className={styles.pnlSection}>
-            <ScenarioTabs scenario={scenario} onChange={setScenario} />
+            <ScenarioTabs scenario={scenario} onChange={setScenario} view={view} />
             <p className={styles.scenarioDesc}>{SCENARIO_DESCS[scenario]}</p>
             <PnLDisplay
               pnl={scenarioPnl}
@@ -336,12 +361,34 @@ export function ResultPage({ result, view, onBack, onNext, onGoTo, ad }: Props) 
               cogsLabel={cogsLabel}
               materialCostRatio={materialCostRatio}
             />
-            <button
-              className={styles.editBtn}
-              onClick={handleEdit}
-            >
-              결과 수정하기
+            <div className={styles.actionGroup}>
+              <button className={styles.actionBtn} onClick={() => { trackClick('AI_사업분석', { business_type: inputs.business_type.name }); setShowAiAnalysis(true); }}>
+                🤖 AI의 사업분석
+              </button>
+              <button className={styles.actionBtn} onClick={() => { trackClick('예상치_수정하기', { from: '월_손익' }); handleEdit(); }}>
+                ✏️ 예상치 수정하여 다시 결과 보기
+              </button>
+              <button className={styles.actionBtn} onClick={() => { trackClick('원금_회수기간_계산하기'); handleNext(); }}>
+                📊 원금 회수기간 계산하기
+              </button>
+            </div>
+          </div>
+        )}
+
+        {view === 'result-monthly' && showAiAnalysis && (
+          <div className={styles.pnlSection}>
+            <button className={styles.backLink} onClick={() => { trackClick('AI_사업분석_닫기'); setShowAiAnalysis(false); }}>
+              ← 월 손익으로 돌아가기
             </button>
+            <AiAnalysis result={result} />
+            <div className={styles.actionGroup}>
+              <button className={styles.actionBtn} onClick={() => { trackClick('예상치_수정하기', { from: 'AI_사업분석' }); handleEdit(); }}>
+                ✏️ 예상치 수정하여 다시 결과 보기
+              </button>
+              <button className={styles.actionBtn} onClick={() => { trackClick('원금_회수기간_계산하기', { from: 'AI_사업분석' }); handleNext(); }}>
+                📊 원금 회수기간 계산하기
+              </button>
+            </div>
           </div>
         )}
 
@@ -397,15 +444,23 @@ export function ResultPage({ result, view, onBack, onNext, onGoTo, ad }: Props) 
         {view === 'result-dcf' && <DcfLimitationsSection />}
 
         <BannerAdSlot />
-        <DisclaimerSection />
-        <DataSourcesSection businessType={inputs.business_type} />
+        {view !== 'result-monthly' && <DisclaimerSection />}
       </div>
 
-      {!isLastResult && (
-        <button className={styles.nextBtn} onClick={view === 'result-daily' ? onNext : handleNext}>
-          {view === 'result-daily' ? '월 손익 확인하기' : view === 'result-monthly' ? '원금 회수기간 계산하기' : view === 'result-payback' ? '사업 가치 계산하기' : '다음'}
+      {!isLastResult && view !== 'result-monthly' && (
+        <button className={styles.nextBtn} onClick={() => {
+          const label = view === 'result-daily' ? '월_손익_확인하기' : view === 'result-payback' ? '사업_가치_계산하기' : '다음';
+          trackClick(label, { business_type: inputs.business_type.name });
+          (view === 'result-daily' ? onNext : handleNext)();
+        }}>
+          {view === 'result-daily' ? '월 손익 확인하기' : view === 'result-payback' ? '사업 가치 계산하기' : '다음'}
         </button>
       )}
+
+      <div className={styles.content}>
+        <DataSourcesSection businessType={inputs.business_type} />
+        {view === 'result-monthly' && <DisclaimerSection />}
+      </div>
     </div>
   );
 }

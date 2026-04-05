@@ -4,6 +4,7 @@ import type { CapitalStructure, BusinessType, BusinessScale } from '../../types'
 import { formatKRWShort, formatPercent } from '../../lib/format';
 import { GuidelineBox } from '../../components/GuidelineBox/GuidelineBox';
 import { getGuideline } from '../../data/guidelines';
+import { trackClick } from '../../lib/analytics';
 
 interface InvestmentProps {
   businessType: BusinessType;
@@ -54,7 +55,7 @@ export function InvestmentStep({ businessType: bt, scale: _scale, capital, onCha
           inputUnit={{ divisor: 1_000_000, label: '백만원' }}
         />
       </div>
-      <button className={styles.nextBtn} onClick={onNext}>다음</button>
+      <button className={styles.nextBtn} onClick={() => { trackClick('자본_구조를_설정하세요', { total_investment: capital.initial_investment, equity: capital.equity }); onNext(); }}>다음</button>
     </div>
   );
 }
@@ -98,7 +99,7 @@ export function LoanStep({ scale, businessTypeId, capital, onChange, onNext }: L
         />
       </div>
       <p className={styles.hint}>금리와 대출기간은 실제 대출기관에서 꼭 상담을 받아야 해요.</p>
-      <button className={styles.nextBtn} onClick={onNext}>다음</button>
+      <button className={styles.nextBtn} onClick={() => { trackClick('대출_조건을_설정하세요', { interest_rate: capital.interest_rate, loan_term_years: capital.loan_term_years }); onNext(); }}>다음</button>
     </div>
   );
 }

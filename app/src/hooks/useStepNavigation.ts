@@ -11,11 +11,11 @@ const INPUT_STEPS: StepId[] = [
 ];
 
 const RESULT_STEPS: StepId[] = [
-  'result-daily', 'result-monthly', 'result-payback', 'set-misc', 'result-dcf',
+  'business-mbti', 'result-daily', 'result-monthly', 'result-payback', 'set-misc', 'result-dcf',
 ];
 
 // set-misc and transition-operating are excluded from progress bar
-const PROGRESS_EXCLUDED: StepId[] = ['set-misc', 'transition-operating', 'industry-transition'];
+const PROGRESS_EXCLUDED: StepId[] = ['set-misc', 'transition-operating', 'industry-transition', 'business-mbti'];
 
 // 뒤로가기 시 건너뛸 전환 화면 (애니메이션만 있는 화면)
 const TRANSITION_STEPS: StepId[] = ['industry-transition', 'transition-operating'];

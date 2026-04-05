@@ -8,6 +8,7 @@ import { useSimulator } from './hooks/useSimulator';
 import { useBusinessTypes } from './hooks/useBusinessTypes';
 import { useRentGuide } from './hooks/useRentGuide';
 import { useStepNavigation } from './hooks/useStepNavigation';
+import { trackClick } from './lib/analytics';
 import { ResultPage } from './pages/ResultPage/ResultPage';
 import { IndustrySelectStep } from './pages/WizardSteps/IndustrySelectStep';
 import { ScaleSelectStep } from './pages/WizardSteps/ScaleSelectStep';
@@ -42,6 +43,7 @@ import { TossNavBar } from './components/TossNavBar/TossNavBar';
 import { useRecentSimulations } from './hooks/useRecentSimulations';
 import type { SavedSimulation } from './hooks/useRecentSimulations';
 import { useFullScreenAd } from './hooks/useFullScreenAd';
+import { BusinessMbtiPage } from './pages/BusinessMbtiPage/BusinessMbtiPage';
 
 /** 토스 WebView 환경 감지 (토스 앱 내 미니앱으로 실행 중인지) */
 const isTossWebView = /TossApp/i.test(navigator.userAgent);
@@ -94,13 +96,21 @@ export default function App() {
     }
   }, [simulator.result, recentSims]);
 
-  const handleCalculate = useCallback(async () => {
+  const handleCalculate = useCallback(() => {
     simulator.calculate();
+    nav.goTo('business-mbti');
+  }, [simulator, nav]);
+
+  const handleMbtiShareSuccess = useCallback(() => {
+    nav.goTo('result-daily');
+  }, [nav]);
+
+  const handleMbtiSkip = useCallback(async () => {
     if (ad.isSupported) {
       await ad.showAd();
     }
     nav.goTo('result-daily');
-  }, [simulator, nav, ad]);
+  }, [nav, ad]);
 
   const handleRestoreSimulation = useCallback((item: SavedSimulation) => {
     simulator.restoreResult(item.result);
@@ -108,6 +118,7 @@ export default function App() {
   }, [simulator, nav]);
 
   const handleGoHome = useCallback(() => {
+    trackClick('다시_시뮬레이션', { from_step: nav.currentStep });
     simulator.reset();
     nav.goTo('select-industry');
   }, [simulator, nav]);
@@ -268,6 +279,15 @@ export default function App() {
       case 'set-misc':
         return simulator.inputs ? (
           <MiscStep inputs={simulator.inputs} onOverride={simulator.setOverride} onNext={() => { simulator.calculate(); nav.goTo('result-dcf'); }} registerBackHandler={h => { customBackRef.current = h; }} />
+        ) : null;
+
+      case 'business-mbti':
+        return simulator.result ? (
+          <BusinessMbtiPage
+            result={simulator.result}
+            onShareSuccess={handleMbtiShareSuccess}
+            onSkip={handleMbtiSkip}
+          />
         ) : null;
 
       case 'result-daily':

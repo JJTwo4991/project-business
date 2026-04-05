@@ -208,6 +208,45 @@
   background: var(--color-primary-dark);
 }
 
+.backLink {
+  display: block;
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 0 12px;
+  font-family: inherit;
+}
+
+.actionGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 20px 0 8px;
+}
+
+.actionBtn {
+  width: 100%;
+  padding: 0;
+  height: 50px;
+  font-size: 15px;
+  font-weight: 700;
+  color: white;
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: inherit;
+  letter-spacing: -0.2px;
+}
+
+.actionBtn:active {
+  background: var(--color-primary-dark);
+}
+
 .disclaimer {
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);

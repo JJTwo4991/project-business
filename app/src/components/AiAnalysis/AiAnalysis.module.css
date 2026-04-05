@@ -1,0 +1,156 @@
+.wrap {
+  margin: 20px 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.headerIcon {
+  font-size: 20px;
+}
+
+.headerTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: #191F28;
+}
+
+/* ── 분석 스텝 카드 ── */
+.step {
+  background: #F9FAFB;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.stepHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.stepIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.stepTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #191F28;
+}
+
+.stepBody {
+  font-size: 13px;
+  line-height: 1.7;
+  color: #4E5968;
+  word-break: keep-all;
+}
+
+.stepBody p {
+  margin: 0 0 4px;
+}
+
+.calc {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 13px;
+  color: #6B7684;
+  margin: 6px 0 2px;
+}
+
+.calcArrow {
+  color: #3182F6;
+  font-weight: 700;
+  margin-right: 2px;
+}
+
+.calcResult {
+  font-weight: 700;
+  color: #191F28;
+  font-size: 14px;
+}
+
+/* ── 항목 리스트 ── */
+.itemList {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0 0;
+}
+
+.itemList li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  font-size: 13px;
+  color: #4E5968;
+}
+
+.itemList li span:last-child {
+  font-weight: 600;
+  color: #191F28;
+}
+
+.expense {
+  color: #EF4444 !important;
+}
+
+.subtotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0 0;
+  margin-top: 6px;
+  border-top: 1px dashed #E5E8EB;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ── 최종 결론 ── */
+.conclusion {
+  background: #EBF4FF;
+  border-radius: 16px;
+  padding: 20px 16px;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.conclusionLabel {
+  font-size: 13px;
+  color: #6B7684;
+  margin-bottom: 6px;
+}
+
+.conclusionValue {
+  font-size: 24px;
+  font-weight: 800;
+  color: #191F28;
+}
+
+.conclusionPositive {
+  color: #16A34A;
+}
+
+.conclusionNegative {
+  color: #EF4444;
+}
+
+.conclusionNote {
+  font-size: 12px;
+  color: #8B95A1;
+  margin-top: 8px;
+  line-height: 1.5;
+}

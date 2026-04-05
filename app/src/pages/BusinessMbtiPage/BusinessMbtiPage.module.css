@@ -1,0 +1,162 @@
+.page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 20px 40px;
+}
+
+/* ── 카드 ── */
+.card {
+  width: 100%;
+  max-width: 360px;
+  border-radius: 24px;
+  padding: 28px 20px 24px;
+  text-align: center;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.07);
+  margin-bottom: 28px;
+}
+
+/* ── 일러스트 ── */
+.illustWrap {
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto 24px;
+}
+
+.illustImg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ── 바이럴 문구 ── */
+.tagline {
+  font-size: 21px;
+  font-weight: 800;
+  line-height: 1.45;
+  color: #191F28;
+  margin: 0 0 12px;
+  word-break: keep-all;
+}
+
+/* ── 이유 ── */
+.reason {
+  font-size: 14px;
+  line-height: 1.65;
+  color: #4E5968;
+  margin: 0 0 20px;
+  word-break: keep-all;
+  white-space: pre-line;
+}
+
+/* ── 핵심 수치 박스 ── */
+.stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 16px;
+  padding: 16px 12px;
+  margin-bottom: 10px;
+}
+
+.statItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.statLabel {
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.4);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.statValue {
+  font-size: 15px;
+  font-weight: 700;
+  color: #191F28;
+  white-space: nowrap;
+}
+
+.positive {
+  color: #16A34A;
+}
+
+.negative {
+  color: #EF4444;
+}
+
+.statDivider {
+  width: 1px;
+  height: 32px;
+  background: rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+}
+
+/* ── WLB 코멘트 ── */
+.wlbComment {
+  font-size: 13px;
+  color: #6B7684;
+  font-weight: 500;
+  margin: 0;
+  padding-top: 4px;
+}
+
+/* ── 공유 버튼 ── */
+.shareBtn {
+  width: 100%;
+  max-width: 360px;
+  padding: 16px 24px;
+  border: none;
+  border-radius: 16px;
+  background: #3182F6;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 12px;
+  transition: opacity 0.15s;
+}
+
+.shareBtn:active {
+  opacity: 0.85;
+}
+
+.shareBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.shareSub {
+  font-size: 12px;
+  font-weight: 400;
+  opacity: 0.85;
+  display: block;
+  margin-top: 4px;
+}
+
+/* ── 스킵 버튼 ── */
+.skipBtn {
+  width: 100%;
+  max-width: 360px;
+  padding: 14px 24px;
+  border: 1px solid #E5E8EB;
+  border-radius: 16px;
+  background: #fff;
+  color: #6B7684;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.skipBtn:active {
+  background: #F9FAFB;
+}

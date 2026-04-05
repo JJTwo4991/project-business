@@ -2,6 +2,7 @@ import styles from './WizardSteps.module.css';
 import type { SimulatorInputs, StepId } from '../../types';
 import { formatKRWShort, formatPercent } from '../../lib/format';
 import { resolveBusinessParams } from '../../lib/calculator';
+import { trackClick } from '../../lib/analytics';
 
 interface Props {
   inputs: SimulatorInputs;
@@ -41,7 +42,7 @@ export function ConfirmStep({ inputs, onCalculate, onGoTo }: Props) {
           <div
             key={i}
             className={`${styles.summaryRow} ${row.step ? styles.summaryRowClickable : ''}`}
-            onClick={row.step ? () => onGoTo(row.step!) : undefined}
+            onClick={row.step ? () => { trackClick('입력_내용_확인_수정', { field: row.label, step: row.step }); onGoTo(row.step!); } : undefined}
           >
             <span className={styles.summaryLabel}>{row.label}</span>
             <span className={`${styles.summaryValue} ${row.step ? styles.summaryValueLink : ''}`}>
@@ -54,7 +55,7 @@ export function ConfirmStep({ inputs, onCalculate, onGoTo }: Props) {
         이 시뮬레이션은 참고용이에요. 부가가치세(VAT)는 반영하지 않았어요.
         실제 수익은 입지, 경쟁, 운영 역량 등에 따라 크게 달라질 수 있어요.
       </div>
-      <button className={styles.nextBtn} onClick={onCalculate}>결과 확인하기</button>
+      <button className={styles.nextBtn} onClick={() => { trackClick('입력_내용_확인', { business_type: bt.name, scale }); onCalculate(); }}>결과 확인하기</button>
     </div>
   );
 }

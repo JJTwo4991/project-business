@@ -10,6 +10,7 @@ import { getScaleSqm } from '../../lib/scale';
 import { GuidelineBox } from '../../components/GuidelineBox/GuidelineBox';
 import { getGuideline } from '../../data/guidelines';
 import { getMenuItems } from '../../data/menuItems';
+import { trackClick } from '../../lib/analytics';
 
 interface StepProps {
   inputs: SimulatorInputs;
@@ -38,7 +39,7 @@ export function CustomersStep({ inputs, onOverride, onNext }: StepProps) {
         format={v => `${v}명`}
         onChange={v => onOverride('daily_customers_override', v)}
       />
-      <button className={styles.nextBtn} onClick={onNext}>다음</button>
+      <button className={styles.nextBtn} onClick={() => { trackClick('일_예상_방문객_수', { customers: current, business_type: inputs.business_type.name }); onNext(); }}>다음</button>
     </div>
   );
 }
@@ -75,7 +76,7 @@ export function TicketStep({ inputs, onOverride, onNext }: StepProps) {
         format={formatKRW}
         onChange={v => onOverride('ticket_price_override', v)}
       />
-      <button className={styles.nextBtn} onClick={onNext}>다음</button>
+      <button className={styles.nextBtn} onClick={() => { trackClick('한명당_얼마쯤_결제할까요', { ticket_price: current, business_type: inputs.business_type.name }); onNext(); }}>다음</button>
     </div>
   );
 }
@@ -144,7 +145,7 @@ export function LaborStep({ inputs, onOverride, onNext }: StepProps) {
         <p className={styles.hint}>최저임금은 10,030원이에요 (고용노동부 2025년 고시)</p>
         <p className={styles.totalLabor}>월 총 인건비: {formatKRWShort(totalLaborCost)}</p>
       </div>
-      <button className={styles.nextBtn} onClick={onNext}>다음</button>
+      <button className={styles.nextBtn} onClick={() => { trackClick('직원_수', { headcount: localHeadcount, weekly_hours: weeklyHours, hourly_wage: hourlyWage, total_labor_cost: totalLaborCost }); onNext(); }}>다음</button>
     </div>
   );
 }
@@ -184,7 +185,7 @@ export function RentStep({ inputs, onOverride, onNext }: StepProps) {
       <p style={{ color: '#aaa', fontSize: '12px', margin: '-4px 0 8px 4px' }}>
         임의 값이에요. 실제 계약 조건에 맞게 조정하세요
       </p>
-      <button className={styles.nextBtn} onClick={onNext}>다음</button>
+      <button className={styles.nextBtn} onClick={() => { trackClick('월_임대료', { rent: current, rent_deposit: rentDeposit }); onNext(); }}>다음</button>
     </div>
   );
 }
@@ -282,7 +283,7 @@ function DiscountStoryPhase({ inputs, purchasePrice, onChangePurchase, onDone }:
           <p style={{ textAlign: 'center', color: 'var(--color-text-tertiary)', fontSize: '13px', margin: '12px 0' }}>
             {formatKRWShort(gap)}을 사업 위험과 기다림의 비용으로 생각하셨네요
           </p>
-          <button className={styles.nextBtn} onClick={onDone}>이 금액으로 결정하기</button>
+          <button className={styles.nextBtn} onClick={() => { trackClick('할인율_결정', { purchase_price: purchasePrice }); onDone(); }}>이 금액으로 결정하기</button>
         </div>
       )}
     </div>
@@ -356,7 +357,7 @@ export function MiscStep({ inputs, onOverride, onNext, registerBackHandler }: St
         )}
         {showTransBtn && (
           <div className={`${styles.miscTransBtnWrap} ${styles.miscTransSlideUp}`}>
-            <button className={styles.nextBtn} onClick={() => setPhase('growth')} type="button">좋아요</button>
+            <button className={styles.nextBtn} onClick={() => { trackClick('사업가치_계산_시작'); setPhase('growth'); }} type="button">좋아요</button>
           </div>
         )}
       </div>
@@ -389,7 +390,7 @@ export function MiscStep({ inputs, onOverride, onNext, registerBackHandler }: St
             onChange={v => onOverride('growth_rate', v)}
           />
         </div>
-        <button className={styles.nextBtn} onClick={() => setPhase('discount')}>다음</button>
+        <button className={styles.nextBtn} onClick={() => { trackClick('내년도_매출_성장률', { growth_rate: growthRate }); setPhase('discount'); }}>다음</button>
       </div>
     );
   }

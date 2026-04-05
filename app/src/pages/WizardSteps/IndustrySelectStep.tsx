@@ -4,6 +4,7 @@ import { getIndustryIcon } from '../../assets/icons';
 import { formatKRWShort } from '../../lib/format';
 import { RecentSimulations } from '../../components/RecentSimulations/RecentSimulations';
 import type { SavedSimulation } from '../../hooks/useRecentSimulations';
+import { trackClick } from '../../lib/analytics';
 
 const INDUSTRY_TAGLINES: Record<number, string> = {
   1: '치킨! 싫어하는 사람은 없는 거 아시죠?',
@@ -44,7 +45,7 @@ export function IndustrySelectStep({ businessTypes, onSelect, recentSimulations,
       <p className={styles.stepDesc}>업종을 선택하면 수익성을 분석해드려요</p>
       <div className={styles.grid}>
         {businessTypes.map(bt => (
-          <button key={bt.id} className={styles.card} onClick={() => onSelect(bt)}>
+          <button key={bt.id} className={styles.card} onClick={() => { trackClick('어떤_업종을_알아볼까요', { business_type: bt.name, category: bt.category }); onSelect(bt); }}>
             <span style={{ fontSize: '34px', lineHeight: 1, flexShrink: 0 }} aria-hidden="true">
               {getIndustryIcon(bt.id, bt.category)}
             </span>

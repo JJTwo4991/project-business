@@ -2,6 +2,7 @@ import styles from './WizardSteps.module.css';
 import { RegionSelector } from '../../components/RegionSelector/RegionSelector';
 import type { RentGuide, BusinessScale } from '../../types';
 import { getScaleSqm } from '../../lib/scale';
+import { trackClick } from '../../lib/analytics';
 
 interface Props {
   sidos: string[];
@@ -27,7 +28,7 @@ export function RegionStep({ sidos, getRegions, getSangkwons, getRent, scale, bu
         scaleSqm={getScaleSqm(scale, businessTypeId)}
         onSelect={onSelect}
       />
-      <button className={styles.nextBtn} onClick={onNext}>다음</button>
+      <button className={styles.nextBtn} onClick={() => { trackClick('지역을_선택하세요'); onNext(); }}>다음</button>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import styles from './VisitorEstimation.module.css';
 import { UI_ICONS } from '../../assets/icons';
+import { trackClick } from '../../lib/analytics';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -396,6 +397,7 @@ export function VisitorEstimationStep({ onComplete, registerBackHandler }: Visit
     }
     // 주 영업일수 → 월 영업일수 (× 4.345주)
     const monthlyOperatingDays = Math.round(operatingDays * 4.345);
+    trackClick('일_예상_방문객_수', { daily_customers: avgPerOperatingDay, operating_days: monthlyOperatingDays });
     onComplete(avgPerOperatingDay, monthlyOperatingDays);
   }
 
