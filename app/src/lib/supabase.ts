@@ -13,17 +13,36 @@ const supabase =
     : null;
 
 export async function fetchBusinessTypes(): Promise<BusinessType[]> {
-  // Supabase 스키마와 로컬 타입이 다르므로 항상 로컬 데이터 사용
+  if (supabase) {
+    const { data, error } = await supabase
+      .from('business_types')
+      .select('id,name,category,avg_ticket_price,material_cost_ratio,avg_daily_customers_small,avg_daily_customers_medium,avg_daily_customers_large,labor_cost_monthly_per_person,misc_fixed_cost_monthly,initial_investment_min,initial_investment_max,initial_investment_small,initial_investment_medium,initial_investment_large,avg_monthly_revenue_min,avg_monthly_revenue_max,survival_rate_3yr,data_sources')
+      .order('id');
+    if (!error && data && data.length > 0) return data as BusinessType[];
+  }
   return BUSINESS_TYPES;
 }
 
 export async function fetchCostItems(businessTypeId: number): Promise<CostItem[]> {
-  // 로컬 데이터 사용 (Supabase 스키마 불일치 방지)
+  if (supabase) {
+    const { data, error } = await supabase
+      .from('cost_items')
+      .select('id,business_type_id,cost_category,cost_name,amount_monthly_min,amount_monthly_max,is_initial_cost,note')
+      .eq('business_type_id', businessTypeId)
+      .order('id');
+    if (!error && data && data.length > 0) return data as CostItem[];
+  }
   return COST_ITEMS.filter(c => c.business_type_id === businessTypeId);
 }
 
 export async function fetchRentGuide(): Promise<RentGuide[]> {
-  // 로컬 데이터 사용 (Supabase 스키마 불일치 방지)
+  if (supabase) {
+    const { data, error } = await supabase
+      .from('rent_guides')
+      .select('id,sido,region,sangkwon,rent_per_sqm,data_quarter')
+      .order('id');
+    if (!error && data && data.length > 0) return data as RentGuide[];
+  }
   return RENT_GUIDES;
 }
 
