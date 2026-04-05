@@ -52,13 +52,15 @@ export function BusinessMbtiPage({ result, onShareSuccess, onSkip }: Props) {
     });
   }, [triggerShare, onShareSuccess, card.tagline, result.inputs.business_type.name]);
 
+  const SHARE_TEXT = `내가 하고 싶은 사업, 얼마 벌지 미리 알아봐요!\n앱 설치하지 않아도 토스에서 바로 쓸 수 있어요.\n\nhttps://minion.toss.im/xAmiYYG7`;
+
   const handleImageShare = useCallback(async () => {
     if (!cardRef.current || isCapturing) return;
     setIsCapturing(true);
     trackClick('사장님_유형_이미지공유', { mbti_type: card.tagline, business_type: result.inputs.business_type.name });
 
     try {
-      // 1) 카드 → Canvas → Blob
+      // 1) 카드 → Canvas
       const canvas = await html2canvas(cardRef.current, {
         backgroundColor: card.bgColor,
         scale: 2,
@@ -67,64 +69,63 @@ export function BusinessMbtiPage({ result, onShareSuccess, onSkip }: Props) {
         useCORS: false,
       });
 
+      // 2) navigator.share (파일 공유) — 일반 모바일 브라우저용
       const blob = await new Promise<Blob | null>(resolve =>
         canvas.toBlob(resolve, 'image/png')
       );
-      if (!blob) {
-        setIsCapturing(false);
-        return;
-      }
-
-      // 2) navigator.share (파일 공유) — canShare 체크 없이 바로 시도
-      const file = new File([blob], 'boss-card.png', { type: 'image/png' });
-      if (navigator.share) {
+      if (blob && navigator.share) {
         try {
+          const file = new File([blob], 'boss-card.png', { type: 'image/png' });
           await navigator.share({
             files: [file],
             title: '사장 될 결심',
-            text: card.tagline.replace(/\n/g, ' '),
+            text: SHARE_TEXT,
           });
           setIsCapturing(false);
           return;
         } catch (shareErr) {
-          // AbortError = 사용자 취소, 그 외 = 미지원 → fallback으로
           if (shareErr instanceof Error && shareErr.name === 'AbortError') {
             setIsCapturing(false);
             return;
           }
+          // 파일 공유 미지원 → fallback
         }
       }
 
-      // 3) Fallback: 이미지 저장 + 토스 텍스트 공유
+      // 3) 토스 WebView: 이미지 갤러리 저장 + 텍스트 공유
       try {
         const sdk = await import('@apps-in-toss/web-framework');
-        const dataUrl = canvas.toDataURL('image/png');
+        const b64 = canvas.toDataURL('image/png').split(',')[1];
 
-        // 이미지를 갤러리에 저장 시도
         const saveFn = (sdk as any).saveBase64Data;
+        let imageSaved = false;
         if (typeof saveFn === 'function') {
           try {
-            await saveFn({ base64: dataUrl.split(',')[1], fileName: 'boss-card.png', mimeType: 'image/png' });
+            await saveFn({ data: b64, fileName: 'boss-card.png', mimeType: 'image/png' });
+            imageSaved = true;
           } catch { /* 저장 실패 */ }
         }
 
         const shareFn = (sdk as any).share;
         if (typeof shareFn === 'function') {
-          await shareFn({ message: `[사장 될 결심] ${card.tagline.replace(/\n/g, ' ')}\n내 사장님 유형 확인하기!` });
+          const prefix = imageSaved ? '📸 카드 이미지가 갤러리에 저장되었어요!\n\n' : '';
+          await shareFn({ message: `${prefix}${SHARE_TEXT}` });
           setIsCapturing(false);
           return;
         }
       } catch { /* SDK 없음 */ }
 
       // 4) 최종 Fallback: 이미지 다운로드
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'boss-card.png';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      if (blob) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'boss-card.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
     } catch (err) {
       console.error('이미지 공유 실패:', err);
     }

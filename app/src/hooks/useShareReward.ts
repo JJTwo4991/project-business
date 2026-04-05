@@ -58,7 +58,7 @@ export function useShareReward(): UseShareRewardReturn {
         const sdk = await import('@apps-in-toss/web-framework');
         const share = (sdk as any).share;
         if (typeof share === 'function') {
-          await share({ message: '나의 자영업 MBTI 결과를 확인해보세요! 🍗' });
+          await share({ message: '내가 하고 싶은 사업, 얼마 벌지 미리 알아봐요!\n앱 설치하지 않아도 토스에서 바로 쓸 수 있어요.\n\nhttps://minion.toss.im/xAmiYYG7' });
           onSuccess();
           setIsSharing(false);
           return;
@@ -72,7 +72,7 @@ export function useShareReward(): UseShareRewardReturn {
         if (navigator.share) {
           await navigator.share({
             title: '사장 될 결심',
-            text: '나의 자영업 MBTI 결과를 확인해보세요!',
+            text: '내가 하고 싶은 사업, 얼마 벌지 미리 알아봐요!\nhttps://minion.toss.im/xAmiYYG7',
           });
           onSuccess();
         } else {
