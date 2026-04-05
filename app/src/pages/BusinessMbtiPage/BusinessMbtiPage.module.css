@@ -17,6 +17,24 @@
   margin-bottom: 28px;
 }
 
+/* ── 지역 + 업종 ── */
+.cardMeta {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.metaTag {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.06);
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
 /* ── 일러스트 ── */
 .illustWrap {
   width: 100%;
@@ -107,6 +125,32 @@
   font-weight: 500;
   margin: 0;
   padding-top: 4px;
+}
+
+/* ── 카드 이미지 공유 버튼 ── */
+.imageShareBtn {
+  width: 100%;
+  max-width: 360px;
+  padding: 14px 24px;
+  border: 2px solid #3182F6;
+  border-radius: 16px;
+  background: #fff;
+  color: #3182F6;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 10px;
+  transition: background 0.15s;
+  font-family: inherit;
+}
+
+.imageShareBtn:active {
+  background: #F0F7FF;
+}
+
+.imageShareBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 /* ── 공유 버튼 ── */

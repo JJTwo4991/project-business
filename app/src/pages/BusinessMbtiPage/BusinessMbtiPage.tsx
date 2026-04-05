@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useEffect } from 'react';
+import { useCallback, useMemo, useEffect, useRef, useState } from 'react';
+import html2canvas from 'html2canvas';
 import styles from './BusinessMbtiPage.module.css';
 import type { SimulationResult } from '../../types';
 import { calculateBossCard } from '../../lib/businessMbti';
@@ -37,6 +38,8 @@ interface Props {
 export function BusinessMbtiPage({ result, onShareSuccess, onSkip }: Props) {
   const card = useMemo(() => calculateBossCard(result), [result]);
   const { triggerShare, isSharing } = useShareReward();
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [isCapturing, setIsCapturing] = useState(false);
 
   useEffect(() => {
     trackScreen('사장님_유형', { mbti_type: card.tagline, business_type: result.inputs.business_type.name });
@@ -49,16 +52,65 @@ export function BusinessMbtiPage({ result, onShareSuccess, onSkip }: Props) {
     });
   }, [triggerShare, onShareSuccess, card.tagline, result.inputs.business_type.name]);
 
+  const handleImageShare = useCallback(async () => {
+    if (!cardRef.current || isCapturing) return;
+    setIsCapturing(true);
+    trackClick('사장님_유형_이미지공유', { mbti_type: card.tagline, business_type: result.inputs.business_type.name });
+
+    try {
+      const canvas = await html2canvas(cardRef.current, {
+        backgroundColor: null,
+        scale: 2,
+        useCORS: true,
+      });
+
+      const blob = await new Promise<Blob | null>(resolve =>
+        canvas.toBlob(resolve, 'image/png')
+      );
+      if (!blob) { setIsCapturing(false); return; }
+
+      const file = new File([blob], 'boss-card.png', { type: 'image/png' });
+
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: '사장 될 결심 - 나의 사장님 유형',
+          text: card.tagline.replace(/\n/g, ' '),
+        });
+      } else {
+        // Fallback: 이미지 다운로드
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'boss-card.png';
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    } catch {
+      // 사용자가 공유 취소하거나 에러
+    }
+    setIsCapturing(false);
+  }, [card.tagline, result.inputs.business_type.name, isCapturing]);
+
   return (
     <div className={styles.page}>
-      {/* ── 카드 ── */}
-      <div className={styles.card} style={{ background: card.bgColor }}>
+      {/* ── 카드 (캡처 영역) ── */}
+      <div ref={cardRef} className={styles.card} style={{ background: card.bgColor }}>
+        {/* 지역 + 업종 */}
+        <div className={styles.cardMeta}>
+          {result.inputs.region && (
+            <span className={styles.metaTag}>{result.inputs.region.sido} {result.inputs.region.sangkwon}</span>
+          )}
+          <span className={styles.metaTag}>{card.businessName}</span>
+        </div>
+
         {/* 일러스트 */}
         <div className={styles.illustWrap}>
           <img
             className={styles.illustImg}
             src={BOSS_IMAGES[card.personaId]}
             alt={card.tagline}
+            crossOrigin="anonymous"
           />
         </div>
 
@@ -94,11 +146,19 @@ export function BusinessMbtiPage({ result, onShareSuccess, onSkip }: Props) {
 
       {/* ── 버튼 영역 ── */}
       <button
+        className={styles.imageShareBtn}
+        onClick={handleImageShare}
+        disabled={isCapturing}
+      >
+        {isCapturing ? '📸 이미지 생성 중...' : '📸 카드 이미지로 공유하기'}
+      </button>
+
+      <button
         className={styles.shareBtn}
         onClick={handleShare}
         disabled={isSharing}
       >
-        {isSharing ? '공유 중...' : '공유하고 광고 없이 손익 확인하기'}
+        {isSharing ? '🎁 공유 중...' : '🎁 공유하고 광고 없이 손익 확인하기'}
         <span className={styles.shareSub}>친구에게 공유하면 일·월 손익을 바로 볼 수 있어요</span>
       </button>
 
@@ -106,7 +166,7 @@ export function BusinessMbtiPage({ result, onShareSuccess, onSkip }: Props) {
         className={styles.skipBtn}
         onClick={onSkip}
       >
-        광고 보고 확인하기
+        📺 광고 보고 확인하기
       </button>
     </div>
   );
