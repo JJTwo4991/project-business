@@ -58,14 +58,9 @@ export function useStepNavigation(): UseStepNavigationResult {
   }, [activeSteps, currentStep]);
 
   const goBack = useCallback(() => {
-    let idx = activeSteps.indexOf(currentStep);
+    const idx = activeSteps.indexOf(currentStep);
     if (idx > 0) {
-      idx -= 1;
-      // 전환 화면(애니메이션만 있는 화면)은 건너뛰기
-      while (idx > 0 && TRANSITION_STEPS.includes(activeSteps[idx])) {
-        idx -= 1;
-      }
-      setCurrentStep(activeSteps[idx]);
+      setCurrentStep(activeSteps[idx - 1]);
     }
   }, [activeSteps, currentStep]);
 

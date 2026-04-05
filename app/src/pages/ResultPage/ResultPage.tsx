@@ -224,7 +224,7 @@ function DcfLimitationsSection() {
   );
 }
 
-const BANNER_AD_GROUP_ID = 'ait-ad-test-banner-id';
+const BANNER_AD_GROUP_ID = 'ait.v2.live.7243434c76174593';
 
 function BannerAdSlot() {
   const containerRef = useRef<HTMLDivElement>(null);
