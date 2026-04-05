@@ -40,6 +40,7 @@ export function BusinessMbtiPage({ result, onShareSuccess, onSkip }: Props) {
   const { triggerShare, isSharing } = useShareReward();
   const cardRef = useRef<HTMLDivElement>(null);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
     trackScreen('사장님_유형', { mbti_type: card.tagline, business_type: result.inputs.business_type.name });
@@ -98,18 +99,17 @@ export function BusinessMbtiPage({ result, onShareSuccess, onSkip }: Props) {
         const b64 = canvas.toDataURL('image/png').split(',')[1];
 
         const saveFn = (sdk as any).saveBase64Data;
-        let imageSaved = false;
         if (typeof saveFn === 'function') {
           try {
             await saveFn({ data: b64, fileName: 'boss-card.png', mimeType: 'image/png' });
-            imageSaved = true;
+            setToast('갤러리에 사진이 저장되었어요!');
+            setTimeout(() => setToast(null), 2500);
           } catch { /* 저장 실패 */ }
         }
 
         const shareFn = (sdk as any).share;
         if (typeof shareFn === 'function') {
-          const prefix = imageSaved ? '📸 카드 이미지가 갤러리에 저장되었어요!\n\n' : '';
-          await shareFn({ message: `${prefix}${SHARE_TEXT}` });
+          await shareFn({ message: SHARE_TEXT });
           setIsCapturing(false);
           return;
         }
@@ -134,8 +134,17 @@ export function BusinessMbtiPage({ result, onShareSuccess, onSkip }: Props) {
 
   return (
     <div className={styles.page}>
+      {/* ── 토스트 ── */}
+      {toast && <div className={styles.toast}>{toast}</div>}
+
       {/* ── 카드 (캡처 영역) ── */}
       <div ref={cardRef} className={styles.card} style={{ background: card.bgColor }}>
+        {/* 서비스 헤더 */}
+        <div className={styles.cardHeader}>
+          <span>사장 될 결심</span>
+          <span>토스 미니앱</span>
+        </div>
+
         {/* 지역 + 업종 */}
         <div className={styles.cardMeta}>
           {result.inputs.region && (
