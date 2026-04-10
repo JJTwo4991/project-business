@@ -44,6 +44,7 @@ import { useRecentSimulations } from './hooks/useRecentSimulations';
 import type { SavedSimulation } from './hooks/useRecentSimulations';
 import { useFullScreenAd } from './hooks/useFullScreenAd';
 import { BusinessMbtiPage } from './pages/BusinessMbtiPage/BusinessMbtiPage';
+import { CoverPage } from './pages/CoverPage/CoverPage';
 
 /** 토스 WebView 환경 감지 (토스 앱 내 미니앱으로 실행 중인지) */
 const isTossWebView = /TossApp/i.test(navigator.userAgent);
@@ -55,6 +56,7 @@ export default function App() {
   const nav = useStepNavigation();
   const recentSims = useRecentSimulations();
   const ad = useFullScreenAd();
+  const [showCover, setShowCover] = useState(true);
 
   const customBackRef = useRef<(() => boolean) | null>(null);
 
@@ -324,6 +326,10 @@ export default function App() {
         return null;
     }
   };
+
+  if (showCover) {
+    return <CoverPage onStart={() => setShowCover(false)} />;
+  }
 
   return (
     <div className={styles.root}>
