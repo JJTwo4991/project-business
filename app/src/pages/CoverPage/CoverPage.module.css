@@ -113,27 +113,23 @@
 
 .startBtn {
   font-family: 'Pretendard Variable', Pretendard, sans-serif;
-  font-weight: 700;
-  font-size: 20px;
+  font-weight: 800;
+  font-size: 22px;
   color: #1a1a1a;
-  background: #fdfcf8;
-  border: 2.5px solid #1a1a1a;
-  padding: 18px 64px;
-  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  background: transparent;
+  border: none;
+  padding: 12px 24px;
   cursor: pointer;
   letter-spacing: -0.5px;
-  box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.1);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
 .startBtn:hover {
-  transform: translate(-1px, -1px);
-  box-shadow: 4px 5px 0 rgba(0, 0, 0, 0.12);
+  opacity: 0.7;
 }
 
 .startBtn:active {
-  transform: translate(2px, 2px);
-  box-shadow: 1px 2px 0 rgba(0, 0, 0, 0.08);
+  transform: translateY(1px);
 }
 
 @media (max-width: 380px) {
@@ -141,11 +137,7 @@
     font-size: 52px;
     letter-spacing: -2.5px;
   }
-  .tagline {
-    font-size: 15px;
-  }
   .startBtn {
-    font-size: 18px;
-    padding: 16px 52px;
+    font-size: 20px;
   }
 }
