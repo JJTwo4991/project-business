@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>릴스 카드뉴스 템플릿 (1080×1920)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+    background: #111;
+    padding: 40px 0;
+  }
+
+  /* ── 9:16 릴스/숏츠 기본 카드 ── */
+  .card {
+    width: 1080px;
+    height: 1920px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 120px 90px;
+    margin: 24px auto;
+    box-shadow: 0 20px 80px rgba(0,0,0,0.4);
+  }
+
+  /* ── 카드 배경 스타일 ── */
+  .card--hook {
+    background: linear-gradient(160deg, #FF3B30 0%, #B91C1C 100%);
+    color: #fff;
+  }
+  .card--hero {
+    background: linear-gradient(160deg, #3182F6 0%, #0B4BC7 100%);
+    color: #fff;
+  }
+  .card--dark {
+    background: linear-gradient(180deg, #191F28 0%, #000 100%);
+    color: #fff;
+  }
+  .card--white {
+    background: #fff;
+    color: #191F28;
+  }
+  .card--soft {
+    background: linear-gradient(180deg, #F0F7FF 0%, #E0ECFF 100%);
+    color: #191F28;
+  }
+  .card--danger {
+    background: linear-gradient(180deg, #FFF5F5 0%, #FFE3E3 100%);
+    color: #191F28;
+  }
+  .card--cta {
+    background: linear-gradient(160deg, #FFD43B 0%, #FF6B1A 100%);
+    color: #191F28;
+  }
+
+  /* 노이즈 질감 오버레이 (후킹 카드용) */
+  .card--hook::before,
+  .card--dark::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
+    background-size: 4px 4px;
+    pointer-events: none;
+  }
+
+  .card__logo {
+    position: absolute;
+    top: 80px;
+    left: 90px;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    opacity: 0.7;
+    z-index: 2;
+  }
+  .card__number {
+    position: absolute;
+    top: 80px;
+    right: 90px;
+    font-size: 28px;
+    font-weight: 800;
+    opacity: 0.5;
+    z-index: 2;
+  }
+  .card__footer {
+    position: absolute;
+    bottom: 70px;
+    font-size: 26px;
+    font-weight: 700;
+    opacity: 0.55;
+    letter-spacing: -0.3px;
+    z-index: 2;
+  }
+
+  /* ── 텍스트 요소 ── */
+  .card__sticker {
+    display: inline-block;
+    background: #FFD43B;
+    color: #191F28;
+    font-size: 38px;
+    font-weight: 900;
+    padding: 14px 32px;
+    border-radius: 16px;
+    transform: rotate(-3deg);
+    margin-bottom: 40px;
+    box-shadow: 0 8px 0 rgba(0,0,0,0.15);
+  }
+
+  .card__emoji {
+    font-size: 220px;
+    line-height: 1;
+    margin-bottom: 50px;
+    filter: drop-shadow(0 12px 30px rgba(0,0,0,0.25));
+  }
+
+  .card__hook {
+    font-size: 130px;
+    font-weight: 900;
+    line-height: 1.1;
+    text-align: center;
+    letter-spacing: -3px;
+    word-break: keep-all;
+    text-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  }
+
+  .card__title {
+    font-size: 96px;
+    font-weight: 900;
+    line-height: 1.2;
+    text-align: center;
+    letter-spacing: -2.5px;
+    word-break: keep-all;
+    margin-bottom: 40px;
+  }
+  .card__title--small { font-size: 76px; }
+
+  .card__subtitle {
+    font-size: 44px;
+    font-weight: 600;
+    line-height: 1.5;
+    text-align: center;
+    opacity: 0.85;
+    word-break: keep-all;
+    margin-bottom: 30px;
+  }
+
+  .card__highlight {
+    background: linear-gradient(180deg, transparent 55%, #FFD43B 55%);
+    padding: 0 8px;
+  }
+  .card__highlight--red {
+    background: linear-gradient(180deg, transparent 55%, #FF6B6B 55%);
+    color: #fff;
+    padding: 0 8px;
+  }
+
+  .card__big-number {
+    font-size: 220px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -6px;
+    margin: 30px 0;
+  }
+  .card__big-number--red { color: #FF3B30; }
+  .card__big-number--green { color: #16A34A; }
+  .card__big-number--blue { color: #3182F6; }
+  .card__big-number--yellow { color: #FFD43B; text-shadow: 0 6px 0 rgba(0,0,0,0.2); }
+
+  .card__unit {
+    font-size: 72px;
+    font-weight: 800;
+    opacity: 0.7;
+    margin-left: 8px;
+  }
+
+  /* ── 스탯 박스 (매출·비용 비교) ── */
+  .card__stat-row {
+    display: flex;
+    gap: 36px;
+    margin: 40px 0;
+    width: 100%;
+    justify-content: center;
+  }
+  .card__stat {
+    text-align: center;
+    background: rgba(255,255,255,0.12);
+    border-radius: 24px;
+    padding: 36px 24px;
+    flex: 1;
+    backdrop-filter: blur(12px);
+  }
+  .card--white .card__stat,
+  .card--soft .card__stat,
+  .card--danger .card__stat {
+    background: rgba(0,0,0,0.05);
+  }
+  .card__stat-label {
+    font-size: 32px;
+    opacity: 0.65;
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+  .card__stat-value {
+    font-size: 60px;
+    font-weight: 900;
+    letter-spacing: -1.5px;
+  }
+
+  /* ── 손익 계산 행 ── */
+  .card__calc {
+    width: 100%;
+    margin: 20px 0;
+  }
+  .card__calc-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 28px 40px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 20px;
+    margin-bottom: 16px;
+    font-size: 44px;
+    font-weight: 700;
+  }
+  .card--white .card__calc-row,
+  .card--soft .card__calc-row {
+    background: rgba(0,0,0,0.05);
+  }
+  .card__calc-row--total {
+    background: #FFD43B;
+    color: #191F28;
+    font-size: 56px;
+    font-weight: 900;
+    padding: 36px 40px;
+  }
+  .card__calc-label { opacity: 0.75; }
+  .card__calc-value--red { color: #FF6B6B; }
+  .card__calc-value--blue { color: #4DABF7; }
+
+  /* ── CTA 버튼 ── */
+  .card__cta-btn {
+    display: inline-block;
+    background: #191F28;
+    color: #FFD43B;
+    font-size: 54px;
+    font-weight: 900;
+    padding: 40px 72px;
+    border-radius: 100px;
+    margin-top: 50px;
+    box-shadow: 0 12px 0 rgba(0,0,0,0.25);
+    letter-spacing: -1px;
+  }
+
+  .card__screenshot {
+    max-width: 720px;
+    border-radius: 40px;
+    box-shadow: 0 20px 80px rgba(0,0,0,0.35);
+    margin: 30px 0;
+  }
+
+  .card__arrow {
+    font-size: 120px;
+    margin: 20px 0;
+    opacity: 0.6;
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- 카드 1 · HOOK — 스크롤 멈추게 하는 미끼           -->
+<!-- ════════════════════════════════════════════ -->
+<div class="card card--hook" id="card-1">
+  <span class="card__logo">사장 될 결심</span>
+  <span class="card__number">1/7</span>
+
+  <div class="card__sticker">⚠️ 창업 고민중이라면</div>
+  <div class="card__emoji">🍗</div>
+  <h1 class="card__hook">
+    나도 때려치고<br>
+    치킨집<br>
+    할까?
+  </h1>
+  <p class="card__subtitle" style="margin-top:50px; font-size:52px; font-weight:800;">
+    ✋ 잠깐, 이거 보고 결정해요
+  </p>
+
+  <span class="card__footer">👉 넘겨보기</span>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- 카드 2 · 환상 깨기 — 매출 공개                   -->
+<!-- ════════════════════════════════════════════ -->
+<div class="card card--dark" id="card-2">
+  <span class="card__logo">사장 될 결심</span>
+  <span class="card__number">2/7</span>
+
+  <p class="card__subtitle" style="font-size:56px; font-weight:800; opacity:1;">
+    "치킨집 월 매출이요?"
+  </p>
+  <div class="card__big-number card__big-number--yellow">
+    1,144<span class="card__unit">만원</span>
+  </div>
+  <p class="card__subtitle" style="font-size:46px;">
+    중형 매장 기준 · 하루 45명 × 9,800원
+  </p>
+  <div class="card__sticker" style="background:#3182F6; color:#fff; margin-top:40px;">
+    😏 오 좀 되는데?
+  </div>
+
+  <span class="card__footer">📊 토스 미니앱 · 사장 될 결심</span>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- 카드 3 · 반전 — 빠져나가는 돈                    -->
+<!-- ════════════════════════════════════════════ -->
+<div class="card card--danger" id="card-3">
+  <span class="card__logo">사장 될 결심</span>
+  <span class="card__number">3/7</span>
+
+  <div class="card__sticker" style="background:#FF3B30; color:#fff;">
+    💸 근데 여기서
+  </div>
+  <h1 class="card__title">이만큼 빠집니다</h1>
+
+  <div class="card__calc">
+    <div class="card__calc-row">
+      <span class="card__calc-label">재료비 (36%)</span>
+      <span class="card__calc-value--red">-412만</span>
+    </div>
+    <div class="card__calc-row">
+      <span class="card__calc-label">임대·인건비</span>
+      <span class="card__calc-value--red">-380만</span>
+    </div>
+    <div class="card__calc-row">
+      <span class="card__calc-label">배달·공과금</span>
+      <span class="card__calc-value--red">-183만</span>
+    </div>
+    <div class="card__calc-row">
+      <span class="card__calc-label">세금·이자</span>
+      <span class="card__calc-value--red">-85만</span>
+    </div>
+  </div>
+
+  <span class="card__footer">🧾 실제 업종 평균 추정</span>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- 카드 4 · 결론 — 실수령액                         -->
+<!-- ════════════════════════════════════════════ -->
+<div class="card card--white" id="card-4">
+  <span class="card__logo">사장 될 결심</span>
+  <span class="card__number">4/7</span>
+
+  <p class="card__subtitle" style="font-size:52px; font-weight:700;">
+    그래서 사장님 손에 남는 돈
+  </p>
+  <div class="card__big-number card__big-number--red">
+    84<span class="card__unit">만원</span>
+  </div>
+  <p class="card__subtitle" style="font-size:44px;">
+    주 6일 · 하루 12시간 일하고<br>
+    <span class="card__highlight">시급 2,900원</span>
+  </p>
+
+  <span class="card__footer">😮‍💨 최저시급의 30%</span>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- 카드 5 · 비교 — 직장인 vs 사장                    -->
+<!-- ════════════════════════════════════════════ -->
+<div class="card card--soft" id="card-5">
+  <span class="card__logo">사장 될 결심</span>
+  <span class="card__number">5/7</span>
+
+  <h1 class="card__title card__title--small">
+    "차라리 회사 다닐걸…"
+  </h1>
+
+  <div class="card__stat-row" style="flex-direction:column; gap:24px;">
+    <div class="card__stat" style="background:#E7F5FF;">
+      <div class="card__stat-label">🧑‍💼 직장인 평균</div>
+      <div class="card__stat-value" style="color:#3182F6;">월 324만</div>
+    </div>
+    <div class="card__stat" style="background:#FFE3E3;">
+      <div class="card__stat-label">🧑‍🍳 치킨집 사장</div>
+      <div class="card__stat-value" style="color:#FF3B30;">월 84만</div>
+    </div>
+  </div>
+
+  <p class="card__subtitle" style="font-size:42px; margin-top:40px;">
+    내 돈 수억 넣고<br>
+    <strong>4배 적게 번다</strong>
+  </p>
+
+  <span class="card__footer">📉 현실 체크</span>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- 카드 6 · 전환 — 그럼 어떡해?                     -->
+<!-- ════════════════════════════════════════════ -->
+<div class="card card--hero" id="card-6">
+  <span class="card__logo">사장 될 결심</span>
+  <span class="card__number">6/7</span>
+
+  <div class="card__sticker">🎯 그래서 만들었어요</div>
+  <h1 class="card__title">
+    창업 전에<br>
+    <span style="color:#FFD43B;">내 사업</span><br>
+    미리 시뮬레이션
+  </h1>
+  <p class="card__subtitle" style="font-size:44px; margin-top:30px;">
+    치킨·카페·편의점 등 <strong>14개 업종</strong><br>
+    월 손익·회수기간까지 3분만에
+  </p>
+
+  <span class="card__footer">💡 토스 미니앱</span>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- 카드 7 · CTA — 지금 해보세요                     -->
+<!-- ════════════════════════════════════════════ -->
+<div class="card card--cta" id="card-7">
+  <span class="card__logo">사장 될 결심</span>
+  <span class="card__number">7/7</span>
+
+  <div class="card__emoji">🐕</div>
+  <h1 class="card__title">
+    사장 될 결심,<br>
+    <span class="card__highlight--red">3분이면 돼요</span>
+  </h1>
+  <p class="card__subtitle" style="font-size:44px;">
+    토스 앱에서 <strong>'사장 될 결심'</strong> 검색
+  </p>
+
+  <div class="card__cta-btn">
+    👉 무료로 시작하기
+  </div>
+
+  <span class="card__footer">🎁 공유하면 광고 스킵</span>
+</div>
+
+</body>
+</html>

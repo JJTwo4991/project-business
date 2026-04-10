@@ -88,6 +88,10 @@ export interface SimulatorInputs {
   region?: { sido: string; sangkwon: string; rent_per_sqm: number };
   material_cost_ratio_override?: number;
   misc_fixed_cost_override?: number;
+  delivery_commission_rate_override?: number;  // 배달수수료율 오버라이드
+  delivery_commission_override?: number;       // 배달수수료 금액 직접 오버라이드
+  misc_rate_override?: number;                 // 기타비용률 오버라이드
+  misc_operating_override?: number;            // 기타비용 금액 직접 오버라이드
   rent_deposit?: number;
   selected_brand?: FranchiseBrand;
 }
@@ -159,7 +163,7 @@ export interface SimulationResult {
 
 export type StepId = 'select-industry' | 'industry-transition' | 'select-scale' |
   'investment-breakdown' | 'select-region' | 'set-investment' | 'set-loan' |
-  'transition-operating' | 'set-customers' | 'set-ticket' | 'set-labor' | 'set-rent' | 'confirm' |
+  'transition-operating' | 'set-customers' | 'set-ticket' | 'set-labor' | 'set-rent' | 'set-sga' | 'confirm' |
   'business-mbti' | 'result-daily' | 'result-monthly' | 'result-payback' | 'set-misc' | 'result-dcf';
 
 export interface ScaleDescription {

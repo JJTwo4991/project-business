@@ -16,9 +16,13 @@ type QuestionId =
   | 'q5-normal-visitors'
   | 'summary';
 
+const VISITOR_SUB_STEPS: QuestionId[] = ['q1-days', 'q2-hours', 'q3-busy-days', 'q4-busy-visitors', 'q5-normal-visitors'];
+const VISITOR_SUB_TOTAL = VISITOR_SUB_STEPS.length;
+
 interface VisitorEstimationStepProps {
   onComplete: (dailyCustomers: number, monthlyOperatingDays: number) => void;
   registerBackHandler?: (handler: (() => boolean) | null) => void;
+  onSubStepChange?: (current: number, total: number) => void;
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -280,7 +284,7 @@ function SummaryScreen({ data, onNext }: { data: SummaryData; onNext: () => void
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export function VisitorEstimationStep({ onComplete, registerBackHandler }: VisitorEstimationStepProps) {
+export function VisitorEstimationStep({ onComplete, registerBackHandler, onSubStepChange }: VisitorEstimationStepProps) {
   // Q1
   const [selectedDays, setSelectedDays] = useState<DayKey[]>(['월', '화', '수', '목', '금', '토']);
   // Q2
@@ -297,6 +301,15 @@ export function VisitorEstimationStep({ onComplete, registerBackHandler }: Visit
   const [animState, setAnimState] = useState<'entering' | 'idle' | 'exiting'>('entering');
   const [currentQ, setCurrentQ] = useState<QuestionId>('q1-days');
   const [pendingQ, setPendingQ] = useState<QuestionId | null>(null);
+
+  // 서브스텝 변경 시 부모에게 알림
+  useEffect(() => {
+    if (!onSubStepChange) return;
+    const idx = VISITOR_SUB_STEPS.indexOf(currentQ);
+    // summary는 마지막 서브스텝과 동일하게 취급
+    const current = idx >= 0 ? idx + 1 : VISITOR_SUB_TOTAL;
+    onSubStepChange(current, VISITOR_SUB_TOTAL);
+  }, [currentQ, onSubStepChange]);
 
   // 헤더 뒤로가기 시 내부 서브스텝으로 이동
   useEffect(() => {

@@ -13,6 +13,10 @@ const DELIVERY_RATES: Record<number, number> = {
   6: 0.033,  // 한식: 3.3% (전체 주문 중 1/3이 배달 가정)
 };
 
+export function getDeliveryRate(businessTypeId: number): number {
+  return DELIVERY_RATES[businessTypeId] ?? 0;
+}
+
 // 기타비용률 (매출 대비, 배달수수료 제외)
 // 외식: 기타 7.0% - 배달 1.2% ≈ 6% (외식업체 경영실태조사 2024, KREI 2025년 제6호 p.2)
 // 소매: 도소매업 기타 7.7% (소상공인실태조사 2023 p.89), 배달 없으므로 6%로 보수적 적용
@@ -81,7 +85,7 @@ function getDebt(capital: SimulatorInputs['capital']): number {
   return Math.max(0, capital.initial_investment - capital.equity);
 }
 
-function getDailyCustomers(inputs: SimulatorInputs, params: ResolvedParams): number {
+export function getDailyCustomers(inputs: SimulatorInputs, params: ResolvedParams): number {
   if (inputs.daily_customers_override != null) return inputs.daily_customers_override;
   const { scale } = inputs;
   return scale === 'small' ? params.avg_daily_customers_small
@@ -112,15 +116,17 @@ export function calcMonthlyPnL(inputs: SimulatorInputs): MonthlyPnL {
   const labor = bt.labor_cost_monthly_per_person * laborHeadcount;
   const rent = inputs.rent_monthly ?? 0;
 
-  const deliveryRate = DELIVERY_RATES[bt.id] ?? 0;
-  const delivery_commission = deliveryRate > 0
-    ? Math.round(revenue * deliveryRate)
-    : 0;
+  // 배달수수료: 금액 직접 오버라이드 > 비율 오버라이드 > 업종 기본값
+  const effectiveDeliveryRate = inputs.delivery_commission_rate_override ?? (DELIVERY_RATES[bt.id] ?? 0);
+  const delivery_commission = inputs.delivery_commission_override != null
+    ? inputs.delivery_commission_override
+    : (effectiveDeliveryRate > 0 ? Math.round(revenue * effectiveDeliveryRate) : 0);
 
-  // 기타 영업비용: 매출 대비 비율 (공과금, 보험료, 소모품비 등 포함)
-  // 외식: 기타 7.0% - 배달 1.2% ≈ 6% (외식업체 경영실태조사 2024, KREI p.2)
-  const miscRate = getMiscCostRate(bt.category);
-  const misc_operating = Math.round(revenue * miscRate);
+  // 기타 영업비용: 금액 직접 오버라이드 > 비율 오버라이드 > 기본 6%
+  const miscRate = inputs.misc_rate_override ?? getMiscCostRate(bt.category);
+  const misc_operating = inputs.misc_operating_override != null
+    ? inputs.misc_operating_override
+    : Math.round(revenue * miscRate);
 
   // 프랜차이즈 수수료 (변동비 — 매출 연동)
   const royalty = Math.round(revenue * params.franchise_royalty_rate);

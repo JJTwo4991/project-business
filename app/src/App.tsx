@@ -15,7 +15,7 @@ import { ScaleSelectStep } from './pages/WizardSteps/ScaleSelectStep';
 import { RegionStep } from './pages/WizardSteps/RegionStep';
 import { InvestmentStep, LoanStep } from './pages/WizardSteps/InvestmentStep';
 import { InvestmentBreakdownStep } from './pages/WizardSteps/InvestmentBreakdownStep';
-import { TicketStep, LaborStep, RentStep, MiscStep } from './pages/WizardSteps/OperatingParamsSteps';
+import { TicketStep, LaborStep, RentStep, MiscStep, SgaStep } from './pages/WizardSteps/OperatingParamsSteps';
 import { VisitorEstimationStep } from './pages/WizardSteps/VisitorEstimationStep';
 import { TossTransition } from './components/TossTransition/TossTransition';
 import { IndustryTransition } from './components/IndustryTransition/IndustryTransition';
@@ -122,6 +122,14 @@ export default function App() {
     simulator.reset();
     nav.goTo('select-industry');
   }, [simulator, nav]);
+
+  // 서브스텝 진행도 (VisitorEstimationStep 등 내부 단계가 있는 스텝)
+  const [subStep, setSubStep] = useState<{ current: number; total: number } | null>(null);
+
+  // set-customers가 아닌 스텝으로 이동 시 subStep 초기화
+  useEffect(() => {
+    if (nav.currentStep !== 'set-customers') setSubStep(null);
+  }, [nav.currentStep]);
 
   // 확인 화면에서 수정 모드
   const [editReturnStep, setEditReturnStep] = useState<StepId | null>(null);
@@ -246,9 +254,11 @@ export default function App() {
             onComplete={(v, days) => {
               simulator.setOverride('daily_customers_override', v);
               simulator.setOverride('operating_days', days);
+              setSubStep(null);
               effectiveGoNext();
             }}
             registerBackHandler={h => { customBackRef.current = h; }}
+            onSubStepChange={(current, total) => setSubStep({ current, total })}
           />
         ) : null;
 
@@ -265,6 +275,11 @@ export default function App() {
       case 'set-rent':
         return simulator.inputs ? (
           <RentStep inputs={simulator.inputs} onOverride={simulator.setOverride} onNext={effectiveGoNext} />
+        ) : null;
+
+      case 'set-sga':
+        return simulator.inputs ? (
+          <SgaStep inputs={simulator.inputs} onOverride={simulator.setOverride} onNext={effectiveGoNext} />
         ) : null;
 
       case 'confirm':
@@ -328,7 +343,24 @@ export default function App() {
               ←
             </button>
           )}
-          {!nav.isResultStep && <StepIndicator progress={nav.progress} />}
+          {!nav.isResultStep && (() => {
+            // set-customers 내부 서브스텝 (5개) → 1스텝을 5스텝으로 확장
+            const SUB_TOTAL = 5;
+            const EXTRA = SUB_TOTAL - 1; // +4 스텝
+            const adjustedTotal = nav.totalVisibleSteps + EXTRA;
+            // set-customers의 visible step 번호
+            const customerStepNum = 7; // select-industry(1), select-region(2), select-scale(3), investment-breakdown(4), set-investment(5), set-loan(6), set-customers(7)
+            let adjustedCurrent: number;
+            if (nav.currentStep === 'set-customers' && subStep) {
+              adjustedCurrent = customerStepNum - 1 + subStep.current;
+            } else if (nav.currentStepNum > customerStepNum) {
+              adjustedCurrent = nav.currentStepNum + EXTRA;
+            } else {
+              adjustedCurrent = nav.currentStepNum;
+            }
+            const adjustedProgress = adjustedTotal > 0 ? Math.min(1, adjustedCurrent / adjustedTotal) : 0;
+            return <StepIndicator progress={adjustedProgress} currentStepNum={adjustedCurrent} totalStepNum={adjustedTotal} />;
+          })()}
           {!isTossWebView && (
             <button className={styles.homeBtn} onClick={handleGoHome} aria-label="처음으로">
               처음으로

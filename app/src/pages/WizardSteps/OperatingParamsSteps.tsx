@@ -5,7 +5,7 @@ import styles from './WizardSteps.module.css';
 import { SliderInput } from '../../components/SliderInput/SliderInput';
 import type { SimulatorInputs } from '../../types';
 import { formatKRW, formatKRWShort } from '../../lib/format';
-import { resolveBusinessParams } from '../../lib/calculator';
+import { resolveBusinessParams, getDeliveryRate, getMiscCostRate, getDailyCustomers } from '../../lib/calculator';
 import { getScaleSqm } from '../../lib/scale';
 import { GuidelineBox } from '../../components/GuidelineBox/GuidelineBox';
 import { getGuideline } from '../../data/guidelines';
@@ -415,6 +415,150 @@ export function MiscStep({ inputs, onOverride, onNext, registerBackHandler }: St
         </div>
       </div>
       <button className={styles.nextBtn} onClick={onNext}>결과 보기</button>
+    </div>
+  );
+}
+
+// ─── SGA 비용 조정 스텝 ─────────────────────────────────────────────────────
+
+export function SgaStep({ inputs, onOverride, onNext }: StepProps) {
+  const bt = inputs.business_type;
+  const params = resolveBusinessParams(inputs);
+  const operatingDays = inputs.operating_days ?? 26;
+  const dailyCustomers = getDailyCustomers(inputs, params);
+  const ticketPrice = inputs.ticket_price_override ?? params.avg_ticket_price;
+  const revenue = dailyCustomers * ticketPrice * operatingDays;
+
+  // 배달수수료
+  const defaultDeliveryRate = getDeliveryRate(bt.id);
+  const deliveryRate = inputs.delivery_commission_rate_override ?? defaultDeliveryRate;
+  const deliveryAmount = inputs.delivery_commission_override ?? Math.round(revenue * deliveryRate);
+
+  // 기타비용
+  const defaultMiscRate = getMiscCostRate(bt.category);
+  const miscRate = inputs.misc_rate_override ?? defaultMiscRate;
+  const miscAmount = inputs.misc_operating_override ?? Math.round(revenue * miscRate);
+
+  const [deliveryMode, setDeliveryMode] = useState<'rate' | 'amount'>('rate');
+  const [miscMode, setMiscMode] = useState<'rate' | 'amount'>('rate');
+
+  const handleDeliveryRateChange = (v: number) => {
+    const rate = v / 100;
+    onOverride('delivery_commission_rate_override', rate);
+    // 금액 오버라이드 해제 → 비율 연동
+    onOverride('delivery_commission_override', Math.round(revenue * rate));
+  };
+
+  const handleDeliveryAmountChange = (v: number) => {
+    onOverride('delivery_commission_override', v);
+  };
+
+  const handleMiscRateChange = (v: number) => {
+    const rate = v / 100;
+    onOverride('misc_rate_override', rate);
+    onOverride('misc_operating_override', Math.round(revenue * rate));
+  };
+
+  const handleMiscAmountChange = (v: number) => {
+    onOverride('misc_operating_override', v);
+  };
+
+  return (
+    <div className={styles.step}>
+      <h2 className={styles.stepTitle}>기타 비용 조정</h2>
+      <p className={styles.stepDesc}>배달수수료·기타비용을 실제 상황에 맞게 조정하세요</p>
+
+      {/* 배달수수료 */}
+      <div className={styles.sgaSection}>
+        <div className={styles.sgaHeader}>
+          <span className={styles.sgaLabel}>🛵 배달앱 수수료</span>
+          <div className={styles.sgaToggle}>
+            <button
+              className={`${styles.sgaToggleBtn} ${deliveryMode === 'rate' ? styles.sgaToggleActive : ''}`}
+              onClick={() => setDeliveryMode('rate')}
+            >비율</button>
+            <button
+              className={`${styles.sgaToggleBtn} ${deliveryMode === 'amount' ? styles.sgaToggleActive : ''}`}
+              onClick={() => setDeliveryMode('amount')}
+            >금액</button>
+          </div>
+        </div>
+        {deliveryMode === 'rate' ? (
+          <SliderInput
+            label="수수료율"
+            value={Math.round(deliveryRate * 10000) / 100}
+            min={0}
+            max={30}
+            step={0.5}
+            format={v => `${v}%`}
+            onChange={handleDeliveryRateChange}
+          />
+        ) : (
+          <SliderInput
+            label="월 수수료"
+            value={deliveryAmount}
+            min={0}
+            max={Math.max(5_000_000, deliveryAmount * 2)}
+            step={50_000}
+            format={formatKRWShort}
+            onChange={handleDeliveryAmountChange}
+          />
+        )}
+        <p className={styles.sgaHint}>
+          월매출 {formatKRWShort(revenue)} 기준 → {formatKRWShort(deliveryAmount)}/월
+        </p>
+      </div>
+
+      {/* 기타비용 */}
+      <div className={styles.sgaSection}>
+        <div className={styles.sgaHeader}>
+          <span className={styles.sgaLabel}>📋 기타 영업비용</span>
+          <div className={styles.sgaToggle}>
+            <button
+              className={`${styles.sgaToggleBtn} ${miscMode === 'rate' ? styles.sgaToggleActive : ''}`}
+              onClick={() => setMiscMode('rate')}
+            >비율</button>
+            <button
+              className={`${styles.sgaToggleBtn} ${miscMode === 'amount' ? styles.sgaToggleActive : ''}`}
+              onClick={() => setMiscMode('amount')}
+            >금액</button>
+          </div>
+        </div>
+        {miscMode === 'rate' ? (
+          <SliderInput
+            label="비용률"
+            value={Math.round(miscRate * 10000) / 100}
+            min={0}
+            max={20}
+            step={0.5}
+            format={v => `${v}%`}
+            onChange={handleMiscRateChange}
+          />
+        ) : (
+          <SliderInput
+            label="월 기타비용"
+            value={miscAmount}
+            min={0}
+            max={Math.max(5_000_000, miscAmount * 2)}
+            step={50_000}
+            format={formatKRWShort}
+            onChange={handleMiscAmountChange}
+          />
+        )}
+        <p className={styles.sgaHint}>
+          공과금, 보험료, 소모품비 등 · 월매출 대비 {(miscRate * 100).toFixed(1)}%
+        </p>
+      </div>
+
+      <button className={styles.nextBtn} onClick={() => {
+        trackClick('기타비용_조정', {
+          delivery_rate: deliveryRate,
+          delivery_amount: deliveryAmount,
+          misc_rate: miscRate,
+          misc_amount: miscAmount,
+        });
+        onNext();
+      }}>다음</button>
     </div>
   );
 }

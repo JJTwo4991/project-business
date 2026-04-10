@@ -7,7 +7,7 @@ const INPUT_STEPS: StepId[] = [
   'select-industry', 'industry-transition', 'select-region', 'select-scale',
   'investment-breakdown', 'set-investment', 'set-loan',
   'transition-operating', 'set-customers',
-  'set-ticket', 'set-labor', 'set-rent', 'confirm',
+  'set-ticket', 'set-labor', 'set-rent', 'set-sga', 'confirm',
 ];
 
 const RESULT_STEPS: StepId[] = [
@@ -27,6 +27,8 @@ interface UseStepNavigationResult {
   stepIndex: number;
   totalSteps: number;
   progress: number;
+  currentStepNum: number;
+  totalVisibleSteps: number;
   isFirstStep: boolean;
   isLastInputStep: boolean;
   isResultStep: boolean;
@@ -162,6 +164,21 @@ export function useStepNavigation(): UseStepNavigationResult {
   }, []);
 
   const isResultStep = RESULT_STEPS.includes(currentStep);
+
+  // Visible input steps (excluding transitions and progress-excluded)
+  const visibleInputSteps = INPUT_STEPS.filter(s => !PROGRESS_EXCLUDED.includes(s));
+  let currentVisibleIdx = visibleInputSteps.indexOf(currentStep);
+  if (currentVisibleIdx < 0) {
+    // 전환 화면 등 비가시 스텝 → 직전 가시 스텝의 인덱스 사용
+    const allIdx = INPUT_STEPS.indexOf(currentStep);
+    for (let i = allIdx - 1; i >= 0; i--) {
+      const vi = visibleInputSteps.indexOf(INPUT_STEPS[i]);
+      if (vi >= 0) { currentVisibleIdx = vi; break; }
+    }
+  }
+  const currentStepNum = currentVisibleIdx >= 0 ? currentVisibleIdx + 1 : 1;
+  const totalVisibleSteps = visibleInputSteps.length;
+
   const progress = inputStepCount > 0
     ? Math.min(1, (Math.min(stepIndex, inputStepCount) / inputStepCount))
     : 0;
@@ -171,6 +188,8 @@ export function useStepNavigation(): UseStepNavigationResult {
     stepIndex,
     totalSteps: activeSteps.length,
     progress,
+    currentStepNum,
+    totalVisibleSteps,
     isFirstStep: stepIndex === 0,
     isLastInputStep: currentStep === 'confirm',
     isResultStep,

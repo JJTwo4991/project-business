@@ -193,29 +193,31 @@ export function BusinessMbtiPage({ result, onShareSuccess, onSkip }: Props) {
       </div>
 
       {/* ── 버튼 영역 ── */}
-      <button
-        className={styles.imageShareBtn}
-        onClick={handleImageShare}
-        disabled={isCapturing}
-      >
-        {isCapturing ? '📸 이미지 생성 중...' : '📸 카드 이미지로 공유하기'}
-      </button>
+      <div className={styles.btnGroup}>
+        <button
+          className={styles.imageShareBtn}
+          onClick={handleImageShare}
+          disabled={isCapturing}
+        >
+          {isCapturing ? '📸 이미지 생성 중...' : '📸 카드 이미지로 공유하기'}
+        </button>
 
-      <button
-        className={styles.shareBtn}
-        onClick={handleShare}
-        disabled={isSharing}
-      >
-        {isSharing ? '🎁 공유 중...' : '🎁 공유하고 광고 없이 손익 확인하기'}
-        <span className={styles.shareSub}>친구에게 공유하면 일·월 손익을 바로 볼 수 있어요</span>
-      </button>
+        <button
+          className={styles.shareBtn}
+          onClick={handleShare}
+          disabled={isSharing}
+        >
+          {isSharing ? '🎁 공유 중...' : '🎁 공유하고 광고 없이 계산내역 확인하기'}
+          <span className={styles.shareSub}>친구에게 공유하면 계산내역을 바로 볼 수 있어요</span>
+        </button>
 
-      <button
-        className={styles.skipBtn}
-        onClick={onSkip}
-      >
-        📺 광고 보고 확인하기
-      </button>
+        <button
+          className={styles.skipBtn}
+          onClick={onSkip}
+        >
+          📺 광고 보고 계산내역 확인하기
+        </button>
+      </div>
     </div>
   );
 }

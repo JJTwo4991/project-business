@@ -15,6 +15,16 @@
 - 테스트: `cd app && npm test`
 - 커밋/푸시: 사용자가 요청할 때만 한다
 
+## .ait 번들 빌드 규칙 (필수)
+
+번들을 빌드할 때는 **반드시 package.json version을 올린 후** 빌드한다. 앱인토스는 동일 버전 번들 업로드를 거부한다.
+
+1. `package.json`의 `version` 필드를 semver 규칙에 따라 올린다 (patch: 버그/UI 수정, minor: 기능 추가, major: 큰 변경)
+2. `npm run build`로 프로덕션 빌드
+3. `export PATH="./node_modules/.bin:$PATH" && node node_modules/@apps-in-toss/web-framework/ait.js build`로 .ait 번들 생성
+4. 생성된 `be-the-boss.ait`를 `be-the-boss-v{version}.ait`로 복사하여 버전별 아카이브 보관 (기존 파일 덮어쓰지 않음)
+5. deploymentId를 사용자에게 알려준다
+
 ## 앱인토스 SDK 문서 조회 (필수)
 
 앱인토스 관련 기능을 개발하기 전에 **반드시** ax CLI로 공식 문서를 검색한다.
