@@ -56,7 +56,6 @@ export default function App() {
   const nav = useStepNavigation();
   const recentSims = useRecentSimulations();
   const ad = useFullScreenAd();
-  const [showCover, setShowCover] = useState(true);
 
   const customBackRef = useRef<(() => boolean) | null>(null);
 
@@ -122,7 +121,7 @@ export default function App() {
   const handleGoHome = useCallback(() => {
     trackClick('다시_시뮬레이션', { from_step: nav.currentStep });
     simulator.reset();
-    nav.goTo('select-industry');
+    nav.goTo('cover');
   }, [simulator, nav]);
 
   // 서브스텝 진행도 (VisitorEstimationStep 등 내부 단계가 있는 스텝)
@@ -150,11 +149,14 @@ export default function App() {
   const effectiveGoNext = editReturnStep ? goBackToConfirm : nav.goNext;
 
   const renderStep = () => {
-    if (!simulator.inputs && nav.currentStep !== 'select-industry') {
+    if (!simulator.inputs && nav.currentStep !== 'select-industry' && nav.currentStep !== 'cover') {
       return null;
     }
 
     switch (nav.currentStep) {
+      case 'cover':
+        return <CoverPage onStart={() => nav.goTo('select-industry')} />;
+
       case 'select-industry':
         return (
           <IndustrySelectStep
@@ -327,10 +329,6 @@ export default function App() {
     }
   };
 
-  if (showCover) {
-    return <CoverPage onStart={() => setShowCover(false)} />;
-  }
-
   return (
     <div className={styles.root}>
       {isTossWebView && <TossNavBar onHome={handleGoHome} />}
@@ -339,7 +337,7 @@ export default function App() {
           ← 수정 완료 후 확인으로 돌아가기
         </div>
       )}
-      {!nav.isFirstStep && !editReturnStep && (
+      {nav.currentStep !== 'cover' && nav.currentStep !== 'select-industry' && !editReturnStep && (
         <header className={styles.header}>
           {(!nav.isResultStep || nav.currentStep === 'set-misc') && (
             <button className={styles.backBtn} onClick={() => {

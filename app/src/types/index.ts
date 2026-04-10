@@ -161,7 +161,7 @@ export interface SimulationResult {
   dcf: DCFResult;
 }
 
-export type StepId = 'select-industry' | 'industry-transition' | 'select-scale' |
+export type StepId = 'cover' | 'select-industry' | 'industry-transition' | 'select-scale' |
   'investment-breakdown' | 'select-region' | 'set-investment' | 'set-loan' |
   'transition-operating' | 'set-customers' | 'set-ticket' | 'set-labor' | 'set-rent' | 'set-sga' | 'confirm' |
   'business-mbti' | 'result-daily' | 'result-monthly' | 'result-payback' | 'set-misc' | 'result-dcf';

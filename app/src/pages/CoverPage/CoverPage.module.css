@@ -23,7 +23,8 @@
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  padding: 72px 32px 56px;
+  justify-content: space-between;
+  padding: 22vh 32px 14vh;
   box-sizing: border-box;
 }
 
@@ -38,19 +39,10 @@
 }
 
 .header {
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   text-align: center;
-  gap: 24px;
-  margin-top: -40px;
-}
-
-.titleWrap {
-  position: relative;
-  display: inline-block;
 }
 
 .title {
@@ -65,46 +57,6 @@
   white-space: nowrap;
 }
 
-.underline {
-  position: absolute;
-  left: -8px;
-  right: -8px;
-  bottom: -14px;
-  width: calc(100% + 16px);
-  height: 14px;
-}
-
-.tagline {
-  font-size: 17px;
-  font-weight: 500;
-  color: #555;
-  line-height: 1.7;
-  margin: 28px 0 0;
-  letter-spacing: -0.3px;
-}
-
-.taglineStrong {
-  font-weight: 700;
-  color: #1a1a1a;
-}
-
-.decor {
-  position: absolute;
-  color: rgba(26, 26, 26, 0.35);
-}
-
-.decorTopRight {
-  top: 80px;
-  right: 28px;
-  transform: rotate(8deg);
-}
-
-.decorBottomLeft {
-  left: 36px;
-  bottom: 160px;
-  transform: rotate(-12deg);
-}
-
 .footer {
   display: flex;
   justify-content: center;
@@ -114,22 +66,26 @@
 .startBtn {
   font-family: 'Pretendard Variable', Pretendard, sans-serif;
   font-weight: 800;
-  font-size: 22px;
-  color: #1a1a1a;
-  background: transparent;
+  font-size: 24px;
+  color: #fdfcf8;
+  background: #1a1a1a;
   border: none;
-  padding: 12px 24px;
+  padding: 22px 80px;
+  border-radius: 18px;
   cursor: pointer;
-  letter-spacing: -0.5px;
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  letter-spacing: -0.8px;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.18), 0 10px 24px rgba(0, 0, 0, 0.1);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
 .startBtn:hover {
-  opacity: 0.7;
+  transform: translateY(-1px);
+  box-shadow: 0 7px 0 rgba(0, 0, 0, 0.18), 0 12px 28px rgba(0, 0, 0, 0.12);
 }
 
 .startBtn:active {
-  transform: translateY(1px);
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.18), 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 @media (max-width: 380px) {
@@ -138,6 +94,7 @@
     letter-spacing: -2.5px;
   }
   .startBtn {
-    font-size: 20px;
+    font-size: 22px;
+    padding: 20px 64px;
   }
 }

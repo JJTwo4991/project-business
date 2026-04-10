@@ -4,7 +4,7 @@ import type { StepId } from '../types';
 const STEP_STORAGE_KEY = 'sim_current_step';
 
 const INPUT_STEPS: StepId[] = [
-  'select-industry', 'industry-transition', 'select-region', 'select-scale',
+  'cover', 'select-industry', 'industry-transition', 'select-region', 'select-scale',
   'investment-breakdown', 'set-investment', 'set-loan',
   'transition-operating', 'set-customers',
   'set-ticket', 'set-labor', 'set-rent', 'set-sga', 'confirm',
@@ -14,8 +14,8 @@ const RESULT_STEPS: StepId[] = [
   'business-mbti', 'result-daily', 'result-monthly', 'result-payback', 'set-misc', 'result-dcf',
 ];
 
-// set-misc and transition-operating are excluded from progress bar
-const PROGRESS_EXCLUDED: StepId[] = ['set-misc', 'transition-operating', 'industry-transition', 'business-mbti'];
+// 진도바에서 제외할 스텝 (표지, 전환 화면, MBTI 등 입력과 무관한 화면)
+const PROGRESS_EXCLUDED: StepId[] = ['cover', 'set-misc', 'transition-operating', 'industry-transition', 'business-mbti'];
 
 // 뒤로가기 시 건너뛸 전환 화면 (애니메이션만 있는 화면)
 const TRANSITION_STEPS: StepId[] = ['industry-transition', 'transition-operating'];
@@ -39,7 +39,7 @@ interface UseStepNavigationResult {
 }
 
 export function useStepNavigation(): UseStepNavigationResult {
-  const [currentStep, setCurrentStep] = useState<StepId>('select-industry');
+  const [currentStep, setCurrentStep] = useState<StepId>('cover');
 
   const activeSteps = useMemo(() => {
     return ALL_STEPS;
@@ -127,7 +127,7 @@ export function useStepNavigation(): UseStepNavigationResult {
 
         unsubscribe = graniteEvent.addEventListener('homeEvent', {
           onEvent: () => {
-            setCurrentStep('select-industry');
+            setCurrentStep('cover');
           },
           onError: (error: unknown) => {
             console.error('homeEvent 에러:', error);
@@ -159,7 +159,7 @@ export function useStepNavigation(): UseStepNavigationResult {
   }, [handleBack, currentStep]);
 
   const reset = useCallback(() => {
-    setCurrentStep('select-industry');
+    setCurrentStep('cover');
     try { localStorage.removeItem(STEP_STORAGE_KEY); } catch { /* ignore */ }
   }, []);
 
