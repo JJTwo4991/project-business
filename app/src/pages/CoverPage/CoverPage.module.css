@@ -14,32 +14,22 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 0 24px;
   animation: fadeIn 1.2s ease-out forwards;
 }
 
 .title {
   font-family: 'Noto Serif KR', serif;
-  font-size: 84px;
+  font-size: clamp(48px, 14vw, 84px);
   font-weight: 900;
   color: #191F28;
   margin: 0;
   line-height: 1.1;
   letter-spacing: -4px;
-  white-space: nowrap;
-}
-
-.subtitle {
-  font-size: 15px;
-  font-weight: 500;
-  color: #8B95A1;
-  letter-spacing: 14px;
-  margin-top: 20px;
-  margin-bottom: 80px;
-  margin-right: -14px;
-  text-transform: uppercase;
 }
 
 .startBtn {
+  margin-top: 80px;
   font-family: 'Pretendard Variable', Pretendard, sans-serif;
   font-size: 17px;
   font-weight: 600;
@@ -70,16 +60,6 @@
 }
 
 @media (max-width: 380px) {
-  .title {
-    font-size: 64px;
-    letter-spacing: -3px;
-  }
-  .subtitle {
-    font-size: 13px;
-    letter-spacing: 10px;
-    margin-right: -10px;
-    margin-bottom: 60px;
-  }
   .startBtn {
     font-size: 16px;
     padding: 18px 48px;

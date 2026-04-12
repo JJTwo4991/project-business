@@ -10,7 +10,6 @@ export function CoverPage({ onStart }: CoverPageProps) {
       <div className={styles.container}>
         <div>
           <h1 className={styles.title}>사장 될 결심</h1>
-          <div className={styles.subtitle}>Business Survival Simulator</div>
         </div>
         <button type="button" className={styles.startBtn} onClick={onStart}>
           시작하기
