@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>v2 · 매거진 에디토리얼 · 망하는 이유 10장</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+    background: #000; padding: 40px 0;
+  }
+
+  .card {
+    width: 1080px; height: 1920px;
+    position: relative; overflow: hidden;
+    margin: 24px auto;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 100px 80px;
+  }
+
+  /* ── 카드 번호 ── */
+  .page-num {
+    position: absolute; top: 50px; right: 60px;
+    font-size: 22px; font-weight: 800;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 1px; z-index: 10;
+  }
+  .page-num--dark { color: rgba(0,0,0,0.25); }
+
+  /* ── 브랜드 워터마크 ── */
+  .watermark {
+    position: absolute; bottom: 50px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 24px; font-weight: 800;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 1px; z-index: 10;
+    white-space: nowrap;
+  }
+  .watermark--dark { color: rgba(0,0,0,0.2); }
+
+  /* ═══════════════════════════════════════════ */
+  /* 배경 변형                                    */
+  /* ═══════════════════════════════════════════ */
+  .bg-cover {
+    background: linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+    color: #fff;
+  }
+  .bg-gold {
+    background: linear-gradient(160deg, #0f0f0f 0%, #1a1a1a 40%, #2d1b00 100%);
+    color: #fff;
+  }
+  .bg-dark {
+    background: #0f0f0f;
+    color: #fff;
+  }
+  .bg-danger {
+    background: linear-gradient(180deg, #0f0f0f 0%, #1c0505 50%, #2d0a0a 100%);
+    color: #fff;
+  }
+  .bg-blue {
+    background: linear-gradient(160deg, #0B1D51 0%, #0F3460 50%, #16213e 100%);
+    color: #fff;
+  }
+  .bg-cta {
+    background: linear-gradient(160deg, #FFB800 0%, #FF8C00 50%, #E65100 100%);
+    color: #191F28;
+  }
+
+  /* ═══════════════════════════════════════════ */
+  /* 공통 요소                                    */
+  /* ═══════════════════════════════════════════ */
+
+  /* 레이블 태그 */
+  .tag {
+    display: inline-block;
+    font-size: 30px; font-weight: 900;
+    padding: 12px 28px;
+    border-radius: 8px;
+    letter-spacing: -0.5px;
+    margin-bottom: 36px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+  }
+  .tag--red { background: #DC2626; color: #fff; }
+  .tag--gold { background: #D4A017; color: #fff; }
+  .tag--blue { background: #3182F6; color: #fff; }
+  .tag--skull { background: rgba(255,255,255,0.1); color: #FF6B6B; border: 2px solid #FF6B6B; }
+
+  /* 초거대 숫자 */
+  .mega {
+    font-size: 200px;
+    font-weight: 900;
+    letter-spacing: -8px;
+    line-height: 0.95;
+    margin: 20px 0;
+  }
+  .mega--gold { color: #FFD43B; text-shadow: 0 6px 40px rgba(255,212,59,0.3); }
+  .mega--red { color: #FF3B30; text-shadow: 0 6px 40px rgba(255,59,48,0.3); }
+  .mega--white { color: #fff; }
+  .mega__unit {
+    font-size: 80px;
+    font-weight: 800;
+    opacity: 0.7;
+    margin-left: 8px;
+    letter-spacing: -2px;
+  }
+
+  /* 큰 제목 */
+  .title {
+    font-size: 88px;
+    font-weight: 900;
+    letter-spacing: -3px;
+    line-height: 1.15;
+    text-align: center;
+    word-break: keep-all;
+    margin-bottom: 30px;
+  }
+  .title--lg { font-size: 110px; letter-spacing: -4px; }
+  .title--sm { font-size: 72px; letter-spacing: -2px; }
+
+  .subtitle {
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 1.5;
+    text-align: center;
+    opacity: 0.7;
+    word-break: keep-all;
+  }
+
+  /* 하이라이트 */
+  .hl { background: linear-gradient(180deg, transparent 55%, #FFD43B 55%); padding: 0 8px; }
+  .hl--red { background: linear-gradient(180deg, transparent 55%, #FF6B6B 55%); padding: 0 8px; }
+
+  /* 이미지 플레이스홀더 */
+  .img-placeholder {
+    width: 100%;
+    border: 4px dashed rgba(255,255,255,0.3);
+    border-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    color: rgba(255,255,255,0.35);
+    font-size: 32px;
+    font-weight: 700;
+    position: relative;
+    overflow: hidden;
+    background: rgba(255,255,255,0.03);
+  }
+  .img-placeholder--dark {
+    border-color: rgba(0,0,0,0.2);
+    color: rgba(0,0,0,0.25);
+    background: rgba(0,0,0,0.03);
+  }
+  .img-placeholder__icon { font-size: 72px; opacity: 0.5; }
+  .img-placeholder__text { letter-spacing: -0.5px; }
+
+  /* 프로그레스 바 */
+  .progress-bar {
+    width: 100%;
+    height: 56px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 28px;
+    overflow: hidden;
+    margin: 20px 0;
+  }
+  .progress-bar__fill {
+    height: 100%;
+    border-radius: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 24px;
+    font-size: 26px;
+    font-weight: 900;
+    color: #fff;
+  }
+  .progress-bar__fill--red { background: linear-gradient(90deg, #EF4444, #DC2626); }
+
+  /* 비용 카드 (분할) */
+  .cost-split {
+    display: flex;
+    gap: 28px;
+    width: 100%;
+    margin: 30px 0;
+  }
+  .cost-box {
+    flex: 1;
+    background: rgba(255,255,255,0.06);
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 28px;
+    padding: 44px 36px;
+    text-align: center;
+  }
+  .cost-box__label {
+    font-size: 30px;
+    font-weight: 700;
+    opacity: 0.5;
+    margin-bottom: 16px;
+  }
+  .cost-box__value {
+    font-size: 72px;
+    font-weight: 900;
+    color: #FF6B6B;
+    letter-spacing: -2px;
+  }
+  .cost-box__desc {
+    font-size: 26px;
+    opacity: 0.5;
+    margin-top: 12px;
+    font-weight: 600;
+  }
+
+  /* 계산식 */
+  .calc {
+    width: 100%;
+    margin: 30px 0;
+  }
+  .calc__row {
+    display: flex;
+    justify-content: space-between;
+    padding: 16px 0;
+    font-size: 38px;
+    font-weight: 700;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .calc__row--total {
+    border-bottom: none;
+    border-top: 3px solid rgba(255,255,255,0.2);
+    padding-top: 24px;
+    margin-top: 8px;
+    font-size: 48px;
+    font-weight: 900;
+  }
+  .calc__minus { color: #FF6B6B; }
+  .calc__plus { color: #4ADE80; }
+  .calc__result { color: #FF3B30; font-size: 64px; }
+
+  /* 솔루션 카드 */
+  .solution-grid {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .sol-card {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 24px;
+    padding: 32px 36px;
+  }
+  .sol-card__icon {
+    font-size: 64px;
+    flex-shrink: 0;
+    width: 100px;
+    text-align: center;
+  }
+  .sol-card__text {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: -0.8px;
+  }
+  .sol-card__text strong {
+    color: #60A5FA;
+    font-weight: 900;
+  }
+
+  /* CTA 체크리스트 */
+  .checklist {
+    width: 100%;
+    margin: 30px 0;
+  }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    font-size: 48px;
+    font-weight: 800;
+    padding: 24px 0;
+    letter-spacing: -1px;
+  }
+  .check-item__icon {
+    width: 64px; height: 64px;
+    background: #191F28;
+    color: #FFD43B;
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px; font-weight: 900;
+    flex-shrink: 0;
+  }
+
+  .cta-btn {
+    display: inline-block;
+    background: #191F28;
+    color: #FFD43B;
+    font-size: 52px; font-weight: 900;
+    padding: 36px 64px;
+    border-radius: 100px;
+    margin-top: 40px;
+    box-shadow: 0 10px 0 rgba(0,0,0,0.2);
+    letter-spacing: -1px;
+  }
+
+  .shiba {
+    width: 400px; height: auto;
+    filter: drop-shadow(0 16px 40px rgba(0,0,0,0.3));
+  }
+  .shiba--sm { width: 280px; }
+
+  /* 반응 스티커 */
+  .sticker {
+    display: inline-block;
+    background: rgba(255,255,255,0.12);
+    border: 2px solid rgba(255,255,255,0.15);
+    padding: 18px 36px;
+    border-radius: 50px;
+    font-size: 38px;
+    font-weight: 800;
+    margin-top: 20px;
+    backdrop-filter: blur(8px);
+  }
+  .sticker--gold { background: rgba(255,212,59,0.15); border-color: rgba(255,212,59,0.3); color: #FFD43B; }
+  .sticker--red { background: rgba(255,59,48,0.15); border-color: rgba(255,59,48,0.3); color: #FF6B6B; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ CARD 1 · COVER ═══════════ -->
+<div class="card bg-cover" id="card-1">
+  <span class="page-num">01 / 10</span>
+
+  <div style="width:100%; height:640px; margin-bottom:60px; border-radius:24px; overflow:hidden;">
+    <img src="../assets/cover_despair.jpg" alt="" style="width:100%; height:100%; object-fit:cover; opacity:0.85;">
+  </div>
+
+  <h1 class="title title--lg" style="text-align:left; width:100%;">
+    무턱대고<br>
+    <span class="hl--red">치킨집</span> 차리면<br>
+    망하는 이유<span style="opacity:0.4; font-weight:600;">.jpg</span>
+  </h1>
+
+  <span class="watermark">사장 될 결심 · 토스 미니앱</span>
+</div>
+
+<!-- ═══════════ CARD 2 · 매출 환상 ═══════════ -->
+<div class="card bg-gold" id="card-2">
+  <span class="page-num">02 / 10</span>
+
+  <p class="subtitle" style="font-size:48px; font-weight:800; opacity:1; margin-bottom:20px;">
+    치킨집 월매출
+  </p>
+  <div class="mega mega--gold">
+    1,430<span class="mega__unit">만원</span>
+  </div>
+
+  <p class="subtitle" style="font-size:38px; margin:30px 0 20px;">
+    일매출 55만 × 영업일 26일
+  </p>
+
+  <div style="display:flex; gap:24px; margin:20px 0;">
+    <div class="cost-box" style="border-color:rgba(255,212,59,0.2); background:rgba(255,212,59,0.06);">
+      <div class="cost-box__label">하루 손님</div>
+      <div class="cost-box__value" style="color:#FFD43B;">25명</div>
+    </div>
+    <div class="cost-box" style="border-color:rgba(255,212,59,0.2); background:rgba(255,212,59,0.06);">
+      <div class="cost-box__label">객단가</div>
+      <div class="cost-box__value" style="color:#FFD43B;">22,000</div>
+    </div>
+  </div>
+
+  <div class="sticker sticker--gold" style="margin-top:40px;">😏 많이 버네?</div>
+
+  <span class="watermark">업종 평균 추정치 (AI)</span>
+</div>
+
+<!-- ═══════════ CARD 3 · 재료비 ═══════════ -->
+<div class="card bg-dark" id="card-3">
+  <span class="page-num">03 / 10</span>
+
+  <span class="tag tag--skull">💀 빠지는 돈</span>
+  <p class="subtitle" style="font-size:52px; font-weight:800; opacity:1; margin-bottom:10px;">재료비</p>
+  <div class="mega mega--red">
+    -572<span class="mega__unit">만</span>
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress-bar__fill progress-bar__fill--red" style="width:40%;">40%</div>
+  </div>
+  <p class="subtitle" style="font-size:36px;">
+    매출의 <strong style="color:#FF6B6B;">40%</strong>가 재료값으로 사라짐
+  </p>
+
+  <span class="watermark">사장 될 결심 · 토스 미니앱</span>
+</div>
+
+<!-- ═══════════ CARD 4 · 배달수수료 ═══════════ -->
+<div class="card bg-dark" id="card-4">
+  <span class="page-num">04 / 10</span>
+
+  <span class="tag tag--skull">💀 빠지는 돈</span>
+  <p class="subtitle" style="font-size:52px; font-weight:800; opacity:1; margin-bottom:10px;">배달수수료</p>
+  <div class="mega mega--red">
+    -143<span class="mega__unit">만</span>
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress-bar__fill progress-bar__fill--red" style="width:10%;">10%</div>
+  </div>
+  <p class="subtitle" style="font-size:36px;">
+    매출의 <strong style="color:#FF6B6B;">10%</strong>를 배달앱이 가져감
+  </p>
+  <p class="subtitle" style="font-size:30px; margin-top:16px; opacity:0.4;">
+    배달 매출 비중 60% · 수수료 15~18%
+  </p>
+
+  <span class="watermark">사장 될 결심 · 토스 미니앱</span>
+</div>
+
+<!-- ═══════════ CARD 5 · 임대료 + 인건비 ═══════════ -->
+<div class="card bg-dark" id="card-5">
+  <span class="page-num">05 / 10</span>
+
+  <span class="tag tag--skull">💀 빠지는 돈</span>
+  <p class="subtitle" style="font-size:44px; font-weight:800; opacity:1; margin-bottom:30px;">
+    매달 고정 지출만 <strong style="color:#FF6B6B;">390만원</strong>
+  </p>
+
+  <div class="cost-split">
+    <div class="cost-box">
+      <div class="cost-box__label">🏠 임대료</div>
+      <div class="cost-box__value">-150만</div>
+      <div class="cost-box__desc">중형 매장 기준</div>
+    </div>
+    <div class="cost-box">
+      <div class="cost-box__label">👨‍🍳 인건비</div>
+      <div class="cost-box__value">-240만</div>
+      <div class="cost-box__desc">직원 1명 · 주40시간 최저임금</div>
+    </div>
+  </div>
+
+  <p class="subtitle" style="font-size:34px; margin-top:20px;">
+    한 명도 안 쓰면? → 하루 12시간 혼자 일해야 함
+  </p>
+
+  <span class="watermark">사장 될 결심 · 토스 미니앱</span>
+</div>
+
+<!-- ═══════════ CARD 6 · 이자 + 기타 ═══════════ -->
+<div class="card bg-dark" id="card-6">
+  <span class="page-num">06 / 10</span>
+
+  <span class="tag tag--skull">💀 빠지는 돈</span>
+  <p class="subtitle" style="font-size:44px; font-weight:800; opacity:1; margin-bottom:30px;">
+    숨겨진 비용까지 합치면…
+  </p>
+
+  <div class="cost-split">
+    <div class="cost-box">
+      <div class="cost-box__label">🏦 대출이자</div>
+      <div class="cost-box__value">-44만</div>
+      <div class="cost-box__desc">1.5억 × 연 3.5%</div>
+    </div>
+    <div class="cost-box">
+      <div class="cost-box__label">📦 기타비용</div>
+      <div class="cost-box__value">-86만</div>
+      <div class="cost-box__desc">수도광열·소모품·매출 6%</div>
+    </div>
+  </div>
+
+  <div class="sticker sticker--red" style="font-size:44px; margin-top:40px;">
+    ⬇️ 그래서 남는 돈은?
+  </div>
+
+  <span class="watermark">사장 될 결심 · 토스 미니앱</span>
+</div>
+
+<!-- ═══════════ CARD 7 · 실수령 충격 ═══════════ -->
+<div class="card bg-danger" id="card-7">
+  <span class="page-num">07 / 10</span>
+
+  <p class="subtitle" style="font-size:44px; font-weight:700; opacity:0.6; margin-bottom:10px;">
+    다 빼고 사장님 손에 남는 돈
+  </p>
+
+  <div class="calc" style="margin-bottom:20px;">
+    <div class="calc__row">
+      <span>매출</span>
+      <span class="calc__plus">+1,430만</span>
+    </div>
+    <div class="calc__row">
+      <span>총 비용</span>
+      <span class="calc__minus">-1,235만</span>
+    </div>
+    <div class="calc__row calc__row--total">
+      <span>실수령</span>
+      <span class="calc__result">195만원</span>
+    </div>
+  </div>
+
+  <div class="mega mega--red" style="font-size:260px; margin:10px 0;">
+    195<span class="mega__unit">만</span>
+  </div>
+
+  <p class="subtitle" style="font-size:40px; opacity:1; margin-top:10px;">
+    시급 <span class="hl--red" style="font-weight:900;">6,250원</span> · 최저시급(10,450원)의 60%
+  </p>
+
+  <span class="watermark">업종 평균 추정치 (AI)</span>
+</div>
+
+<!-- ═══════════ CARD 8 · 폐업률 ═══════════ -->
+<div class="card bg-danger" id="card-8">
+  <span class="page-num">08 / 10</span>
+
+  <span class="tag tag--red">⚠️ 그리고</span>
+
+  <p class="subtitle" style="font-size:42px; font-weight:800; opacity:1; margin-bottom:10px;">
+    2024년 자영업 폐업자 수
+  </p>
+  <div class="mega mega--red" style="font-size:200px;">
+    100<span class="mega__unit">만 돌파</span>
+  </div>
+  <p class="subtitle" style="font-size:36px; margin-bottom:24px;">
+    역대 최초 · 폐업률 <strong style="color:#FF6B6B;">9.04%</strong>
+  </p>
+
+  <div style="width:100%; display:flex; flex-direction:column; gap:16px; margin:10px 0 20px;">
+    <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:20px; padding:28px 36px; display:flex; justify-content:space-between; align-items:center;">
+      <span style="font-size:34px; font-weight:700; opacity:0.7;">음식점 폐업률 (10년 최고)</span>
+      <span style="font-size:42px; font-weight:900; color:#FF6B6B;">11.5%</span>
+    </div>
+    <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:20px; padding:28px 36px; display:flex; justify-content:space-between; align-items:center;">
+      <span style="font-size:34px; font-weight:700; opacity:0.7;">폐업이 신규 개업 초과</span>
+      <span style="font-size:42px; font-weight:900; color:#FF6B6B;">2년 연속</span>
+    </div>
+  </div>
+
+  <div style="width:100%; height:340px; border-radius:20px; overflow:hidden;">
+    <img src="../assets/closure_shop.jpg" alt="" style="width:100%; height:100%; object-fit:cover; opacity:0.8;">
+  </div>
+
+  <p class="subtitle" style="font-size:22px; margin-top:16px; opacity:0.3; line-height:1.5; text-align:left; width:100%;">
+    출처: "자영업 폐업 100만 시대…법인까지 흔들린다" 경기뉴스 2025.07<br>
+    "'버티기 포기'…자영업 폐업 사상 첫 '100만'" 동아일보 2025.07<br>
+    "금요일 밤 강남역도 텅 텅…10년 만에 사상 초유" 한국경제 2026.02
+  </p>
+
+  <span class="watermark">사장 될 결심 · 토스 미니앱</span>
+</div>
+
+<!-- ═══════════ CARD 9 · 솔루션 ═══════════ -->
+<div class="card bg-blue" id="card-9">
+  <span class="page-num">09 / 10</span>
+
+  <span class="tag tag--blue">💡 그렇다면?</span>
+  <h1 class="title title--sm" style="margin-bottom:40px;">
+    방법은<br>
+    <span class="hl">엄청 다양함</span>
+  </h1>
+
+  <div class="solution-grid">
+    <div class="sol-card">
+      <span class="sol-card__icon">🏠</span>
+      <div class="sol-card__text">임대료 싼 상권 찾아<br><strong>월세 150→80만 절감</strong></div>
+    </div>
+    <div class="sol-card">
+      <span class="sol-card__icon">🚶</span>
+      <div class="sol-card__text">배달 최소화, 워크인 위주<br><strong>수수료 -143→-30만</strong></div>
+    </div>
+    <div class="sol-card">
+      <span class="sol-card__icon">📊</span>
+      <div class="sol-card__text">원가율 모니터링<br><strong>재료비 40→34%로</strong></div>
+    </div>
+    <div class="sol-card">
+      <span class="sol-card__icon">🧮</span>
+      <div class="sol-card__text">핵심은 <strong>시작 전에 계산</strong>해보는 것<br>감으로 하면 망함</div>
+    </div>
+  </div>
+
+  <span class="watermark">사장 될 결심 · 토스 미니앱</span>
+</div>
+
+<!-- ═══════════ CARD 10 · CTA ═══════════ -->
+<div class="card bg-cta" id="card-10">
+  <span class="page-num page-num--dark">10 / 10</span>
+
+  <img class="shiba" src="../assets/shiba/shiba_cheering.png" alt="" style="margin-bottom:30px;">
+
+  <h1 class="title" style="color:#191F28; margin-bottom:16px;">
+    퇴직금과 인생을<br>걸기 전에
+  </h1>
+  <h1 class="title title--lg" style="color:#191F28;">
+    <span class="hl" style="background:linear-gradient(180deg,transparent 55%,#fff 55%);">계산 한 번은</span><br>해보세요
+  </h1>
+
+  <div class="checklist">
+    <div class="check-item">
+      <span class="check-item__icon">✓</span>
+      <span>평생 무료</span>
+    </div>
+    <div class="check-item">
+      <span class="check-item__icon">✓</span>
+      <span>가입 필요 없음</span>
+    </div>
+    <div class="check-item">
+      <span class="check-item__icon">✓</span>
+      <span>설치 필요 없음</span>
+    </div>
+  </div>
+
+  <div class="cta-btn">👉 토스 미니앱에서 "사장 될 결심" 검색</div>
+
+  <span class="watermark watermark--dark">사장 될 결심 · 토스 미니앱</span>
+</div>
+
+</body>
+</html>

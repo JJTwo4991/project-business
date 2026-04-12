@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>v1 · 카카오톡 · 치킨집 7장 풀세트</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+    background: #111; padding: 40px 0;
+  }
+
+  /* ═══════════════════════════════════════════ */
+  /* ══ 카드 기본 (1080×1920 릴스) ══            */
+  /* ═══════════════════════════════════════════ */
+  .card {
+    width: 1080px; height: 1920px;
+    position: relative; overflow: hidden;
+    padding: 0; margin: 24px auto;
+    background: #ABC1D1;
+    box-shadow: 0 20px 80px rgba(0,0,0,0.4);
+    display: flex; flex-direction: column;
+  }
+
+  /* ── 상태바 (아이폰 스타일) ── */
+  .status-bar {
+    height: 60px;
+    padding: 0 54px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 28px; font-weight: 800;
+    color: #191F28;
+    background: #ABC1D1;
+  }
+  .status-bar__right { display: flex; gap: 12px; align-items: center; }
+
+  /* ── 카카오톡 헤더 ── */
+  .kk-header {
+    background: #ABC1D1;
+    padding: 10px 40px 24px;
+    display: flex; align-items: center; gap: 24px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+  .kk-back { font-size: 52px; color: #191F28; font-weight: 400; }
+  .kk-title-wrap { flex: 1; display: flex; flex-direction: column; }
+  .kk-title {
+    font-size: 38px; font-weight: 800; color: #191F28;
+    display: flex; align-items: center; gap: 12px;
+    letter-spacing: -0.5px;
+  }
+  .kk-title__count {
+    color: #6B7280; font-weight: 700; font-size: 32px;
+  }
+  .kk-subtitle {
+    font-size: 22px; color: #6B7280; font-weight: 600; margin-top: 2px;
+  }
+  .kk-icons {
+    display: flex; gap: 22px; font-size: 38px; color: #191F28;
+  }
+
+  /* ── 채팅 영역 ── */
+  .kk-chat {
+    flex: 1;
+    padding: 40px 40px 50px;
+    display: flex; flex-direction: column;
+    gap: 32px;
+    overflow: hidden;
+  }
+
+  /* 날짜 구분선 */
+  .kk-divider {
+    display: flex; justify-content: center; align-items: center;
+    gap: 20px;
+    margin: 10px 0 24px;
+  }
+  .kk-divider::before, .kk-divider::after {
+    content: ''; flex: 0 0 80px;
+    height: 2px;
+    background: rgba(0,0,0,0.12);
+  }
+  .kk-divider span {
+    background: rgba(255,255,255,0.45);
+    padding: 12px 28px;
+    border-radius: 40px;
+    font-size: 24px;
+    font-weight: 700;
+    color: #374151;
+  }
+
+  /* 메시지 */
+  .kk-msg {
+    display: flex; gap: 20px;
+    max-width: 82%;
+    align-items: flex-end;
+  }
+  .kk-msg--me { align-self: flex-end; flex-direction: row-reverse; max-width: 86%; }
+
+  .kk-avatar {
+    width: 110px; height: 110px;
+    border-radius: 28px;
+    background-color: #fff;
+    flex-shrink: 0;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  }
+  .kk-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .kk-spacer { width: 110px; flex-shrink: 0; }
+
+  .kk-col { display: flex; flex-direction: column; min-width: 0; }
+  .kk-name {
+    font-size: 28px;
+    font-weight: 700;
+    color: #374151;
+    margin: 0 10px 8px;
+    letter-spacing: -0.3px;
+  }
+
+  .kk-bubble-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+  }
+  .kk-msg--me .kk-bubble-row { flex-direction: row-reverse; }
+
+  /* ── 말풍선 (베이스 크기 통일) ── */
+  .kk-bubble {
+    background: #fff;
+    color: #191F28;
+    padding: 26px 34px;
+    border-radius: 8px 28px 28px 28px;
+    font-size: 44px;
+    font-weight: 500;
+    line-height: 1.45;
+    letter-spacing: -0.6px;
+    word-break: keep-all;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    max-width: 100%;
+  }
+  .kk-msg--me .kk-bubble {
+    background: #FAE100;
+    color: #191F28;
+    border-radius: 28px 8px 28px 28px;
+  }
+
+  /* 강조 말풍선 (폰트 크기는 동일, 스타일로 강조) */
+  .kk-bubble--highlight {
+    font-weight: 800;
+  }
+  .kk-bubble--highlight-red {
+    font-weight: 800;
+    color: #E02424;
+  }
+  .kk-bubble--highlight-blue {
+    font-weight: 800;
+    color: #2563EB;
+  }
+  /* 밑줄 형광펜 효과 */
+  .marker-red {
+    background: linear-gradient(to top, rgba(224, 36, 36, 0.2) 40%, transparent 40%);
+  }
+  .marker-blue {
+    background: linear-gradient(to top, rgba(37, 99, 235, 0.2) 40%, transparent 40%);
+  }
+
+  /* 시간 + 읽음 */
+  .kk-meta {
+    display: flex; flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    font-size: 24px;
+    color: #4B5563;
+    font-weight: 600;
+    white-space: nowrap;
+    padding-bottom: 8px;
+  }
+  .kk-msg--me .kk-meta { align-items: flex-end; }
+  .kk-read { color: #F5D100; font-size: 24px; font-weight: 800; }
+
+  /* 첨부 이미지 카드 */
+  .kk-attach {
+    background: #fff;
+    border-radius: 8px 28px 28px 28px;
+    padding: 36px;
+    max-width: 800px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+  .kk-msg--me .kk-attach { border-radius: 28px 8px 28px 28px; }
+  .kk-attach__title {
+    font-size: 42px; font-weight: 800; color: #191F28;
+    margin-bottom: 24px;
+  }
+  .kk-attach__body {
+    background: #F3F4F6;
+    border-radius: 20px;
+    padding: 32px;
+  }
+  .kk-attach__row {
+    display: flex; justify-content: space-between;
+    font-size: 38px; font-weight: 700;
+    padding: 16px 0;
+    color: #374151;
+  }
+  .kk-attach__row span:last-child { color: #DC2626; font-weight: 900; }
+  .kk-attach__divider {
+    height: 3px; background: #D1D5DB; margin: 16px 0;
+  }
+  .kk-attach__total {
+    font-size: 52px !important; font-weight: 900 !important;
+    color: #191F28 !important;
+  }
+
+  /* 타이핑 인디케이터 */
+  .kk-typing {
+    display: flex; gap: 8px; padding: 26px 32px;
+    background: #fff;
+    border-radius: 6px 24px 24px 24px;
+    align-items: center;
+    width: fit-content;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .kk-typing span {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: #9CA3AF;
+  }
+  .kk-typing span:nth-child(2) { background: #6B7280; }
+  .kk-typing span:nth-child(3) { background: #4B5563; }
+
+  /* 시스템 메시지 */
+  .kk-system {
+    align-self: center;
+    background: rgba(0,0,0,0.5);
+    color: #fff;
+    padding: 14px 28px;
+    border-radius: 40px;
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  /* 경고/안내 박스 (7번 카드) */
+  .kk-warning-box {
+    align-self: center;
+    background: rgba(25, 31, 40, 0.85);
+    backdrop-filter: blur(10px);
+    color: #fff;
+    padding: 40px;
+    border-radius: 32px;
+    text-align: center;
+    width: 95%;
+    margin-top: 10px;
+    border: 2px solid rgba(255,255,255,0.1);
+  }
+  .kk-warning-tags {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .kk-warning-tags span {
+    background: #FFD43B;
+    color: #191F28;
+    padding: 10px 24px;
+    border-radius: 40px;
+    font-size: 28px;
+    font-weight: 900;
+  }
+  .kk-warning-desc {
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1.5;
+    color: #F9FAFB;
+    word-break: keep-all;
+  }
+  .kk-warning-desc .highlight {
+    color: #FF6B6B;
+    font-weight: 900;
+  }
+
+  /* 토스 미니앱 카드 (6번 카드용) 개선 */
+  .toss-card {
+    background: #ffffff;
+    color: #191F28;
+    border-radius: 32px;
+    max-width: 800px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.05);
+  }
+  .toss-card__img {
+    width: 100%;
+    height: 360px;
+    background: #fff url('../../assets/shiba_working.png') no-repeat center/cover;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    mix-blend-mode: multiply;
+  }
+  .toss-card__body {
+    padding: 40px 44px;
+  }
+  .toss-card__title {
+    font-size: 52px; font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+    color: #191F28;
+  }
+  .toss-card__desc {
+    font-size: 38px; font-weight: 500;
+    color: #4E5968; line-height: 1.4;
+    margin-bottom: 32px;
+  }
+  .toss-card__footer {
+    font-size: 32px; font-weight: 600;
+    color: #8B95A1;
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  /* 카드 하단 "다음 카드로" 힌트 */
+  .kk-footer-hint {
+    position: absolute;
+    bottom: 40px; left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.75);
+    color: #fff;
+    padding: 16px 36px;
+    border-radius: 40px;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    backdrop-filter: blur(4px);
+    z-index: 10;
+  }
+
+  /* 카드 번호 (우측 상단) */
+  .kk-cardnum {
+    position: absolute;
+    top: 34px; right: 40px;
+    background: rgba(0,0,0,0.35);
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: 30px;
+    font-size: 20px;
+    font-weight: 800;
+    z-index: 11;
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- CARD 1 · HOOK — 친구가 고민 털어놓기                   -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="card" id="card-1">
+  <span class="kk-cardnum">1 / 7</span>
+  <div class="status-bar">
+    <span>11:47</span>
+    <div class="status-bar__right">
+      <span>📶</span><span>📡</span><span>🔋</span>
+    </div>
+  </div>
+  <div class="kk-header">
+    <span class="kk-back">‹</span>
+    <div class="kk-title-wrap">
+      <div class="kk-title">🐕 대학동기 시바 <span class="kk-title__count">2</span></div>
+      <div class="kk-subtitle">● 접속 중</div>
+    </div>
+    <div class="kk-icons">☰</div>
+  </div>
+
+  <div class="kk-chat">
+    <div class="kk-divider"><span>새 채팅</span></div>
+
+    <div class="kk-msg">
+      <div class="kk-avatar"><img src="../../assets/shiba_profile.png" alt=""></div>
+      <div class="kk-col">
+        <span class="kk-name">시바</span>
+        <div class="kk-bubble-row">
+          <div class="kk-bubble">야 나 회사 진짜 못버티겠어ㅠㅠ</div>
+          <div class="kk-meta"><span>오후 11:47</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg">
+      <div class="kk-spacer"></div>
+      <div class="kk-col">
+        <div class="kk-bubble-row">
+          <div class="kk-bubble kk-bubble--highlight">그냥 치킨집 차릴까봐</div>
+          <div class="kk-meta"><span>11:48</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg">
+      <div class="kk-spacer"></div>
+      <div class="kk-col">
+        <div class="kk-bubble-row">
+          <div class="kk-bubble">우리집 앞에 치킨집 사람 엄청 많더라</div>
+          <div class="kk-meta"><span>11:48</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg">
+      <div class="kk-spacer"></div>
+      <div class="kk-col">
+        <div class="kk-bubble-row">
+          <div class="kk-bubble">퇴직금 + 대출 땡기면 될 듯? ㅋㅋ</div>
+          <div class="kk-meta"><span>11:48</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg kk-msg--me">
+      <div class="kk-col">
+        <div class="kk-bubble-row">
+          <div class="kk-bubble kk-bubble--highlight">ㅋㅋ 잠깐만. 진정하고 이거 먼저 봐봐</div>
+          <div class="kk-meta"><span class="kk-read">1</span><span>11:49</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <span class="kk-footer-hint">👇 넘겨보기</span>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- CARD 2 · 환상 — 매출은 좀 되는데                       -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="card" id="card-2">
+  <span class="kk-cardnum">2 / 7</span>
+  <div class="status-bar">
+    <span>11:50</span>
+    <div class="status-bar__right">
+      <span>📶</span><span>📡</span><span>🔋</span>
+    </div>
+  </div>
+  <div class="kk-header">
+    <span class="kk-back">‹</span>
+    <div class="kk-title-wrap">
+      <div class="kk-title">🐕 대학동기 시바</div>
+      <div class="kk-subtitle">● 접속 중</div>
+    </div>
+    <div class="kk-icons">☰</div>
+  </div>
+
+  <div class="kk-chat">
+    <div class="kk-msg kk-msg--me">
+      <div class="kk-col">
+        <div class="kk-bubble-row">
+          <div class="kk-bubble">치킨집 월매출이 얼마인지 알아?</div>
+          <div class="kk-meta"><span class="kk-read">1</span><span>11:50</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg kk-msg--me">
+      <div class="kk-col">
+        <div class="kk-bubble-row">
+          <div class="kk-bubble kk-bubble--highlight-blue">1,430만원</div>
+          <div class="kk-meta"><span class="kk-read">1</span><span>11:50</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg kk-msg--me">
+      <div class="kk-col">
+        <div class="kk-bubble-row">
+          <div class="kk-bubble">중형 매장 기준 · 하루 25명 객단가 22,000원</div>
+          <div class="kk-meta"><span class="kk-read">1</span><span>11:50</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg">
+      <div class="kk-avatar"><img src="../../assets/shiba_profile.png" alt=""></div>
+      <div class="kk-col">
+        <span class="kk-name">시바</span>
+        <div class="kk-bubble-row">
+          <div class="kk-bubble kk-bubble--highlight">오 생각보다 많은데?? 😳</div>
+          <div class="kk-meta"><span>11:51</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg">
+      <div class="kk-spacer"></div>
+      <div class="kk-col">
+        <div class="kk-bubble-row">
+          <div class="kk-bubble">난 월급 3백만원도 안되는데..</div>
+          <div class="kk-meta"><span>11:51</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg">
+      <div class="kk-spacer"></div>
+      <div class="kk-col">
+        <div class="kk-bubble-row">
+          <div class="kk-bubble">그럼 그냥 하면 되는거 아냐?</div>
+          <div class="kk-meta"><span>11:51</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="kk-footer-hint">👇 계속</span>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- CARD 3 · 폭탄 — 빠지는 돈 첨부                         -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="card" id="card-3">
+  <span class="kk-cardnum">3 / 7</span>
+  <div class="status-bar">
+    <span>11:52</span>
+    <div class="status-bar__right">
+      <span>📶</span><span>📡</span><span>🔋</span>
+    </div>
+  </div>
+  <div class="kk-header">
+    <span class="kk-back">‹</span>
+    <div class="kk-title-wrap">
+      <div class="kk-title">🐕 대학동기 시바</div>
+      <div class="kk-subtitle">● 접속 중</div>
+    </div>
+    <div class="kk-icons">☰</div>
+  </div>
+
+  <div class="kk-chat">
+    <div class="kk-msg kk-msg--me">
+      <div class="kk-col">
+        <div class="kk-bubble-row">
+          <div class="kk-bubble">ㄴㄴ 그런데 거기서 빠지는 것도 생각해야지</div>
+          <div class="kk-meta"><span class="kk-read">1</span><span>11:52</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg kk-msg--me">
+      <div class="kk-col">
+        <div class="kk-bubble-row">
+          <div class="kk-bubble">이거 봐봐 ⬇️</div>
+          <div class="kk-meta"><span class="kk-read">1</span><span>11:52</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg kk-msg--me">
+      <div class="kk-col">
+        <div class="kk-bubble-row">
+          <div class="kk-attach">
+            <div class="kk-attach__title">📄 치킨집_월비용.pdf</div>
+            <div class="kk-attach__body">
+              <div class="kk-attach__row"><span>재료비 (40%)</span><span>-572만</span></div>
+              <div class="kk-attach__row"><span>임대·인건비</span><span>-390만</span></div>
+              <div class="kk-attach__row"><span>배달수수료</span><span>-143만</span></div>
+              <div class="kk-attach__row"><span>이자·기타</span><span>-130만</span></div>
+              <div class="kk-attach__divider"></div>
+              <div class="kk-attach__row kk-attach__total"><span>합계</span><span>-1,235만</span></div>
+            </div>
+          </div>
+          <div class="kk-meta"><span class="kk-read">1</span><span>11:52</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg">
+      <div class="kk-avatar"><img src="../../assets/shiba_profile.png" alt=""></div>
+      <div class="kk-col">
+        <span class="kk-name">시바</span>
+        <div class="kk-bubble-row">
+          <div class="kk-bubble kk-bubble--highlight">엥 잠깐만<br>이게 다 매출에서 빠진다고???</div>
+          <div class="kk-meta"><span>11:53</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="kk-footer-hint">👇 계속</span>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- CARD 4 · 충격 — 실수령 195만                           -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="card" id="card-4">
+  <span class="kk-cardnum">4 / 7</span>
+  <div class="status-bar">
+    <span>11:54</span>
+    <div class="status-bar__right">
+      <span>📶</span><span>📡</span><span>🔋</span>
+    </div>
+  </div>
+  <div class="kk-header">
+    <span class="kk-back">‹</span>
+    <div class="kk-title-wrap">
+      <div class="kk-title">🐕 대학동기 시바</div>
+      <div class="kk-subtitle">● 접속 중</div>
+    </div>
+    <div class="kk-icons">☰</div>
+  </div>
+
+  <div class="kk-chat">
+    <div class="kk-msg">
+      <div class="kk-avatar"><img src="../../assets/shiba_profile.png" alt=""></div>
+      <div class="kk-col">
+        <span class="kk-name">시바</span>
+        <div class="kk-bubble-row">
+          <div class="kk-bubble">그럼 대체 얼마 남는거야</div>
+          <div class="kk-meta"><span>11:54</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg kk-msg--me">
+      <div class="kk-col">
+        <div class="kk-bubble-row">
+          <div class="kk-bubble kk-bubble--highlight-red">대충 195만원.</div>
+          <div class="kk-meta"><span class="kk-read">1</span><span>11:54</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg">
+      <div class="kk-avatar"><img src="../../assets/shiba_profile.png" alt=""></div>
+      <div class="kk-col">
+        <span class="kk-name">시바</span>
+        <div class="kk-bubble-row">
+          <div class="kk-bubble kk-bubble--highlight">???</div>
+          <div class="kk-meta"><span>11:54</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg">
+      <div class="kk-spacer"></div>
+      <div class="kk-col">
+        <div class="kk-bubble-row">
+          <div class="kk-bubble kk-bubble--highlight">잠깐 다시 말해봐</div>
+          <div class="kk-meta"><span>11:54</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg">
+      <div class="kk-spacer"></div>
+      <div class="kk-col">
+        <div class="kk-bubble-row">
+          <div class="kk-bubble kk-bubble--highlight">1430만 매출인데 195만??</div>
+          <div class="kk-meta"><span>11:55</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg kk-msg--me">
+      <div class="kk-col">
+        <div class="kk-bubble-row">
+          <div class="kk-bubble">응 ㅇㅇ 그거 맞아</div>
+          <div class="kk-meta"><span class="kk-read">1</span><span>11:55</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="kk-footer-hint">👇 계속</span>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- CARD 5 · 시급 비교 — 알바보다 못 벎                    -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="card" id="card-5">
+  <span class="kk-cardnum">5 / 7</span>
+  <div class="status-bar">
+    <span>11:56</span>
+    <div class="status-bar__right">
+      <span>📶</span><span>📡</span><span>🔋</span>
+    </div>
+  </div>
+  <div class="kk-header">
+    <span class="kk-back">‹</span>
+    <div class="kk-title-wrap">
+      <div class="kk-title">🐕 대학동기 시바</div>
+      <div class="kk-subtitle">● 접속 중</div>
+    </div>
+    <div class="kk-icons">☰</div>
+  </div>
+
+  <div class="kk-chat">
+    <div class="kk-msg kk-msg--me">
+      <div class="kk-col">
+        <div class="kk-bubble-row">
+          <div class="kk-bubble">주 6일 · 하루 12시간 일해서</div>
+          <div class="kk-meta"><span class="kk-read">1</span><span>11:56</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg kk-msg--me">
+      <div class="kk-col">
+        <div class="kk-bubble-row">
+          <div class="kk-bubble"><span class="marker-red">시급 6,250원</span></div>
+          <div class="kk-meta"><span class="kk-read">1</span><span>11:56</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg kk-msg--me">
+      <div class="kk-col">
+        <div class="kk-bubble-row">
+          <div class="kk-bubble">참고로 2026년 최저시급 10,450원</div>
+          <div class="kk-meta"><span class="kk-read">1</span><span>11:56</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg">
+      <div class="kk-avatar"><img src="../../assets/shiba_profile.png" alt=""></div>
+      <div class="kk-col">
+        <span class="kk-name">시바</span>
+        <div class="kk-bubble-row">
+          <div class="kk-bubble kk-bubble--highlight">ㅋㅋㅋㅋㅋㅋㅋㅋㅋ</div>
+          <div class="kk-meta"><span>11:57</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg">
+      <div class="kk-spacer"></div>
+      <div class="kk-col">
+        <div class="kk-bubble-row">
+          <div class="kk-bubble">알바가 나았겠는데ㅠㅠㅠ</div>
+          <div class="kk-meta"><span>11:57</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="kk-footer-hint">👇 계속</span>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- CARD 6 · 전환 — 해결책 공유                            -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="card" id="card-6">
+  <span class="kk-cardnum">6 / 7</span>
+  <div class="status-bar">
+    <span>11:58</span>
+    <div class="status-bar__right">
+      <span>📶</span><span>📡</span><span>🔋</span>
+    </div>
+  </div>
+  <div class="kk-header">
+    <span class="kk-back">‹</span>
+    <div class="kk-title-wrap">
+      <div class="kk-title">🐕 대학동기 시바</div>
+      <div class="kk-subtitle">● 접속 중</div>
+    </div>
+    <div class="kk-icons">☰</div>
+  </div>
+
+  <div class="kk-chat">
+    <div class="kk-msg">
+      <div class="kk-avatar"><img src="../../assets/shiba_profile.png" alt=""></div>
+      <div class="kk-col">
+        <span class="kk-name">시바</span>
+        <div class="kk-bubble-row">
+          <div class="kk-bubble">아 그럼 어떡해<br>진짜 회사 힘들단말야</div>
+          <div class="kk-meta"><span>11:58</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg kk-msg--me">
+      <div class="kk-col">
+        <div class="kk-bubble-row">
+          <div class="kk-bubble">일단 이거 먼저 해봐</div>
+          <div class="kk-meta"><span class="kk-read">1</span><span>11:58</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg kk-msg--me">
+      <div class="kk-col">
+        <div class="kk-bubble-row">
+          <div class="toss-card">
+            <div class="toss-card__img"></div>
+            <div class="toss-card__body">
+              <div class="toss-card__title">사장 될 결심</div>
+              <div class="toss-card__desc">내 업종·지역·규모 넣으면<br>월손익·회수기간 3분만에 계산</div>
+              <div class="toss-card__footer">
+                <span style="color:#3182F6; font-weight:800;">toss</span> 미니앱
+              </div>
+            </div>
+          </div>
+          <div class="kk-meta"><span class="kk-read">1</span><span>11:59</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg kk-msg--me">
+      <div class="kk-col">
+        <div class="kk-bubble-row">
+          <div class="kk-bubble">치킨·카페·편의점 14개 업종 다 있음</div>
+          <div class="kk-meta"><span class="kk-read">1</span><span>11:59</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="kk-footer-hint">👇 마지막</span>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- CARD 7 · CTA — 감사 인사 + 공유                        -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="card" id="card-7">
+  <span class="kk-cardnum">7 / 7</span>
+  <div class="status-bar">
+    <span>00:01</span>
+    <div class="status-bar__right">
+      <span>📶</span><span>📡</span><span>🔋</span>
+    </div>
+  </div>
+  <div class="kk-header">
+    <span class="kk-back">‹</span>
+    <div class="kk-title-wrap">
+      <div class="kk-title">🐕 대학동기 시바</div>
+      <div class="kk-subtitle">● 접속 중</div>
+    </div>
+    <div class="kk-icons">☰</div>
+  </div>
+
+  <div class="kk-chat">
+    <div class="kk-msg">
+      <div class="kk-avatar"><img src="../../assets/shiba_profile.png" alt=""></div>
+      <div class="kk-col">
+        <span class="kk-name">시바</span>
+        <div class="kk-bubble-row">
+          <div class="kk-bubble">어 이거 무료야?</div>
+          <div class="kk-meta"><span>00:00</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg kk-msg--me">
+      <div class="kk-col">
+        <div class="kk-bubble-row">
+          <div class="kk-bubble">ㅇㅇ 토스 미니앱에서 검색해봐</div>
+          <div class="kk-meta"><span class="kk-read">1</span><span>00:00</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg kk-msg--me">
+      <div class="kk-col">
+        <div class="kk-bubble-row">
+          <div class="kk-bubble kk-bubble--highlight-blue">"사장 될 결심"</div>
+          <div class="kk-meta"><span class="kk-read">1</span><span>00:00</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg">
+      <div class="kk-avatar"><img src="../../assets/shiba_profile.png" alt=""></div>
+      <div class="kk-col">
+        <span class="kk-name">시바</span>
+        <div class="kk-bubble-row">
+          <div class="kk-bubble kk-bubble--highlight">고마워 진짜ㅠㅠ<br>해보고 알려줄게 🙏</div>
+          <div class="kk-meta"><span>00:01</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg kk-msg--me">
+      <div class="kk-col">
+        <div class="kk-bubble-row">
+          <div class="kk-bubble">평생 무료에 가입, 설치도 필요 없으니까</div>
+          <div class="kk-meta"><span class="kk-read">1</span><span>00:02</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kk-msg kk-msg--me">
+      <div class="kk-col">
+        <div class="kk-bubble-row">
+          <div class="kk-bubble kk-bubble--highlight-red" style="font-size: 48px; line-height: 1.5; padding: 32px 40px; border: 3px solid #E02424;">
+            수천만 원 퇴직금이랑<br>
+            <span class="marker-red" style="font-size: 56px; letter-spacing: -2px;">인생을 걸기 전</span>에<br>
+            단 1분만 투자해서 진짜 수익 계산해봐
+          </div>
+          <div class="kk-meta"><span class="kk-read">1</span><span>00:02</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <span class="kk-footer-hint">👉 토스 미니앱에서 "사장 될 결심" 검색</span>
+</div>
+
+</body>
+</html>
